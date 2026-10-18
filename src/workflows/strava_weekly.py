@@ -12,6 +12,11 @@ STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 
 class WeeklySummaryInput(BaseModel):
     days: int = Field(default=7, ge=1, le=90, description="Fenêtre en jours d'activités à résumer")
+    client_id: str = Field(description="Client ID de l'application Strava")
+    client_secret: str = Field(description="Client Secret de l'application Strava")
+    refresh_token: str | None = Field(default=None, description="Refresh token Strava permanent")
+    auth_code: str | None = Field(default=None, description="Code d'autorisation à usage unique (première exécution)")
+    mistral_api_key: str | None = Field(default=None, description="Clé API Mistral pour le résumé IA (optionnel)")
 
 
 class ActivitySummary(BaseModel):
@@ -21,6 +26,11 @@ class ActivitySummary(BaseModel):
     moving_time_min: int
     total_elevation_m: float
     start_date: str
+
+
+class WorkflowOutput(BaseModel):
+    summary: str
+    new_refresh_token: str | None = None
 
 
 async def _post(url: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -38,19 +48,32 @@ async def _get(url: str, headers: dict[str, str], params: dict[str, Any]) -> lis
 
 
 @workflows.activity()
-async def get_access_token() -> str:
-    """Rafraîchit le token d'accès Strava (les tokens expirent toutes les 6 h)."""
-    import os
+async def get_access_token(client_id: str, client_secret: str, refresh_token: str | None, auth_code: str | None) -> dict[str, str]:
+    """Obtient un access token Strava : via refresh token si présent, sinon échange le code d'autorisation."""
+    if refresh_token:
+        resp = await _post(STRAVA_TOKEN_URL, data={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        })
+    elif auth_code:
+        resp = await _post(STRAVA_TOKEN_URL, data={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "authorization_code",
+            "code": auth_code,
+        })
+    else:
+        raise ValueError("Fournir refresh_token ou auth_code en entrée")
 
-    resp = await _post(STRAVA_TOKEN_URL, data={
-        "client_id": os.environ["STRAVA_CLIENT_ID"],
-        "client_secret": os.environ["STRAVA_CLIENT_SECRET"],
-        "grant_type": "refresh_token",
-        "refresh_token": os.environ["STRAVA_REFRESH_TOKEN"],
-    })
     if resp.get("access_token") is None:
-        raise RuntimeError(f"Échec du rafraîchissement du token Strava : {resp}")
-    return resp["access_token"]
+        raise RuntimeError(f"Échec de l'obtention du token Strava : {resp}")
+
+    return {
+        "access_token": resp["access_token"],
+        "refresh_token": resp.get("refresh_token") or refresh_token or "",
+    }
 
 
 @workflows.activity()
@@ -73,9 +96,14 @@ async def fetch_activities(access_token: str, days: int) -> list[dict[str, Any]]
     return activities
 
 
+def _format_duration(minutes: int) -> str:
+    h, m = divmod(minutes, 60)
+    return f"{h}h{m:02d}" if h else f"{m} min"
+
+
 @workflows.activity()
-async def build_summary(activities: list[dict[str, Any]], days: int) -> str:
-    """Calcule les statistiques et rédige le résumé avec Mistral AI."""
+async def build_summary(activities: list[dict[str, Any]], days: int, mistral_api_key: str | None) -> str:
+    """Calcule les statistiques et rédige le résumé (IA si clé dispo, sinon modèle fixe)."""
     parsed = [
         ActivitySummary(
             name=a.get("name", "Sans nom"),
@@ -94,11 +122,31 @@ async def build_summary(activities: list[dict[str, Any]], days: int) -> str:
             "Lève-toi du canapé ! 🏃"
         )
 
+    total_km = round(sum(p.distance_km for p in parsed), 2)
+    total_min = sum(p.moving_time_min for p in parsed)
+    total_dplus = round(sum(p.total_elevation_m for p in parsed), 1)
+
+    fallback = (
+        f"📊 Résumé des {days} derniers jours : {len(parsed)} activités, "
+        f"{total_km} km, {_format_duration(total_min)} d'effort, {total_dplus} m de D+. "
+        "Bonne semaine, continue comme ça ! 💪"
+    )
+
+    api_key = mistral_api_key
+    if not api_key:
+        try:
+            import os
+            api_key = os.environ.get("MISTRAL_API_KEY")
+        except Exception:
+            api_key = None
+    if not api_key:
+        return fallback
+
     stats = {
         "nb_activites": len(parsed),
-        "distance_totale_km": round(sum(p.distance_km for p in parsed), 2),
-        "temps_total_min": sum(p.moving_time_min for p in parsed),
-        "denivele_total_m": round(sum(p.total_elevation_m for p in parsed), 1),
+        "distance_totale_km": total_km,
+        "temps_total_min": total_min,
+        "denivele_total_m": total_dplus,
         "par_type": {},
         "activites": [p.model_dump() for p in parsed],
     }
@@ -110,16 +158,12 @@ async def build_summary(activities: list[dict[str, Any]], days: int) -> str:
     stats["par_type"] = {k: {"nombre": v[0], "km": round(v[1], 2)} for k, v in types.items()}
 
     import json
-    import os
     from mistralai import Mistral
 
-    client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+    client = Mistral(api_key=api_key)
     prompt = (
         "Voici mes statistiques sportives des "
-        f"{days} derniers jours (JSON) :
-{json.dumps(stats, ensure_ascii=False)}
-
-"
+        f"{days} derniers jours (JSON) :\n{json.dumps(stats, ensure_ascii=False)}\n\n"
         "Rédige un résumé motivant et concis (5-8 phrases) en français : "
         "volume, répartition par sport, point fort, et un encouragement "
         "pour la semaine prochaine. Termine par les 3 chiffres clés sur une ligne."
@@ -128,7 +172,7 @@ async def build_summary(activities: list[dict[str, Any]], days: int) -> str:
         model="mistral-small-latest",
         messages=[{"role": "user", "content": prompt}],
     )
-    return chat.choices[0].message.content or ""
+    return chat.choices[0].message.content or fallback
 
 
 @workflows.workflow.define(
@@ -138,7 +182,15 @@ async def build_summary(activities: list[dict[str, Any]], days: int) -> str:
 )
 class StravaWeeklyWorkflow:
     @workflows.workflow.entrypoint
-    async def run(self, input: WeeklySummaryInput) -> str:
-        token = await get_access_token()
-        activities = await fetch_activities(token, input.days)
-        return await build_summary(activities, input.days)
+    async def run(self, input: WeeklySummaryInput) -> WorkflowOutput:
+        tokens = await get_access_token(
+            input.client_id, input.client_secret, input.refresh_token, input.auth_code,
+        )
+        activities = await fetch_activities(tokens["access_token"], input.days)
+        summary = await build_summary(activities, input.days, input.mistral_api_key)
+
+        new_refresh = None
+        if input.auth_code and tokens.get("refresh_token"):
+            new_refresh = tokens["refresh_token"]
+
+        return WorkflowOutput(summary=summary, new_refresh_token=new_refresh)
