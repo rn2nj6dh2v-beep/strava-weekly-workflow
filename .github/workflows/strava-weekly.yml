@@ -1,6 +1,8 @@
 name: Résumé hebdomadaire Strava
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: "0 7 * * 1"  # chaque lundi 07:00 UTC (08:00/09:00 heure de Paris)
   workflow_dispatch:
