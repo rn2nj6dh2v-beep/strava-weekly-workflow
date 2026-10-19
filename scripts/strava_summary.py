@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-"""Résumé hebdomadaire Strava — exécuté par GitHub Actions chaque lundi."""
+"""Résumé hebdomadaire Strava — exécuté par GitHub Actions le dimanche 20h (heure de Paris)."""
 import datetime as dt
 import json
+import os
 import pathlib
 import urllib.parse
 import urllib.request
 import urllib.error
+import zoneinfo
 
 BASE = pathlib.Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE / "config" / "strava.json"
 OUT_DIR = BASE / "summaries"
 DAYS = 7
+PARIS = zoneinfo.ZoneInfo("Europe/Paris")
+
+
+def _heure_paris_valide() -> bool:
+    """Vrai s'il est 20h (à la minute près) à Paris. Permet l'ajustement automatique
+    été/hiver : GitHub déclenche à 18h et 19h UTC, on n'exécute que le bon créneau."""
+    if os.environ.get("STRAVA_FORCE_RUN"):
+        return True  # déclenchement manuel : toujours exécuter
+    return dt.datetime.now(PARIS).hour == 20
 
 TOKEN_URL = "https://www.strava.com/oauth/token"
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
@@ -39,6 +50,10 @@ def http_get(url: str, headers: dict, params: dict) -> list:
 
 
 def main() -> None:
+    if not _heure_paris_valide():
+        print("Pas encore 20h à Paris — rien à faire (ajustement heure été/hiver).")
+        return
+
     config = json.loads(CONFIG_PATH.read_text())
 
     if config.get("refresh_token"):
