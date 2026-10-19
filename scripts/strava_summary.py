@@ -5,6 +5,7 @@ import json
 import pathlib
 import urllib.parse
 import urllib.request
+import urllib.error
 
 BASE = pathlib.Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE / "config" / "strava.json"
@@ -18,15 +19,23 @@ ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 def http_post(url: str, data: dict) -> dict:
     payload = urllib.parse.urlencode(data).encode()
     req = urllib.request.Request(url, data=payload, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        raise SystemExit(f"ERREUR STRAVA {e.code} : {body}")
 
 
 def http_get(url: str, headers: dict, params: dict) -> list:
     qs = urllib.parse.urlencode(params)
     req = urllib.request.Request(f"{url}?{qs}", headers=headers, method="GET")
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        raise SystemExit(f"ERREUR STRAVA {e.code} : {body}")
 
 
 def main() -> None:
