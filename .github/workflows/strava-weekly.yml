@@ -23,6 +23,8 @@ jobs:
           python-version: "3.12"
 
       - name: Générer le résumé Strava (uniquement s'il est 20h à Paris)
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
         run: python scripts/strava_summary.py
 
       - name: Enregistrer les résultats
