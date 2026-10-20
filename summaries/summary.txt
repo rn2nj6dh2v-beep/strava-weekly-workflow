@@ -1,20 +1,19 @@
 📊 Résumé Strava des 7 derniers jours
-• 13 activité(s), 111.09 km, 5h44, 553.0 m de D+
-  - 2026-10-13 · Afternoon Ride (Ride) : 7.22 km, 20 min, 37.0 m D+
-  - 2026-10-13 · Afternoon Run (Run) : 5.06 km, 30 min, 24.0 m D+
-  - 2026-10-14 · Sortie vélo le matin (Ride) : 7.36 km, 23 min, 50.0 m D+
-  - 2026-10-14 · Sortie vélo dans l'après-midi (Ride) : 7.3 km, 21 min, 35.0 m D+
-  - 2026-10-15 · Sortie vélo le midi (Ride) : 32.75 km, 71 min, 82.0 m D+
-  - 2026-10-16 · Sortie vélo le matin (Ride) : 7.38 km, 24 min, 55.0 m D+
-  - 2026-10-16 · Sortie vélo dans l'après-midi (Ride) : 7.15 km, 20 min, 32.0 m D+
-  - 2026-10-17 · Sortie vélo le matin (Ride) : 7.28 km, 22 min, 53.0 m D+
-  - 2026-10-17 · Sortie vélo dans l'après-midi (Ride) : 4.86 km, 15 min, 50.0 m D+
-  - 2026-10-17 · Course à pied dans l'après-midi (Run) : 5.06 km, 28 min, 23.0 m D+
-  - 2026-10-19 · Course à pied le matin (Run) : 5.06 km, 27 min, 15.0 m D+
-  - 2026-10-19 · Sortie vélo dans l'après-midi (Ride) : 7.27 km, 21 min, 51.0 m D+
-  - 2026-10-19 · Sortie vélo de nuit (Ride) : 7.34 km, 22 min, 46.0 m D+
+• 12 activité(s), 131.56 km, 6h03, 570.0 m de D+
+  - 2026-10-14 · Sortie vélo le matin (Ride) : 7.36 km, 23 min, 50.0 m D+ [FC 98.4/122.0 bpm, 19.0 km/h moy (max 42.3), 90.0 W moy, souffrance 4.0, Garmin epix (Gen2)]
+  - 2026-10-14 · Sortie vélo dans l'après-midi (Ride) : 7.3 km, 21 min, 35.0 m D+ [FC 93.2/111.0 bpm, 21.0 km/h moy (max 38.7), 87.2 W moy, souffrance 3.0, Garmin epix (Gen2)]
+  - 2026-10-15 · Sortie vélo le midi (Ride) : 32.75 km, 71 min, 82.0 m D+ [FC 130.5/167.0 bpm, 27.8 km/h moy (max 43.5), 156.8 W moy, cadence 78.0, souffrance 73.0, Garmin Edge 850]
+  - 2026-10-16 · Sortie vélo le matin (Ride) : 7.38 km, 24 min, 55.0 m D+ [FC 101.5/120.0 bpm, 18.5 km/h moy (max 42.4), 85.5 W moy, souffrance 4.0, Garmin epix (Gen2)]
+  - 2026-10-16 · Sortie vélo dans l'après-midi (Ride) : 7.15 km, 20 min, 32.0 m D+ [FC 97.6/116.0 bpm, 21.8 km/h moy (max 39.5), 90.7 W moy, souffrance 3.0, Garmin epix (Gen2)]
+  - 2026-10-17 · Sortie vélo le matin (Ride) : 7.28 km, 22 min, 53.0 m D+ [FC 99.3/114.0 bpm, 20.1 km/h moy (max 32.4), 95.2 W moy, souffrance 3.0, Garmin epix (Gen2)]
+  - 2026-10-17 · Sortie vélo dans l'après-midi (Ride) : 4.86 km, 15 min, 50.0 m D+ [FC 109.2/151.0 bpm, 19.4 km/h moy (max 26.1), 127.5 W moy, souffrance 4.0, Garmin epix (Gen2)]
+  - 2026-10-17 · Course à pied dans l'après-midi (Run) : 5.06 km, 28 min, 23.0 m D+ [FC 136.2/154.0 bpm, 10.8 km/h moy (max 12.8), 312.7 W moy, cadence 90.1, souffrance 35.0, Garmin epix (Gen2)]
+  - 2026-10-19 · Course à pied le matin (Run) : 5.06 km, 27 min, 15.0 m D+ [FC 147.1/166.0 bpm, 11.1 km/h moy (max 13.3), 320.3 W moy, cadence 91.5, souffrance 57.0, Garmin epix (Gen2)]
+  - 2026-10-19 · Sortie vélo dans l'après-midi (Ride) : 7.27 km, 21 min, 51.0 m D+ [FC 107.0/132.0 bpm, 20.6 km/h moy (max 49.0), 108.9 W moy, souffrance 5.0, Garmin epix (Gen2)]
+  - 2026-10-19 · Sortie vélo de nuit (Ride) : 7.34 km, 22 min, 46.0 m D+ [FC 89.9/106.0 bpm, 20.5 km/h moy (max 35.7), 97.5 W moy, souffrance 3.0, Garmin epix (Gen2)]
+  - 2026-10-20 · Sortie vélo dans l'après-midi (Ride) : 32.75 km, 69 min, 78.0 m D+ [FC 125.0/158.0 bpm, 28.6 km/h moy (max 51.6), 170.6 W moy, cadence 76.6, souffrance 53.0, Garmin Edge 850]
 
 🧠 Analyse IA :
-Bravo pour cette semaine ultra-active avec 111 km et une belle diversité ! Ton endurance est en pleine forme, surtout avec cette longue sortie à vélo (32,75 km) qui prouve que tu sais gérer les efforts prolongés. Tes séances de running sont bien dosées, avec des temps constants autour de 5 km, ce qui montre une bonne régularité. Tu as aussi varié les horaires et les conditions, ce qui est parfait pour ton adaptation.
+Bravo pour cette semaine intense et variée ! Tes sorties du 15 et 20 octobre en vélo (32 km à 156-170 W et 28 km à 170 W) montrent une excellente capacité à maintenir des efforts en zone aérobie élevée, avec une fréquence cardiaque bien contrôlée (130-167 bpm) et une cadence optimale (76-78 tr/min). Tes runs, bien que courts, sont explosifs : une puissance moyenne de 320 W sur 5 km à 91 tr/min prouve une endurance fondamentale solide et une efficacité technique impressionnante. Ces efforts en endurance et en qualité te permettent de progresser en fond tout en travaillant ta vitesse.
 
-Attention cependant à ne pas négliger la récupération : certaines journées sont très chargées (comme le 17 octobre avec 3 sorties). Et si tu veux progresser, intégrer un peu de fractionné léger en vélo ou des exercices de renforcement musculaire (comme des squats ou des fentes) pourrait booster ta puissance. Pour la semaine prochaine, essaie de faire une séance de *fartlek* (alternance rythme libre) en vélo, 20-30 min, pour dynamiser ton cardio sans forcer ! 💪🚴‍♂️
+Attention cependant à ne pas négliger la récupération : certaines sorties du soir (comme le 17 octobre en vélo ou le 19 au matin en course) ont des pics de souffrance élevés (4-5/10) avec des FC proches de tes limites (150+ bpm). Cela peut fatiguer ton système nerveux. Un conseil concret : alterne mieux les jours intenses avec des sorties très légères (FC < 120 bpm) pour favoriser la récupération active. Par exemple, remplace une sortie du soir par un balade tranquille le lendemain matin. Tu as le potentiel pour encore plus, mais ton corps a besoin de ces pauses pour progresser durablement !
