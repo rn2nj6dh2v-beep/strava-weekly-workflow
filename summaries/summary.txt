@@ -1,8 +1,5 @@
 📊 Résumé Strava des 7 derniers jours
-• 14 activité(s), 116.43 km, 6h20, 548.0 m de D+
-  - 2026-10-12 · Afternoon Ride (Ride) : 7.49 km, 24 min, 31.0 m D+
-  - 2026-10-12 · Afternoon Run (Run) : 5.05 km, 29 min, 13.0 m D+
-  - 2026-10-13 · Morning Ride (Ride) : 7.41 km, 26 min, 48.0 m D+
+• 13 activité(s), 111.09 km, 5h44, 553.0 m de D+
   - 2026-10-13 · Afternoon Ride (Ride) : 7.22 km, 20 min, 37.0 m D+
   - 2026-10-13 · Afternoon Run (Run) : 5.06 km, 30 min, 24.0 m D+
   - 2026-10-14 · Sortie vélo le matin (Ride) : 7.36 km, 23 min, 50.0 m D+
@@ -14,3 +11,7 @@
   - 2026-10-17 · Sortie vélo dans l'après-midi (Ride) : 4.86 km, 15 min, 50.0 m D+
   - 2026-10-17 · Course à pied dans l'après-midi (Run) : 5.06 km, 28 min, 23.0 m D+
   - 2026-10-19 · Course à pied le matin (Run) : 5.06 km, 27 min, 15.0 m D+
+  - 2026-10-19 · Sortie vélo dans l'après-midi (Ride) : 7.27 km, 21 min, 51.0 m D+
+  - 2026-10-19 · Sortie vélo de nuit (Ride) : 7.34 km, 22 min, 46.0 m D+
+
+🧠 Analyse IA : indisponible (clé Mistral absente ou erreur API)

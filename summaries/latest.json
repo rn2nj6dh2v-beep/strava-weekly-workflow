@@ -1,45 +1,21 @@
 {
-  "genere_le": "2026-10-19T08:38:00.879976+00:00",
+  "genere_le": "2026-10-20T06:19:23.196401+00:00",
   "fenetre_jours": 7,
-  "nb_activites": 14,
-  "distance_totale_km": 116.43,
-  "temps_total_min": 380,
-  "denivele_total_m": 548.0,
+  "nb_activites": 13,
+  "distance_totale_km": 111.09,
+  "temps_total_min": 344,
+  "denivele_total_m": 553.0,
   "par_type": {
     "Ride": {
       "nombre": 10,
-      "km": 96.2
+      "km": 95.91
     },
     "Run": {
-      "nombre": 4,
-      "km": 20.23
+      "nombre": 3,
+      "km": 15.18
     }
   },
   "activites": [
-    {
-      "nom": "Afternoon Ride",
-      "type": "Ride",
-      "km": 7.49,
-      "minutes": 24,
-      "denivele_m": 31.0,
-      "date": "2026-10-12"
-    },
-    {
-      "nom": "Afternoon Run",
-      "type": "Run",
-      "km": 5.05,
-      "minutes": 29,
-      "denivele_m": 13.0,
-      "date": "2026-10-12"
-    },
-    {
-      "nom": "Morning Ride",
-      "type": "Ride",
-      "km": 7.41,
-      "minutes": 26,
-      "denivele_m": 48.0,
-      "date": "2026-10-13"
-    },
     {
       "nom": "Afternoon Ride",
       "type": "Ride",
@@ -126,6 +102,22 @@
       "km": 5.06,
       "minutes": 27,
       "denivele_m": 15.0,
+      "date": "2026-10-19"
+    },
+    {
+      "nom": "Sortie vélo dans l'après-midi",
+      "type": "Ride",
+      "km": 7.27,
+      "minutes": 21,
+      "denivele_m": 51.0,
+      "date": "2026-10-19"
+    },
+    {
+      "nom": "Sortie vélo de nuit",
+      "type": "Ride",
+      "km": 7.34,
+      "minutes": 22,
+      "denivele_m": 46.0,
       "date": "2026-10-19"
     }
   ]
