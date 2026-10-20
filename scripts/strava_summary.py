@@ -6,6 +6,12 @@ Inclut depuis le 19/10/2026 :
 - Analyse IA générée via l'API Mistral (si clé présente), avec comparaison
   à la semaine précédente archivée. En cas d'échec, la raison exacte est
   journalisée dans le résumé (champ "analyse_ia_erreur").
+
+Enrichi le 20/10/2026 :
+- Données détaillées par activité : fréquence cardiaque (moy/max), vitesses
+  (moy/max), calories, puissance (moy/max, vélo), cadence (moy/max — vélo ET
+  course à pied), temps écoulé vs en mouvement, suffer score, effort,
+  appareil d'enregistrement.
 """
 import datetime as dt
 import json
@@ -35,7 +41,7 @@ def _heure_paris_valide() -> bool:
 TOKEN_URL = "https://www.strava.com/oauth/token"
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
-# Modèles essayés dans l'ordre (le 2e/3e servent de secours si un nom n'existe plus)
+# Modèles essayés dans l'ordre (les suivants servent de secours)
 MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
 
 
@@ -80,6 +86,44 @@ def _fichier_historique(d: dt.datetime) -> pathlib.Path:
     return HISTORY_DIR / f"{annee}-S{semaine:02d}.json"
 
 
+def _peut_etre(v, arrondi=None):
+    """Retourne la valeur si elle existe et n'est pas nulle, sinon None."""
+    if v is None or v == 0:
+        return None
+    return round(v, arrondi) if arrondi is not None else v
+
+
+def _parse_activite(a: dict) -> dict:
+    """Extrait l'ensemble des données utiles d'une activité Strava.
+    Les champs absents selon le matériel (ex. puissance sans capteur) restent None."""
+    return {
+        "nom": a.get("name", "Sans nom"),
+        "type": a.get("type", "Unknown"),
+        "date": (a.get("start_date_local") or "")[:10],
+        "km": round((a.get("distance") or 0) / 1000, 2),
+        "minutes": round((a.get("moving_time") or 0) / 60),
+        "minutes_ecoulees": round((a.get("elapsed_time") or 0) / 60),
+        "denivele_m": round(a.get("total_elevation_gain") or 0, 1),
+        # Fréquence cardiaque (si mesurée par l'appareil)
+        "fc_moyenne": _peut_etre(a.get("average_heartrate")),
+        "fc_max": _peut_etre(a.get("max_heartrate")),
+        # Vitesses (m/s -> km/h pour la lisibilité)
+        "vitesse_moyenne_kmh": _peut_etre((a.get("average_speed") or 0) * 3.6, 1),
+        "vitesse_max_kmh": _peut_etre((a.get("max_speed") or 0) * 3.6, 1),
+        # Énergie et effort
+        "calories": _peut_etre(a.get("calories")),
+        "suffer_score": a.get("suffer_score") or None,
+        "effort": a.get("effort") or None,
+        # Puissance et cadence de pédalage (vélo, si capteurs présents)
+        "puissance_moyenne_w": _peut_etre(a.get("average_watts")),
+        "puissance_max_w": _peut_etre(a.get("max_watts")),
+        "cadence_moyenne": _peut_etre(a.get("average_cadence"), 1),
+        "cadence_max": _peut_etre(a.get("max_cadence"), 1),
+        # Appareil d'enregistrement
+        "appareil": a.get("device_name") or None,
+    }
+
+
 def _resume_court(data: dict) -> str:
     lignes = [
         f"{data['nb_activites']} activités, {data['distance_totale_km']} km, "
@@ -88,7 +132,23 @@ def _resume_court(data: dict) -> str:
     for t, v in data.get("par_type", {}).items():
         lignes.append(f"  {t}: {v['nombre']} sorties, {v['km']} km")
     for a in data.get("activites", []):
-        lignes.append(f"  {a['date']} {a['type']} \"{a['nom']}\": {a['km']} km, {a['minutes']} min, {a['denivele_m']} m D+")
+        detail = f"  {a['date']} {a['type']} \"{a['nom']}\": {a['km']} km, {a['minutes']} min, {a['denivele_m']} m D+"
+        extras = []
+        if a.get("fc_moyenne"):
+            extras.append(f"FC {a['fc_moyenne']}/{a.get('fc_max')} bpm")
+        if a.get("vitesse_moyenne_kmh"):
+            extras.append(f"{a['vitesse_moyenne_kmh']} km/h moy (max {a.get('vitesse_max_kmh')})")
+        if a.get("calories"):
+            extras.append(f"{a['calories']} kcal")
+        if a.get("puissance_moyenne_w"):
+            extras.append(f"{a['puissance_moyenne_w']} W moy")
+        if a.get("cadence_moyenne"):
+            extras.append(f"cadence {a['cadence_moyenne']}")
+        if a.get("suffer_score"):
+            extras.append(f"souffrance {a['suffer_score']}")
+        if extras:
+            detail += " [" + ", ".join(str(e) for e in extras) + "]"
+        lignes.append(detail)
     return "\n".join(lignes)
 
 
@@ -101,6 +161,8 @@ def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | N
         return None, "clé MISTRAL_API_KEY absente (ni variable d'env ni config/mistral.json)"
     prompt = (
         "Tu es un coach sportif. Analyse la semaine d'entraînement Strava ci-dessous. "
+        "Exploite les données de fréquence cardiaque, vitesse, puissance et cadence quand "
+        "elles sont présentes pour évaluer l'intensité réelle des efforts. "
         "Réponds en français, en 150 mots maximum : 2-3 points forts, 1-2 points de "
         "vigilance, 1 conseil concret pour la semaine suivante. Ton direct et encourageant, "
         "pas de listes à puces, du texte fluide en 2 paragraphes courts.\n\n"
@@ -177,21 +239,12 @@ def main() -> None:
             break
         page += 1
 
-    parsed = [
-        {
-            "nom": a.get("name", "Sans nom"),
-            "type": a.get("type", "Unknown"),
-            "km": round((a.get("distance") or 0) / 1000, 2),
-            "minutes": round((a.get("moving_time") or 0) / 60),
-            "denivele_m": round(a.get("total_elevation_gain") or 0, 1),
-            "date": (a.get("start_date_local") or "")[:10],
-        }
-        for a in activities
-    ]
+    parsed = [_parse_activite(a) for a in activities]
 
     total_km = round(sum(p["km"] for p in parsed), 2)
     total_min = sum(p["minutes"] for p in parsed)
     total_dplus = round(sum(p["denivele_m"] for p in parsed), 1)
+    total_kcal = sum(p["calories"] for p in parsed if p["calories"]) or None
     par_type: dict = {}
     for p in parsed:
         t = par_type.setdefault(p["type"], {"nombre": 0, "km": 0.0})
@@ -209,6 +262,7 @@ def main() -> None:
         "distance_totale_km": total_km,
         "temps_total_min": total_min,
         "denivele_total_m": total_dplus,
+        "calories_totales": total_kcal,
         "par_type": par_type,
         "activites": parsed,
     }
@@ -238,12 +292,33 @@ def main() -> None:
     if parsed:
         h, m = divmod(total_min, 60)
         duree = f"{h}h{m:02d}" if h else f"{m} min"
-        lignes = [
+        entete = [
             f"📊 Résumé Strava des {DAYS} derniers jours",
             f"• {len(parsed)} activité(s), {total_km} km, {duree}, {total_dplus} m de D+",
         ]
+        if total_kcal:
+            entete.append(f"• {total_kcal} kcal brûlées")
+        lignes = list(entete)
         for p in parsed:
-            lignes.append(f"  - {p['date']} · {p['nom']} ({p['type']}) : {p['km']} km, {p['minutes']} min, {p['denivele_m']} m D+")
+            ligne = f"  - {p['date']} · {p['nom']} ({p['type']}) : {p['km']} km, {p['minutes']} min, {p['denivele_m']} m D+"
+            extras = []
+            if p.get("fc_moyenne"):
+                extras.append(f"FC {p['fc_moyenne']}/{p.get('fc_max')} bpm")
+            if p.get("vitesse_moyenne_kmh"):
+                extras.append(f"{p['vitesse_moyenne_kmh']} km/h moy (max {p.get('vitesse_max_kmh')})")
+            if p.get("calories"):
+                extras.append(f"{p['calories']} kcal")
+            if p.get("puissance_moyenne_w"):
+                extras.append(f"{p['puissance_moyenne_w']} W moy")
+            if p.get("cadence_moyenne"):
+                extras.append(f"cadence {p['cadence_moyenne']}")
+            if p.get("suffer_score"):
+                extras.append(f"souffrance {p['suffer_score']}")
+            if p.get("appareil"):
+                extras.append(str(p["appareil"]))
+            if extras:
+                ligne += " [" + ", ".join(str(e) for e in extras) + "]"
+            lignes.append(ligne)
         if analyse:
             lignes += ["", "🧠 Analyse IA :", analyse]
         else:

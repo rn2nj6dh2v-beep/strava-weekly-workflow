@@ -2,12 +2,15 @@ name: Résumé hebdomadaire Strava
 
 on:
   schedule:
-    # GitHub ne gère que l'UTC : on déclenche aux deux créneaux possibles
-    # (18:00 UTC = 20:00 Paris en été, 19:00 UTC = 20:00 Paris en hiver)
-    # et le script vérifie l'heure réelle de Paris avant de s'exécuter.
     - cron: "0 18 * * 0"
     - cron: "0 19 * * 0"
   workflow_dispatch:
+  # TEMPORAIRE (test) : un push sur ces fichiers déclenche un run forcé
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/strava-weekly.yml"
+      - "scripts/**"
 
 permissions:
   contents: write
@@ -22,9 +25,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Générer le résumé Strava (uniquement s'il est 20h à Paris)
+      - name: Générer le résumé Strava
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          STRAVA_FORCE_RUN: ${{ github.event_name == 'push' && '1' || '' }}
         run: python scripts/strava_summary.py
 
       - name: Enregistrer les résultats
