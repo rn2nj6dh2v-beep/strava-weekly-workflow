@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-20T07:04:14.723152+00:00",
+  "genere_le": "2026-10-20T07:05:41.674758+00:00",
   "fenetre_jours": 7,
   "nb_activites": 13,
   "distance_totale_km": 111.09,
@@ -120,5 +120,7 @@
       "denivele_m": 46.0,
       "date": "2026-10-19"
     }
-  ]
+  ],
+  "analyse_ia": "Bravo pour cette semaine ultra-active avec 111 km et une belle diversité ! Ton endurance est en pleine forme, surtout avec cette longue sortie à vélo (32,75 km) qui prouve que tu sais gérer les efforts prolongés. Tes séances de running sont bien dosées, avec des temps constants autour de 5 km, ce qui montre une bonne régularité. Tu as aussi varié les horaires et les conditions, ce qui est parfait pour ton adaptation.\n\nAttention cependant à ne pas négliger la récupération : certaines journées sont très chargées (comme le 17 octobre avec 3 sorties). Et si tu veux progresser, intégrer un peu de fractionné léger en vélo ou des exercices de renforcement musculaire (comme des squats ou des fentes) pourrait booster ta puissance. Pour la semaine prochaine, essaie de faire une séance de *fartlek* (alternance rythme libre) en vélo, 20-30 min, pour dynamiser ton cardio sans forcer ! 💪🚴‍♂️",
+  "modele_ia": "mistral-small-latest"
 }
