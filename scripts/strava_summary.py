@@ -4,7 +4,8 @@
 Inclut depuis le 19/10/2026 :
 - Archivage hebdomadaire dans summaries/history/<année>-S<semaine ISO>.json
 - Analyse IA générée via l'API Mistral (si clé présente), avec comparaison
-  à la semaine précédente archivée.
+  à la semaine précédente archivée. En cas d'échec, la raison exacte est
+  journalisée dans le résumé (champ "analyse_ia_erreur").
 """
 import datetime as dt
 import json
@@ -34,7 +35,8 @@ def _heure_paris_valide() -> bool:
 TOKEN_URL = "https://www.strava.com/oauth/token"
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
-MISTRAL_MODEL = "mistral-small-latest"
+# Modèles essayés dans l'ordre (le 2e/3e servent de secours si un nom n'existe plus)
+MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
 
 
 def http_post(url: str, data: dict) -> dict:
@@ -90,12 +92,13 @@ def _resume_court(data: dict) -> str:
     return "\n".join(lignes)
 
 
-def _analyse_ia(data: dict, precedent: dict | None) -> str | None:
+def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | None]:
     """Appelle l'API Mistral pour une analyse d'entraînement en français.
-    Renvoie None (et n'échoue pas) si pas de clé ou erreur API."""
+    Retourne (analyse, None) en cas de succès, ou (None, raison) en cas d'échec.
+    N'interrompt jamais le résumé."""
     key = _cle_mistral()
     if not key:
-        return None
+        return None, "clé MISTRAL_API_KEY absente (ni variable d'env ni config/mistral.json)"
     prompt = (
         "Tu es un coach sportif. Analyse la semaine d'entraînement Strava ci-dessous. "
         "Réponds en français, en 150 mots maximum : 2-3 points forts, 1-2 points de "
@@ -105,23 +108,29 @@ def _analyse_ia(data: dict, precedent: dict | None) -> str | None:
     )
     if precedent:
         prompt += "\n\nSEMAINE PRÉCÉDENTE (pour comparaison) :\n" + _resume_court(precedent)
-    payload = json.dumps({
-        "model": MISTRAL_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 400,
-        "temperature": 0.5,
-    }).encode()
-    req = urllib.request.Request(MISTRAL_CHAT_URL, data=payload, method="POST", headers={
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            body = json.loads(resp.read().decode())
-        return body["choices"][0]["message"]["content"].strip()
-    except (urllib.error.URLError, urllib.error.HTTPError, KeyError, IndexError) as e:
-        print(f"Analyse IA indisponible ({e}) — résumé généré sans analyse.")
-        return None
+
+    derniere_erreur = None
+    for modele in MODELES_FALLBACK:
+        payload = json.dumps({
+            "model": modele,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 400,
+            "temperature": 0.5,
+        }).encode()
+        req = urllib.request.Request(MISTRAL_CHAT_URL, data=payload, method="POST", headers={
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+        })
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                body = json.loads(resp.read().decode())
+            return body["choices"][0]["message"]["content"].strip(), None
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode(errors="replace")[:300]
+            derniere_erreur = f"HTTP {e.code} (modèle {modele}) : {detail}"
+        except (urllib.error.URLError, KeyError, IndexError) as e:
+            derniere_erreur = f"{type(e).__name__} (modèle {modele}) : {e}"
+    return None, derniere_erreur or "erreur inconnue"
 
 
 def main() -> None:
@@ -214,10 +223,12 @@ def main() -> None:
             precedent = None
 
     # Analyse IA (best effort : n'interrompt jamais le résumé)
-    analyse = _analyse_ia(result, precedent)
+    analyse, raison_erreur = _analyse_ia(result, precedent)
     if analyse:
         result["analyse_ia"] = analyse
-        result["modele_ia"] = MISTRAL_MODEL
+        result["modele_ia"] = MODELES_FALLBACK[0]
+    elif raison_erreur:
+        result["analyse_ia_erreur"] = raison_erreur
 
     # Archivage de la semaine + fichier "latest"
     (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
@@ -236,7 +247,7 @@ def main() -> None:
         if analyse:
             lignes += ["", "🧠 Analyse IA :", analyse]
         else:
-            lignes += ["", "🧠 Analyse IA : indisponible (clé Mistral absente ou erreur API)"]
+            lignes += ["", f"🧠 Analyse IA : indisponible — raison : {raison_erreur}"]
     else:
         lignes = [f"Aucune activité Strava sur les {DAYS} derniers jours. Lève-toi du canapé ! 🏃"]
     (OUT_DIR / "summary.txt").write_text("\n".join(lignes))
