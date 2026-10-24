@@ -1,0 +1,36 @@
+name: intervals.icu — données VFC quotidiennes
+
+on:
+  schedule:
+    # 8h00 Paris : 07:00 UTC en hiver, 06:00 UTC en été.
+    # Le script vérifie l'heure réelle de Paris avant de s'exécuter.
+    - cron: "0 6 * * *"
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  vfc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Récupérer les données wellness intervals.icu (si ~8h à Paris)
+        env:
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+        run: python scripts/intervals_hrv.py
+
+      - name: Enregistrer les résultats
+        run: |
+          git config user.name "intervals-bot"
+          git config user.email "intervals-bot@users.noreply.github.com"
+          git add summaries/intervals/
+          git commit -m "Données intervals.icu du $(date +'%Y-%m-%d')" || echo "Rien à commiter"
+          git push
