@@ -2,15 +2,11 @@ name: Résumé hebdomadaire Strava
 
 on:
   schedule:
+    # 23h Paris : 21:00 UTC en hiver, 22:00 UTC en été
+    # le script vérifie l'heure réelle de Paris avant de s'exécuter.
     - cron: "0 21 * * 0"
     - cron: "0 22 * * 0"
   workflow_dispatch:
-  # TEMPORAIRE (test) : un push sur ces fichiers déclenche un run forcé
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/strava-weekly.yml"
-      - "scripts/**"
 
 permissions:
   contents: write
@@ -25,13 +21,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Générer le résumé Strava
+      - name: Générer le résumé Strava (uniquement s'il est 23h à Paris)
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
-          STRAVA_FORCE_RUN: ${{ github.event_name == 'push' && '1' || '' }}
         run: python scripts/strava_summary.py
 
       - name: Enregistrer les résultats
