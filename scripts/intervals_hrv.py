@@ -44,7 +44,13 @@ def _headers() -> dict:
     if not key:
         raise SystemExit("ERREUR INTERVALS : secret INTERVALS_API_KEY absent")
     token = base64.b64encode(f"{key}:".encode()).decode()
-    return {"Authorization": f"Basic {token}", "Accept": "application/json"}
+    # intervals.icu est derrière Cloudflare : sans User-Agent "navigateur",
+    # la requête est bloquée (erreur 1010 Access denied).
+    return {
+        "Authorization": f"Basic {token}",
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    }
 
 
 def _get(path: str, params: dict | None = None):
