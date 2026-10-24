@@ -6,6 +6,8 @@
 - Données enrichies par activité : FC, vitesses, calories, puissance, cadence,
   suffer score, appareil
 - Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
+- Résumé épuré (type/distance/temps) : les données détaillées restent
+  archivées dans latest.json et history/ et exploitées par l analyse IA
 """
 import datetime as dt
 import json
@@ -306,26 +308,13 @@ def main() -> None:
         ]
         if total_kcal:
             lignes.append(f"• {total_kcal} kcal brûlées")
+        # Résumé volontairement épuré (demande de Cyril du 24/10/2026) :
+        # type, distance et temps uniquement. Toutes les données détaillées
+        # (FC, vitesses, puissance, cadence, calories, etc.) restent collectées
+        # et archivées dans latest.json et summaries/history/ pour analyse ultérieure,
+        # et l'analyse IA continue de les exploiter.
         for p in parsed:
-            ligne = f"  - {p['date']} · {p['nom']} ({p['type']}) : {p['km']} km, {p['minutes']} min, {p['denivele_m']} m D+"
-            extras = []
-            if p.get("fc_moyenne"):
-                extras.append(f"FC {p['fc_moyenne']}/{p.get('fc_max')} bpm")
-            if p.get("vitesse_moyenne_kmh"):
-                extras.append(f"{p['vitesse_moyenne_kmh']} km/h moy (max {p.get('vitesse_max_kmh')})")
-            if p.get("calories"):
-                extras.append(f"{p['calories']} kcal")
-            if p.get("puissance_moyenne_w"):
-                extras.append(f"{p['puissance_moyenne_w']} W moy")
-            if p.get("cadence_moyenne"):
-                extras.append(f"cadence {p['cadence_moyenne']}")
-            if p.get("suffer_score"):
-                extras.append(f"souffrance {p['suffer_score']}")
-            if p.get("appareil"):
-                extras.append(str(p["appareil"]))
-            if extras:
-                ligne += " [" + ", ".join(str(e) for e in extras) + "]"
-            lignes.append(ligne)
+            lignes.append(f"  - {p['type']} : {p['km']} km, {p['minutes']} min")
         if analyse:
             lignes += ["", "🧠 Analyse IA :", analyse]
         else:
