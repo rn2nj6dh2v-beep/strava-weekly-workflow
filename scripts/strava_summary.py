@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""RÃ©sumÃ© hebdomadaire Strava â exÃ©cutÃ© par GitHub Actions le dimanche 23h (heure de Paris).
+"""Résumé hebdomadaire Strava — exécuté par GitHub Actions le dimanche 23h (heure de Paris).
 
-- Archivage hebdomadaire dans summaries/history/<annÃ©e>-S<semaine ISO>.json
-- Analyse IA via l'API Mistral (comparaison avec la semaine prÃ©cÃ©dente archivÃ©e)
-- DonnÃ©es enrichies par activitÃ© : FC, vitesses, calories, puissance, cadence,
+- Archivage hebdomadaire dans summaries/history/<année>-S<semaine ISO>.json
+- Analyse IA via l'API Mistral (comparaison avec la semaine précédente archivée)
+- Données enrichies par activité : FC, vitesses, calories, puissance, cadence,
   suffer score, appareil
-- DonnÃ©es VFC/sommeil des 7 derniers jours (intervals.icu, gÃ©nÃ©rÃ©es par
-  scripts/intervals_hrv.py dans summaries/intervals/week.json) intÃ©grÃ©es au
-  rÃ©sumÃ© et exploitÃ©es par l'analyse IA
-- Envoi du rÃ©sumÃ© par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO prÃ©sents
-- RÃ©sumÃ© Ã©purÃ© (type/distance/temps) : les donnÃ©es dÃ©taillÃ©es restent
-  archivÃ©es dans latest.json et history/ et exploitÃ©es par l analyse IA
+- Données VFC/sommeil des 7 derniers jours (intervals.icu, générées par
+  scripts/intervals_hrv.py dans summaries/intervals/week.json) intégrées au
+  résumé et exploitées par l'analyse IA
+- Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
+- Résumé épuré (type/distance/temps) : les données détaillées restent
+  archivées dans latest.json et history/ et exploitées par l analyse IA
 """
 import datetime as dt
 import json
@@ -33,16 +33,16 @@ VFC_WEEK_PATH = OUT_DIR / "intervals" / "week.json"
 DAYS = 7
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 HEURE_EXECUTION = 23  # heure de Paris
-SMTP_HOST = os.environment.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 
 
 def _heure_paris_valide() -> bool:
-    """Vrai s'il est HEURE_EXECUTION Ã  Paris. Permet l'ajustement automatique
-    Ã©tÃ©/hiver : GitHub dÃ©clenche aux deux crÃ©neaux UTC possibles, on bnnÃ©cute
+    """Vrai s'il est HEURE_EXECUTION à Paris. Permet l'ajustement automatique
+    été/hiver : GitHub déclenche aux deux créneaux UTC possibles, on n'exécute
     que le bon."""
     if os.environ.get("STRAVA_FORCE_RUN"):
-        return True  # dÃ©clenchement manuel : toujours exÃ©cuter
+        return True  # déclenchement manuel : toujours exécuter
     return dt.datetime.now(PARIS).hour == HEURE_EXECUTION
 
 TOKEN_URL = "https://www.strava.com/oauth/token"
@@ -80,25 +80,25 @@ def _cle_mistral() -> str | None:
     if MISTRAL_CONFIG_PATH.exists():
         try:
             return json.loads(MISTRAL_CONFIG_PATH.read_text()).get("api_key")
-        except (json.JSONDEcodeError, OSError):
+        except (json.JSONDecodeError, OSError):
             return None
     return None
 
 
-def _envoi_email(content: str) -> str | None:
-    """Envoie le rÃ©sumÃ© par email via SMTP (Gmail par dÃ©faut).
-    Retourne None si succÃ¨s, ou la raison de l'Ã©chec. Best effort."""
+def _envoi_email(contenu: str) -> str | None:
+    """Envoie le résumé par email via SMTP (Gmail par défaut).
+    Retourne None si succès, ou la raison de l'échec. Best effort."""
     user = os.environ.get("SMTP_USER")
     password = os.environ.get("SMTP_PASSWORD")
     to = os.environ.get("MAIL_TO") or user
     if not user or not password:
-        return "secrets SMTP_USER / SMTP_PASSWORD absents â email non envoyÃ©"
-    sujet = f"ð Ton rÃ©sumÃ© Strava de la semaine â {dt.datetime.now(PARIS).strftime('%d/%m/%Y')}"
+        return "secrets SMTP_USER / SMTP_PASSWORD absents — email non envoyé"
+    sujet = f"📊 Ton résumé Strava de la semaine — {dt.datetime.now(PARIS).strftime('%d/%m/%Y')}"
     msg = EmailMessage()
     msg["Subject"] = sujet
     msg["From"] = f"Strava Bot <{user}>"
     msg["To"] = to
-    msg.set_content(content)
+    msg.set_content(contenu)
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
             server.starttls(context=ssl.create_default_context())
@@ -115,8 +115,8 @@ def _fichier_historique(d: dt.datetime) -> pathlib.Path:
 
 
 def _vfc_semaine() -> dict | None:
-    """Stats VFC/sommeil des 7 derniers jours, gÃ©nÃ©rÃ©es par scripts/intervals_hrv.py.
-    Best effort : si absent ou illisible, le rÃ©sumÃ© Strava continue sans VFC."""
+    """Stats VFC/sommeil des 7 derniers jours, générées par scripts/intervals_hrv.py.
+    Best effort : si absent ou illisible, le résumé Strava continue sans VFC."""
     try:
         return json.loads(VFC_WEEK_PATH.read_text())
     except (OSError, json.JSONDecodeError):
@@ -133,7 +133,8 @@ def _parse_activite(a: dict) -> dict:
     return {
         "nom": a.get("name", "Sans nom"),
         "type": a.get("type", "Unknown"),
-        "date": (a.get("start_date_local") or "")[:10],        "km": round((a.get("distance") or 0) / 1000, 2),
+        "date": (a.get("start_date_local") or "")[:10],
+        "km": round((a.get("distance") or 0) / 1000, 2),
         "minutes": round((a.get("moving_time") or 0) / 60),
         "minutes_ecoulees": round((a.get("elapsed_time") or 0) / 60),
         "denivele_m": round(a.get("total_elevation_gain") or 0, 1),
@@ -164,15 +165,15 @@ def _ligne_vfc(v: dict) -> str:
     for j in v.get("jours", []):
         if j.get("vfc_ms") is not None or j.get("sommeil_h") is not None:
             jours.append(
-                f"   {i['date']} : VFC {j.get('vfc_ms')} ms, "
+                f"    {j['date']} : VFC {j.get('vfc_ms')} ms, "
                 f"FC repos {j.get('fc_repos')}, sommeil {j.get('sommeil_h')} h"
             )
-    return "\n".join(bliZg] + jours)
+    return "\n".join([ligne] + jours)
 
 
 def _resume_court(data: dict) -> str:
     lignes = [
-        f"{data['nb_activites']} activitÃ©s, {data['distance_totale_km']} km, "
+        f"{data['nb_activites']} activités, {data['distance_totale_km']} km, "
         f"{data['temps_total_min']} min, {data['denivele_total_m']} m D+"
     ]
     if data.get("vfc"):
@@ -203,22 +204,22 @@ def _resume_court(data: dict) -> str:
 def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | None]:
     key = _cle_mistral()
     if not key:
-        return None, "clÃ© MISTRAL_API_KEY absente (ni variable d'env ni config/mistral.json)"
+        return None, "clé MISTRAL_API_KEY absente (ni variable d'env ni config/mistral.json)"
     prompt = (
-        "Tu es un coach sportif. Analyse la semaine d'entraÃ®nement Strava ci-dessous. "
-        "Exploite les donnÃ©es de frÃ©quence cardiaque, vitesse, puissance et cadence quand "
-        "elles sont prÃ©sentes pour Ã©valuer l'intensitÃ© rÃ©lle des efforts. Exploite aussi "
-        "la VFC (variabilitÃ© de frÃ©quence cardiaque, rMSSD nocturne), la FC de repos et le "
-        "sommeil d'intervals.icu quand ils sont prÃ©sents pour Ã©valuer la rÃ©cupÃ©ration et "
-        "l'Ã©tat de forme : signale les baisses de VFC ou Ã©lÃ©vations de FC de repos qui "
-        "suggÃ¨rent un surmenage ou un sommeil insuffisant. "
-        "RÃ©ponds en franjÃ§ais, en 150 mots maximum : 2-3 points forts, 1-2 points de "
+        "Tu es un coach sportif. Analyse la semaine d'entraînement Strava ci-dessous. "
+        "Exploite les données de fréquence cardiaque, vitesse, puissance et cadence quand "
+        "elles sont présentes pour évaluer l'intensité réelle des efforts. Exploite aussi "
+        "la VFC (variabilité de fréquence cardiaque, rMSSD nocturne), la FC de repos et le "
+        "sommeil d'intervals.icu quand ils sont présents pour évaluer la récupération et "
+        "l'état de forme : signale les baisses de VFC ou élévations de FC de repos qui "
+        "suggèrent un surmenage ou un sommeil insuffisant. "
+        "Réponds en français, en 150 mots maximum : 2-3 points forts, 1-2 points de "
         "vigilance, 1 conseil concret pour la semaine suivante. Ton direct et encourageant, "
-        "pas de listes Ã  puces, du texte fluide en 2 paragraphes courts.\n\n"
-        "SEMAINE Ã ANALYSER :\n" + _resume_court(data)
+        "pas de listes à puces, du texte fluide en 2 paragraphes courts.\n\n"
+        "SEMAINE À ANALYSER :\n" + _resume_court(data)
     )
     if precedent:
-        prompt += "\n\nSEMAINE PRÃCÃDENTE (pour comparaison) :\n" + _resume_court(precedent)
+        prompt += "\n\nSEMAINE PRÉCÉDENTE (pour comparaison) :\n" + _resume_court(precedent)
 
     derniere_erreur = None
     for modele in MODELES_FALLBACK:
@@ -238,15 +239,15 @@ def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | N
             return body["choices"][0]["message"]["content"].strip(), None
         except urllib.error.HTTPError as e:
             detail = e.read().decode(errors="replace")[:300]
-            derniere_erreur = f"HTTP {e.code} (modÃ¨le {modele}) : {detail}"
+            derniere_erreur = f"HTTP {e.code} (modèle {modele}) : {detail}"
         except (urllib.error.URLError, KeyError, IndexError) as e:
-            derniere_erreur = f"{type(e).__name__} (modÃ¨le {modele}) : {e}"
+            derniere_erreur = f"{type(e).__name__} (modèle {modele}) : {e}"
     return None, derniere_erreur or "erreur inconnue"
 
 
 def main() -> None:
     if not _heure_paris_valide():
-        print(f"Pas encore {HEURE_EXECUTION}h Ã  Paris â rien Ã  faire (ajustement heure Ã©tÃ©/hiver).")
+        print(f"Pas encore {HEURE_EXECUTION}h à Paris — rien à faire (ajustement heure été/hiver).")
         return
 
     config = json.loads(CONFIG_PATH.read_text())
@@ -254,13 +255,15 @@ def main() -> None:
     if config.get("refresh_token"):
         resp = http_post(TOKEN_URL, {
             "client_id": config["client_id"],
-            "client_secret": config["client_secret"],            "grant_type": "refresh_token",
+            "client_secret": config["client_secret"],
+            "grant_type": "refresh_token",
             "refresh_token": config["refresh_token"],
         })
     elif config.get("auth_code"):
         resp = http_post(TOKEN_URL, {
             "client_id": config["client_id"],
-            "client_secret": config["client_secret"],            "grant_type": "authorization_code",
+            "client_secret": config["client_secret"],
+            "grant_type": "authorization_code",
             "code": config["auth_code"],
         })
     else:
@@ -272,8 +275,8 @@ def main() -> None:
         config["auth_code"] = None
         CONFIG_PATH.write_text(json.dumps(config, indent=2))
 
-    after = int((tdt.datetime.now((tdt.timezone.utc) - dt.dimedelta(days=DAYS)).timestamp())
-    headers = {"Authorization": f"Bearer {access_token}"}"
+    after = int((dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=DAYS)).timestamp())
+    headers = {"Authorization": f"Bearer {access_token}"}
     activities, page = [], 1
     while True:
         batch = http_get(ACTIVITIES_URL, headers, {
@@ -315,7 +318,7 @@ def main() -> None:
     }
 
     # VFC/sommeil intervals.icu (best effort : absent si le job quotidien
-    # n'a pas encore tournÃ© ou si la clÃ© API n'est pas configurÃ©)
+    # n'a pas encore tourné ou si la clé API n'est pas configurée)
     vfc = _vfc_semaine()
     if vfc:
         result["vfc"] = vfc
@@ -343,33 +346,46 @@ def main() -> None:
 
     if parsed:
         h, m = divmod(total_min, 60)
-        duree = f"{h}{m:02d}" if h else f"{m} min"
+        duree = f"{h}h{m:02d}" if h else f"{m} min"
         lignes = [
-            fÂ§ðê\Ý[pêHÝ]H\ÈÑVTßH\Y\ÈÝ\È®(
-Û[\ÙY
-_HXÝ]]0êJÊKÝÝ[ÚÛ_HÛKÙ\Y_KÝÝ[Ù\ßßHHH
-ÈBYÝ[ÚØØ[YÛ\Ë\[
-° )âÝÝ[ÚØØ[HØØ[°îÛ0êY\ÈBYÈ[ËÙ]
-×Û[ÞY[WÛ\ÈNYÛ\Ë\[
-®((8§i;î#ÈÈ[ÞY[H
-ÈHÝÖÉÝ×Û[ÞY[WÛ\É×_H\ÈÝËÙ]
-	Ý×ÛZ[Û\ÉÊ_x $ÞÝËÙ]
-	Ý×ÛX^Û\ÉÊ_JKÈ\ÜÈÝËÙ]
-	Ù×Ü\Ü×Û[ÞY[IÊ_HKÛÛ[YZ[[ÞY[ÝËÙ]
-	ÜÛÛ[YZ[Û[ÞY[Ú	Ê_H
-BÈ°ê\Ý[pêHÛÛZ\[Y[0ê\\°êH
-[X[HHÞ\[HÌLÌHÈ\K\Ý[ÙH][\È[\]Y[Y[Ý]\È\ÈÛ°êY\È0ê]Z[0êY\ÂÈ
-Ë]\ÜÙ\ËZ\ÜØ[ÙKØY[ÙKØ[ÜY\ËË]ËH\Ý[ÛÛXÝ0êY\ÂÈ]\Ú]°êY\È[È]\ÝÛÛ]Ý[[X\Y\ËÚ\ÝÜKÈÝ\[[\ÙH[0ê\Y]\KÈ]	Ø[[\ÙHPHÛÛ[YHH\È^Ú]\Ü[\ÙYYÛ\Ë\[
-HÜÉÝ\I×_HÜÉÚÛI×_HÛKÜÉÛZ[]\É×_HZ[BY[[\ÙNYÛ\È
-ÏHÈ¼'éè[[\ÙHPH[[\ÙWB[ÙNYÛ\È
-ÏHÈ° )è[[\ÙHPH[\ÜÛXH8 %Z\ÛÛÜZ\ÛÛÙ\]\HB[ÙNYÛ\ÈHÙ]XÝ[HXÝ]]0êHÝ]HÝ\\ÈÑVTßH\Y\ÈÝ\Ë0êK]ÚHHØ[\0êHH<'ãàÈB
-ÕUÑTÈÝ[[X\KKÜ]WÝ^
-Ú[YÛ\ÊJBÈ[ÚH[XZ[
-\ÝYÜÚ[\Û\[XZ\ÈH°ê\Ý[pêJB\]\Ù[XZ[HÙ[ÚWÙ[XZ[
-Ú[YÛ\ÊJBY\]\Ù[XZ[[
-[XZ[Û[ÞpêH8 %Z\ÛÛÙ\]\Ù[XZ[HB\Ý[È[XZ[Ù\]\HH\]\Ù[XZ[
-ÕUÑTÈ]\ÝÛÛKÜ]WÝ^
-ÛÛ[\Ê\Ý[[Ý\WØ\ØÚZOQ[ÙK[[LJB[ÙN[
-°ê\Ý[pêH[ÞpêH\[XZ[8§"»î#ÈB[
-Ú[YÛ\ÊJBY×Û[YW×ÈOH×ÛXZ[×ÈXZ[
-B
+            f"📊 Résumé Strava des {DAYS} derniers jours",
+            f"• {len(parsed)} activité(s), {total_km} km, {duree}, {total_dplus} m de D+",
+        ]
+        if total_kcal:
+            lignes.append(f"• {total_kcal} kcal brûlées")
+        if vfc and vfc.get("vfc_moyenne_ms"):
+            lignes.append(
+                f"• ❤️ VFC moyenne (7 j) : {vfc['vfc_moyenne_ms']} ms "
+                f"({vfc.get('vfc_min_ms')}–{vfc.get('vfc_max_ms')}), "
+                f"FC repos {vfc.get('fc_repos_moyenne')} bpm, "
+                f"sommeil moyen {vfc.get('sommeil_moyen_h')} h"
+            )
+        # Résumé volontairement épuré (demande de Cyril du 24/10/2026) :
+        # type, distance et temps uniquement. Toutes les données détaillées
+        # (FC, vitesses, puissance, cadence, calories, VFC, etc.) restent collectées
+        # et archivées dans latest.json et summaries/history/ pour analyse ultérieure,
+        # et l'analyse IA continue de les exploiter.
+        for p in parsed:
+            lignes.append(f"  - {p['type']} : {p['km']} km, {p['minutes']} min")
+        if analyse:
+            lignes += ["", "🧠 Analyse IA :", analyse]
+        else:
+            lignes += ["", f"🧠 Analyse IA : indisponible — raison : {raison_erreur}"]
+    else:
+        lignes = [f"Aucune activité Strava sur les {DAYS} derniers jours. Lève-toi du canapé ! 🏃"]
+    (OUT_DIR / "summary.txt").write_text("\n".join(lignes))
+
+    # Envoi email (best effort : n'interrompt jamais le résumé)
+    erreur_email = _envoi_email("\n".join(lignes))
+    if erreur_email:
+        print(f"Email non envoyé — raison : {erreur_email}")
+        result["email_erreur"] = erreur_email
+        (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print("Résumé envoyé par email ✉️")
+
+    print("\n".join(lignes))
+
+
+if __name__ == "__main__":
+    main()

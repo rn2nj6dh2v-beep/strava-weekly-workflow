@@ -40,7 +40,7 @@ def _heure_paris_valide() -> bool:
 
 
 def _headers() -> dict:
-    key = os.environment.get("INTERVALS_API_KEY")
+    key = os.environ.get("INTERVALS_API_KEY")
     if not key:
         raise SystemExit("ERREUR INTERVALS : secret INTERVALS_API_KEY absent")
     token = base64.b64encode(f"{key}:".encode()).decode()
@@ -48,7 +48,7 @@ def _headers() -> dict:
 
 
 def _get(path: str, params: dict | None = None):
-    url = f{API}{path}"
+    url = f"{API}{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers=_headers(), method="GET")
