@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
-"""Résumé hebdomadaire Strava — exécuté par GitHub Actions le dimanche 20h (heure de Paris).
+"""Résumé hebdomadaire Strava — exécuté par GitHub Actions le dimanche 23h (heure de Paris).
 
-Inclut depuis le 19/10/2026 :
 - Archivage hebdomadaire dans summaries/history/<année>-S<semaine ISO>.json
-- Analyse IA générée via l'API Mistral (si clé présente), avec comparaison
-  à la semaine précédente archivée. En cas d'échec, la raison exacte est
-  journalisée dans le résumé (champ "analyse_ia_erreur").
-
-Enrichi le 20/10/2026 :
-- Données détaillées par activité : fréquence cardiaque (moy/max), vitesses
-  (moy/max), calories, puissance (moy/max, vélo), cadence (moy/max — vélo ET
-  course à pied), temps écoulé vs en mouvement, suffer score, effort,
-  appareil d'enregistrement.
+- Analyse IA via l'API Mistral (comparaison avec la semaine précédente archivée)
+- Données enrichies par activité : FC, vitesses, calories, puissance, cadence,
+  suffer score, appareil
+- Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
 """
 import datetime as dt
 import json
 import os
 import pathlib
+import smtplib
+import ssl
 import urllib.parse
 import urllib.request
 import urllib.error
+from email.message import EmailMessage
 import zoneinfo
 
 BASE = pathlib.Path(__file__).resolve().parent.parent
@@ -29,19 +26,22 @@ OUT_DIR = BASE / "summaries"
 HISTORY_DIR = OUT_DIR / "history"
 DAYS = 7
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
+HEURE_EXECUTION = 23  # heure de Paris
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 
 
 def _heure_paris_valide() -> bool:
-    """Vrai s'il est 20h (à la minute près) à Paris. Permet l'ajustement automatique
-    été/hiver : GitHub déclenche à 18h et 19h UTC, on n'exécute que le bon créneau."""
+    """Vrai s'il est HEURE_EXECUTION à Paris. Permet l'ajustement automatique
+    été/hiver : GitHub déclenche aux deux créneaux UTC possibles, on n'exécute
+    que le bon."""
     if os.environ.get("STRAVA_FORCE_RUN"):
         return True  # déclenchement manuel : toujours exécuter
-    return dt.datetime.now(PARIS).hour == 20
+    return dt.datetime.now(PARIS).hour == HEURE_EXECUTION
 
 TOKEN_URL = "https://www.strava.com/oauth/token"
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
-# Modèles essayés dans l'ordre (les suivants servent de secours)
 MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
 
 
@@ -68,7 +68,6 @@ def http_get(url: str, headers: dict, params: dict) -> list:
 
 
 def _cle_mistral() -> str | None:
-    """Clé API Mistral : variable d'env MISTRAL_API_KEY, sinon config/mistral.json."""
     key = os.environ.get("MISTRAL_API_KEY")
     if key:
         return key
@@ -80,22 +79,42 @@ def _cle_mistral() -> str | None:
     return None
 
 
+def _envoi_email(contenu: str) -> str | None:
+    """Envoie le résumé par email via SMTP (Gmail par défaut).
+    Retourne None si succès, ou la raison de l'échec. Best effort."""
+    user = os.environ.get("SMTP_USER")
+    password = os.environ.get("SMTP_PASSWORD")
+    to = os.environ.get("MAIL_TO") or user
+    if not user or not password:
+        return "secrets SMTP_USER / SMTP_PASSWORD absents — email non envoyé"
+    sujet = f"📊 Ton résumé Strava de la semaine — {dt.datetime.now(PARIS).strftime('%d/%m/%Y')}"
+    msg = EmailMessage()
+    msg["Subject"] = sujet
+    msg["From"] = f"Strava Bot <{user}>"
+    msg["To"] = to
+    msg.set_content(contenu)
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.starttls(context=ssl.create_default_context())
+            server.login(user, password)
+            server.send_message(msg)
+        return None
+    except Exception as e:
+        return f"{type(e).__name__} : {e}"
+
+
 def _fichier_historique(d: dt.datetime) -> pathlib.Path:
-    """Chemin d'archive pour la semaine ISO contenant la date d (ex. 2026-S42.json)."""
     annee, semaine, _ = d.isocalendar()
     return HISTORY_DIR / f"{annee}-S{semaine:02d}.json"
 
 
 def _peut_etre(v, arrondi=None):
-    """Retourne la valeur si elle existe et n'est pas nulle, sinon None."""
     if v is None or v == 0:
         return None
     return round(v, arrondi) if arrondi is not None else v
 
 
 def _parse_activite(a: dict) -> dict:
-    """Extrait l'ensemble des données utiles d'une activité Strava.
-    Les champs absents selon le matériel (ex. puissance sans capteur) restent None."""
     return {
         "nom": a.get("name", "Sans nom"),
         "type": a.get("type", "Unknown"),
@@ -104,22 +123,17 @@ def _parse_activite(a: dict) -> dict:
         "minutes": round((a.get("moving_time") or 0) / 60),
         "minutes_ecoulees": round((a.get("elapsed_time") or 0) / 60),
         "denivele_m": round(a.get("total_elevation_gain") or 0, 1),
-        # Fréquence cardiaque (si mesurée par l'appareil)
         "fc_moyenne": _peut_etre(a.get("average_heartrate")),
         "fc_max": _peut_etre(a.get("max_heartrate")),
-        # Vitesses (m/s -> km/h pour la lisibilité)
         "vitesse_moyenne_kmh": _peut_etre((a.get("average_speed") or 0) * 3.6, 1),
         "vitesse_max_kmh": _peut_etre((a.get("max_speed") or 0) * 3.6, 1),
-        # Énergie et effort
         "calories": _peut_etre(a.get("calories")),
         "suffer_score": a.get("suffer_score") or None,
         "effort": a.get("effort") or None,
-        # Puissance et cadence de pédalage (vélo, si capteurs présents)
         "puissance_moyenne_w": _peut_etre(a.get("average_watts")),
         "puissance_max_w": _peut_etre(a.get("max_watts")),
         "cadence_moyenne": _peut_etre(a.get("average_cadence"), 1),
         "cadence_max": _peut_etre(a.get("max_cadence"), 1),
-        # Appareil d'enregistrement
         "appareil": a.get("device_name") or None,
     }
 
@@ -153,9 +167,6 @@ def _resume_court(data: dict) -> str:
 
 
 def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | None]:
-    """Appelle l'API Mistral pour une analyse d'entraînement en français.
-    Retourne (analyse, None) en cas de succès, ou (None, raison) en cas d'échec.
-    N'interrompt jamais le résumé."""
     key = _cle_mistral()
     if not key:
         return None, "clé MISTRAL_API_KEY absente (ni variable d'env ni config/mistral.json)"
@@ -197,7 +208,7 @@ def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | N
 
 def main() -> None:
     if not _heure_paris_valide():
-        print("Pas encore 20h à Paris — rien à faire (ajustement heure été/hiver).")
+        print(f"Pas encore {HEURE_EXECUTION}h à Paris — rien à faire (ajustement heure été/hiver).")
         return
 
     config = json.loads(CONFIG_PATH.read_text())
@@ -267,7 +278,6 @@ def main() -> None:
         "activites": parsed,
     }
 
-    # Semaine précédente archivée (pour comparaison IA), si elle existe
     precedent = None
     fichier_prec = _fichier_historique(maintenant - dt.timedelta(weeks=1))
     if fichier_prec.exists():
@@ -276,7 +286,6 @@ def main() -> None:
         except json.JSONDecodeError:
             precedent = None
 
-    # Analyse IA (best effort : n'interrompt jamais le résumé)
     analyse, raison_erreur = _analyse_ia(result, precedent)
     if analyse:
         result["analyse_ia"] = analyse
@@ -284,7 +293,6 @@ def main() -> None:
     elif raison_erreur:
         result["analyse_ia_erreur"] = raison_erreur
 
-    # Archivage de la semaine + fichier "latest"
     (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     archive = _fichier_historique(maintenant)
     archive.write_text(json.dumps(result, ensure_ascii=False, indent=2))
@@ -292,13 +300,12 @@ def main() -> None:
     if parsed:
         h, m = divmod(total_min, 60)
         duree = f"{h}h{m:02d}" if h else f"{m} min"
-        entete = [
+        lignes = [
             f"📊 Résumé Strava des {DAYS} derniers jours",
             f"• {len(parsed)} activité(s), {total_km} km, {duree}, {total_dplus} m de D+",
         ]
         if total_kcal:
-            entete.append(f"• {total_kcal} kcal brûlées")
-        lignes = list(entete)
+            lignes.append(f"• {total_kcal} kcal brûlées")
         for p in parsed:
             ligne = f"  - {p['date']} · {p['nom']} ({p['type']}) : {p['km']} km, {p['minutes']} min, {p['denivele_m']} m D+"
             extras = []
@@ -326,6 +333,15 @@ def main() -> None:
     else:
         lignes = [f"Aucune activité Strava sur les {DAYS} derniers jours. Lève-toi du canapé ! 🏃"]
     (OUT_DIR / "summary.txt").write_text("\n".join(lignes))
+
+    # Envoi email (best effort : n'interrompt jamais le résumé)
+    erreur_email = _envoi_email("\n".join(lignes))
+    if erreur_email:
+        print(f"Email non envoyé — raison : {erreur_email}")
+        result["email_erreur"] = erreur_email
+        (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print("Résumé envoyé par email ✉️")
 
     print("\n".join(lignes))
 
