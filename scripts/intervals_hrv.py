@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Récupération quotidienne des données wellness intervals.icu (VFC/HRV, sommeil, etc.)
 
-- Authentification Basic : clé API intervals.icu via le secret INTERVALS_API_KEY
-- L'identifiant athlete est auto-détecté via GET /api/v1/athlete
-  (ou forçable via config/intervals.json → {"athlete_id": ...})
+- Authentification Basic : nom d'utilisateur littéral "API_KEY",
+  mot de passe = clé API (secret INTERVALS_API_KEY)
+- Identifiant athlete : config/intervals.json (ou "0" = soi-même)
 - Archivage mensuel cumulé : summaries/intervals/<YYYY>-MM.json (fusion par date)
 - summaries/intervals/week.json : statistiques des 7 derniers jours, lues par
   scripts/strava_summary.py pour enrichir le résumé hebdomadaire du dimanche.
@@ -43,7 +43,10 @@ def _headers() -> dict:
     key = os.environ.get("INTERVALS_API_KEY")
     if not key:
         raise SystemExit("ERREUR INTERVALS : secret INTERVALS_API_KEY absent")
-    token = base64.b64encode(f"{key}:".encode()).decode()
+    # Authentification Basic spécifique intervals.icu : le nom d'utilisateur
+    # est littéralement "API_KEY", et le mot de passe est la clé API.
+    # (cf. forum intervals.icu — "API access to Intervals.icu")
+    token = base64.b64encode(f"API_KEY:{key}".encode()).decode()
     # intervals.icu est derrière Cloudflare : sans User-Agent "navigateur",
     # la requête est bloquée (erreur 1010 Access denied).
     return {
@@ -67,7 +70,8 @@ def _get(path: str, params: dict | None = None):
 
 
 def _athlete_id() -> str:
-    """Identifiant athlete : config/intervals.json si présent, sinon auto-détection."""
+    """Identifiant athlete : config/intervals.json si présent, sinon "0"
+    (= soi-même pour l'API intervals.icu, cf. forum officiel)."""
     if CONFIG_PATH.exists():
         try:
             aid = json.loads(CONFIG_PATH.read_text()).get("athlete_id")
@@ -75,8 +79,7 @@ def _athlete_id() -> str:
                 return str(aid)
         except (json.JSONDecodeError, OSError):
             pass
-    ath = _get("/athlete")
-    return str(ath["id"])
+    return "0"
 
 
 def _parse_jour(w: dict) -> dict:
