@@ -82,17 +82,30 @@ def _athlete_id() -> str:
     return "0"
 
 
+def _date_wellness(w: dict) -> str | None:
+    """Extrait la date d'une entrée wellness : la date est le champ 'id'
+    (ex. "2026-10-24"), parfois aussi 'localDate' ou 'date'."""
+    for cle in ("id", "localDate", "date"):
+        v = w.get(cle)
+        if isinstance(v, str) and len(v) >= 10 and v[:4].isdigit():
+            return v[:10]
+    return None
+
+
 def _parse_jour(w: dict) -> dict:
     sommeil_h = None
     if w.get("sleepSecs"):
         sommeil_h = round(w["sleepSecs"] / 3600, 1)
     elif w.get("sleepMsecs"):
         sommeil_h = round(w["sleepMsecs"] / 3600000, 1)
+    # FC de repos : le champ s'appelle restingHR (ou restingHeartRate selon les versions)
+    fc_repos = w.get("restingHR")
+    if fc_repos is None:
+        fc_repos = w.get("restingHeartRate")
     return {
-        "date": w.get("localDate"),
+        "date": _date_wellness(w),
         "vfc_ms": w.get("hrv") or None,  # rMSSD en ms, mesuré la nuit par la Garmin
-        "fc_repos": w.get("restingHeartRate") or None,
-        "fc_max_jour": w.get("maxRestingHeartRate") or None,
+        "fc_repos": fc_repos or None,
         "sommeil_h": sommeil_h,
         "qualite_sommeil": w.get("sleepQuality") or None,
         "fatigue": w.get("fatigue") or None,
@@ -101,6 +114,9 @@ def _parse_jour(w: dict) -> dict:
         "stress": w.get("stress") or None,
         "douleurs": w.get("soreness") or None,
         "poids_kg": w.get("weightKg") or None,
+        "ctl": w.get("ctl") or None,      # condition (fitness)
+        "atl": w.get("atl") or None,      # fatigue
+        "tsb": w.get("tsb") or None,      # forme
     }
 
 
@@ -165,6 +181,7 @@ def _stats_semaine() -> dict | None:
         "sommeil_moyen_h": _moy([j.get("sommeil_h") for j in jours]),
         "qualite_sommeil_moyenne": _moy([j.get("qualite_sommeil") for j in jours]),
         "readiness_moyen": _moy([j.get("readiness") for j in jours]),
+        "tsb_moyen": _moy([j.get("tsb") for j in jours]),
         "jours": sorted(jours, key=lambda j: j.get("date") or ""),
     }
 
@@ -183,10 +200,18 @@ def main() -> None:
         "oldest": plus_ancien.isoformat(),
         "newest": aujourd_hui.isoformat(),
     })
-    jours = [_parse_jour(w) for w in wellness if w.get("localDate")]
+    if not isinstance(wellness, list) or not wellness:
+        # Réponse inattendue : l'afficher (tronquée) pour diagnostiquer
+        print("RÉPONSE INATTENDUE de l'API wellness — débogage :")
+        print(json.dumps(wellness, ensure_ascii=False)[:1500])
+        raise SystemExit("ERREUR INTERVALS : réponse wellness vide ou d'un type inattendu")
+
+    jours = [_parse_jour(w) for w in wellness if isinstance(w, dict)]
+    jours = [j for j in jours if j.get("date")]
     if not jours:
-        print("Aucune donnée wellness reçue d'intervals.icu pour la fenêtre demandée.")
-        return
+        print("Aucune date reconnue dans les entrées wellness — débogage :")
+        print(json.dumps(wellness[:2], ensure_ascii=False)[:1500])
+        raise SystemExit("ERREUR INTERVALS : format des entrées wellness non reconnu")
 
     _archive_mensuelle(jours)
 
