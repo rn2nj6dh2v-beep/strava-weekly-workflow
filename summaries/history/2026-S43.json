@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-25T17:45:14.470112+00:00",
+  "genere_le": "2026-10-25T22:18:37.834618+00:00",
   "source": "intervals.icu",
   "fenetre_jours": 7,
   "periode": {
@@ -3156,6 +3156,6 @@
     ]
   },
   "vfc_erreur": null,
-  "analyse_ia": "Bravo pour cette semaine intense et variée, avec près de 100 km et un bon équilibre entre course et vélo ! Tes performances sont solides : les sorties en vélo comme le 32,75 km à 28,6 km/h avec une puissance pondérée de 202 W montrent une excellente endurance, tandis que tes runs en fractionné (FC entre 140 et 160 bpm) confirment que tu maîtrises bien les efforts à haute intensité. La cadence élevée (autour de 90 spm en running) prouve aussi une technique optimisée, ce qui réduit la fatigue articulaire malgré les charges importantes (jusqu’à 87 sur la semaine).\n\nAttention cependant à la baisse de VFC le 20 octobre (38 ms) et à la hausse de ta FC de repos (46 bpm), couplées à un sommeil réduit (7,7 h). Ces signes pointent vers un léger surmenage, surtout après la longue sortie du 20 octobre. Même si la moyenne de sommeil (8,3 h) est correcte, les nuits courtes et la VFC basse suggèrent que ton corps a besoin de récupérer. Pour la semaine prochaine, privilégie **une sortie active légère (vélo ou footing très doux) le lendemain de ton effort le plus intense**, et surveille ton sommeil en te couchant plus tôt. Écoute ton corps : si la VFC reste basse, réduis légèrement l’intensité d’une séance pour laisser ton système nerveux se régénérer !",
+  "analyse_ia": "Tu as enchaîné une semaine intense et variée, avec un volume global très bien géré (104 km) et des efforts bien dosés ! Tes sorties en vélo montrent une belle régularité, notamment le long effort du 20 octobre (32 km à 125-158 bpm) qui prouve ta capacité à maintenir une intensité soutenue. Les runs, bien que courts, sont explosifs (FC max souvent proche de 160 bpm) et optimisent ton endurance grâce à la cadence élevée (90+ spm). La VFC reste globalement stable autour de 45 ms, sauf le 23 octobre où elle chute à 43 ms – signe possible de stress accumulé, compensé par une FC de repos revenue à la normale le lendemain.\n\nAttention à la baisse de sommeil le 23 et 24 octobre (7h15-7h45) et à la VFC minimale à 38 ms le 20 octobre, coïncidant avec une FC de repos à 46 bpm. Ces indicateurs suggèrent un léger surmenage ce jour-là, peut-être lié à l’accumulation des efforts (charge totale de 87+55+34+13=189). Pour la semaine prochaine, privilégie une sortie *active* (marche ou vélo très léger) le lendemain d’un jour chargé comme le 20, et vérifie que tes nuits dépassent 8h. Ton corps est résilient, mais écoute ces signaux pour maintenir ta performance !",
   "modele_ia": "mistral-small-latest"
 }
