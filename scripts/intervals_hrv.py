@@ -9,6 +9,8 @@
   scripts/strava_summary.py pour enrichir le résumé hebdomadaire du dimanche.
 - Exécuté par GitHub Actions vers 8h heure de Paris (double cron été/hiver,
   le script vérifie l'heure réelle à Paris).
+- INTERVALS_BACKFILL_DAYS (défaut 3) : fenêtre de récupération — permet le
+  rattrapage historique (ex. 90 jours) via workflow_dispatch.
 """
 import base64
 import datetime as dt
@@ -25,7 +27,7 @@ BASE = pathlib.Path(__file__).resolve().parent.parent
 OUT_DIR = BASE / "summaries" / "intervals"
 CONFIG_PATH = BASE / "config" / "intervals.json"
 API = "https://intervals.icu/api/v1"
-JOURS_FENETRE = 3  # jours récupérés à chaque exécution (rattrape les syncs tardifs Garmin)
+JOURS_FENETRE = int(os.environ.get("INTERVALS_BACKFILL_DAYS", "3"))  # jours récupérés (rattrapage possible)
 JOURS_SEMAINE = 7  # fenêtre des stats hebdo écrites dans week.json
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 HEURE_EXECUTION = 8  # heure de Paris
@@ -225,7 +227,8 @@ def main() -> None:
         )
     else:
         print(f"Données archivées : {len(jours)} jour(s) — stats semaine indisponibles.")
-    for j in jours:
+    print(f"Jours les plus récents :")
+    for j in sorted(jours, key=lambda j: j["date"])[-7:]:
         print(
             f"  {j['date']} : VFC {j.get('vfc_ms')} ms, FC repos {j.get('fc_repos')}, "
             f"sommeil {j.get('sommeil_h')} h"

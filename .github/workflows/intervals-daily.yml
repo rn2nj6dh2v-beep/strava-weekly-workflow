@@ -7,6 +7,11 @@ on:
     - cron: "0 6 * * *"
     - cron: "0 7 * * *"
   workflow_dispatch:
+    inputs:
+      backfill_days:
+        description: "Nombre de jours à récupérer (3 par défaut ; 90 pour un rattrapage historique)"
+        required: false
+        default: "3"
 
 permissions:
   contents: write
@@ -25,6 +30,7 @@ jobs:
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+          INTERVALS_BACKFILL_DAYS: ${{ github.event.inputs.backfill_days || '3' }}
         run: python scripts/intervals_hrv.py
 
       - name: Enregistrer les résultats
