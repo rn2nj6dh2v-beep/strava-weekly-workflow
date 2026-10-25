@@ -1,19 +1,19 @@
-📊 Résumé Strava des 7 derniers jours
-• 12 activité(s), 105.4 km, 5h52, 590.0 m de D+
-  - 2026-10-17 · Sortie vélo dans l'après-midi (Ride) : 4.86 km, 15 min, 50.0 m D+ [FC 109.2/151.0 bpm, 19.4 km/h moy (max 26.1), 127.5 W moy, souffrance 4.0, Garmin epix (Gen2)]
-  - 2026-10-17 · Course à pied dans l'après-midi (Run) : 5.06 km, 28 min, 23.0 m D+ [FC 136.2/154.0 bpm, 10.8 km/h moy (max 12.8), 312.7 W moy, cadence 90.1, souffrance 35.0, Garmin epix (Gen2)]
-  - 2026-10-19 · Course à pied le matin (Run) : 5.06 km, 27 min, 15.0 m D+ [FC 147.1/166.0 bpm, 11.1 km/h moy (max 13.3), 320.3 W moy, cadence 91.5, souffrance 57.0, Garmin epix (Gen2)]
-  - 2026-10-19 · Sortie vélo dans l'après-midi (Ride) : 7.27 km, 21 min, 51.0 m D+ [FC 107.0/132.0 bpm, 20.6 km/h moy (max 49.0), 108.9 W moy, souffrance 5.0, Garmin epix (Gen2)]
-  - 2026-10-19 · Sortie vélo de nuit (Ride) : 7.34 km, 22 min, 46.0 m D+ [FC 89.9/106.0 bpm, 20.5 km/h moy (max 35.7), 97.5 W moy, souffrance 3.0, Garmin epix (Gen2)]
-  - 2026-10-20 · Sortie vélo dans l'après-midi (Ride) : 32.75 km, 69 min, 78.0 m D+ [FC 125.0/158.0 bpm, 28.6 km/h moy (max 51.6), 170.6 W moy, cadence 76.6, souffrance 53.0, Garmin Edge 850]
-  - 2026-10-21 · Course à pied le matin (Run) : 8.57 km, 51 min, 63.0 m D+ [FC 136.3/148.0 bpm, 10.0 km/h moy (max 12.7), 295.8 W moy, cadence 88.4, souffrance 65.0, Garmin epix (Gen2)]
-  - 2026-10-21 · Sortie vélo dans l'après-midi (Ride) : 7.29 km, 24 min, 94.0 m D+ [FC 107.8/127.0 bpm, 17.9 km/h moy (max 30.5), 129.3 W moy, souffrance 6.0, Garmin epix (Gen2)]
-  - 2026-10-21 · Sortie vélo de nuit (Ride) : 7.29 km, 21 min, 32.0 m D+ [FC 89.0/106.0 bpm, 21.1 km/h moy (max 38.4), 86.3 W moy, souffrance 3.0, Garmin epix (Gen2)]
-  - 2026-10-22 · Course à pied le matin (Run) : 5.07 km, 28 min, 17.0 m D+ [FC 145.0/160.0 bpm, 11.0 km/h moy (max 13.0), 315.8 W moy, cadence 91.9, souffrance 51.0, Garmin epix (Gen2)]
-  - 2026-10-22 · Sortie vélo dans l'après-midi (Ride) : 8.11 km, 26 min, 86.0 m D+ [FC 110.5/129.0 bpm, 18.4 km/h moy (max 40.2), 116.9 W moy, souffrance 6.0, Garmin epix (Gen2)]
-  - 2026-10-22 · Sortie vélo en soirée (Ride) : 6.73 km, 20 min, 35.0 m D+ [FC 87.0/106.0 bpm, 20.0 km/h moy (max 36.6), 92.8 W moy, souffrance 2.0, Garmin epix (Gen2)]
+📊 Résumé sportif des 7 derniers jours (intervals.icu)
+• 11 activité(s), 104.0 km, 6h04, 801.7 m de D+
+• ❤️ VFC moyenne (7 j) : 45.7 ms (38.0–51.0), FC repos 43.4 bpm, sommeil moyen 8.3 h
+  - Run : 5.06 km, 27 min
+  - Ride : 7.34 km, 22 min
+  - Ride : 7.27 km, 21 min
+  - Ride : 32.75 km, 69 min
+  - Run : 8.57 km, 51 min
+  - Ride : 7.29 km, 21 min
+  - Ride : 7.29 km, 25 min
+  - Run : 5.07 km, 28 min
+  - Ride : 6.73 km, 21 min
+  - Ride : 8.11 km, 27 min
+  - Run : 8.52 km, 52 min
 
 🧠 Analyse IA :
-Tu as enchaîné une semaine **très équilibrée** avec une belle diversité d’efforts ! Tes sorties à vélo montrent une **excellente régularité** : la sortie de 32 km à 28,6 km/h avec une FC entre 125 et 158 bpm prouve que tu sais doser l’intensité sans te brûler (170 W en moyenne, c’est très bien pour un effort soutenu). Tes runs, même courts, sont **explosifs** : des cadences autour de 90-92 pas/min et des FC proches de tes limites (145-160 bpm) confirment que tu travailles ton endurance *et* ta puissance. Bravo pour cette **polyvalence** – tu gères aussi bien les efforts intenses que les sorties récup’ fluides !
+Bravo pour cette semaine intense et variée, avec près de 100 km et un bon équilibre entre course et vélo ! Tes performances sont solides : les sorties en vélo comme le 32,75 km à 28,6 km/h avec une puissance pondérée de 202 W montrent une excellente endurance, tandis que tes runs en fractionné (FC entre 140 et 160 bpm) confirment que tu maîtrises bien les efforts à haute intensité. La cadence élevée (autour de 90 spm en running) prouve aussi une technique optimisée, ce qui réduit la fatigue articulaire malgré les charges importantes (jusqu’à 87 sur la semaine).
 
-Attention cependant à **ne pas sous-estimer la fatigue cumulative** : tes runs du 19 et 21 octobre, avec des FC max proches de 166 bpm et des notes de souffrance élevées (57/65), pourraient indiquer un **décalage entre perception et récupération**. Si tu sens que tes nuits de vélo (FC basse mais durée courte) ne compensent pas assez, privilégie une **sortie très légère** demain pour éviter le surentraînement. Et pour la semaine prochaine, teste un **run en fractionné court** (ex : 30s sprint / 1min marche) pour booster ta puissance sans forcer l’endurance – ça devrait te dynamiser !
+Attention cependant à la baisse de VFC le 20 octobre (38 ms) et à la hausse de ta FC de repos (46 bpm), couplées à un sommeil réduit (7,7 h). Ces signes pointent vers un léger surmenage, surtout après la longue sortie du 20 octobre. Même si la moyenne de sommeil (8,3 h) est correcte, les nuits courtes et la VFC basse suggèrent que ton corps a besoin de récupérer. Pour la semaine prochaine, privilégie **une sortie active légère (vélo ou footing très doux) le lendemain de ton effort le plus intense**, et surveille ton sommeil en te couchant plus tôt. Écoute ton corps : si la VFC reste basse, réduis légèrement l’intensité d’une séance pour laisser ton système nerveux se régénérer !
