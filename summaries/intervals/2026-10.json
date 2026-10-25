@@ -1,0 +1,50 @@
+{
+  "2026-10-23": {
+    "atl": 37.65259,
+    "ctl": 37.073437,
+    "date": "2026-10-23",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 42,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 3,
+    "readiness": null,
+    "sommeil_h": 7.1,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 43.0
+  },
+  "2026-10-24": {
+    "atl": 32.640198,
+    "ctl": 36.20116,
+    "date": "2026-10-24",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 42,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 9.4,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 51.0
+  },
+  "2026-10-25": {
+    "atl": 28.295067,
+    "ctl": 35.349407,
+    "date": "2026-10-25",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 43,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 3,
+    "readiness": null,
+    "sommeil_h": 7.7,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 48.0
+  }
+}
