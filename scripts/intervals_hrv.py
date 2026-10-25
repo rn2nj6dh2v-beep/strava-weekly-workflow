@@ -7,6 +7,11 @@
 - Archivage mensuel cumulé : summaries/intervals/<YYYY>-MM.json (fusion par date)
 - summaries/intervals/week.json : statistiques des 7 derniers jours, lues par
   scripts/strava_summary.py pour enrichir le résumé hebdomadaire du dimanche.
+- summaries/intervals/activities.json : activités d'entraînement des 14 derniers
+  jours (endpoint /athlete/{id}/activities), données brutes intervals.icu —
+  UNIQUE source d'activités du coach quotidien Vibe (Strava abandonné pour le
+  coach le 25/10/2026, demande de Cyril). Best effort : un échec de cet appel
+  n'interrompt jamais l'archivage wellness.
 - Exécuté par GitHub Actions vers 8h heure de Paris (double cron été/hiver,
   le script vérifie l'heure réelle à Paris).
 - INTERVALS_BACKFILL_DAYS (défaut 3) : fenêtre de récupération — permet le
@@ -29,6 +34,7 @@ CONFIG_PATH = BASE / "config" / "intervals.json"
 API = "https://intervals.icu/api/v1"
 JOURS_FENETRE = int(os.environ.get("INTERVALS_BACKFILL_DAYS", "3"))  # jours récupérés (rattrapage possible)
 JOURS_SEMAINE = 7  # fenêtre des stats hebdo écrites dans week.json
+JOURS_ACTIVITES = 14  # fenêtre des activités archivées dans activities.json
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 HEURE_EXECUTION = 8  # heure de Paris
 
@@ -151,6 +157,44 @@ def _archive_mensuelle(jours: list[dict]) -> None:
         chemin.write_text(json.dumps(existant, ensure_ascii=False, indent=2, sort_keys=True))
 
 
+def _archive_activites(athlete_id: str, aujourd_hui) -> None:
+    """Récupère les activités des JOURS_ACTIVITES derniers jours (endpoint
+    /athlete/{id}/activities, tri du plus récent au plus ancien selon la doc
+    intervals.icu) et les archive dans summaries/intervals/activities.json.
+    Re-exécutable : le fichier est remplacé à chaque exécution.
+    Best effort : une erreur n'interrompt pas l'archivage wellness."""
+    plus_ancien = aujourd_hui - dt.timedelta(days=JOURS_ACTIVITES - 1)
+    try:
+        acts = _get(f"/athlete/{athlete_id}/activities", {
+            "oldest": plus_ancien.isoformat(),
+            "newest": aujourd_hui.isoformat(),
+        })
+    except SystemExit as e:
+        print(f"⚠️ Activités non récupérées (wellness archivé quand même) : {e}")
+        return
+    if not isinstance(acts, list):
+        print("⚠️ Réponse activités inattendue — débogage :")
+        print(json.dumps(acts, ensure_ascii=False)[:800])
+        return
+    activites = [a for a in acts if isinstance(a, dict)]
+    activites.sort(
+        key=lambda a: str(a.get("startTime") or a.get("start_time") or a.get("id") or "")
+    )
+    contenu = {
+        "genere_le": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "source": "intervals.icu /athlete/{id}/activities",
+        "fenetre_jours": JOURS_ACTIVITES,
+        "nb_activites": len(activites),
+        "activites": activites,
+    }
+    (OUT_DIR / "activities.json").write_text(
+        json.dumps(contenu, ensure_ascii=False, indent=2)
+    )
+    print(f"Activités archivées : {len(activites)} sur {JOURS_ACTIVITES} jours")
+    for a in activites[-5:]:
+        print(f"  {a.get('startTime')} — {a.get('type')} : {a.get('name')}")
+
+
 def _stats_semaine() -> dict | None:
     """Lit l'archive mensuelle et calcule les stats des 7 derniers jours."""
     aujourd_hui = dt.datetime.now(PARIS).date()
@@ -216,6 +260,7 @@ def main() -> None:
         raise SystemExit("ERREUR INTERVALS : format des entrées wellness non reconnu")
 
     _archive_mensuelle(jours)
+    _archive_activites(athlete_id, aujourd_hui)
 
     stats = _stats_semaine()
     if stats:
