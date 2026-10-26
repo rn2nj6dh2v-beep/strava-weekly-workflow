@@ -14,15 +14,22 @@ Cyril le 25/10/2026) : plus AUCUNE donnée Strava.
 - Résumé épuré (type/distance/temps) : les données détaillées restent
   archivées dans latest.json (champ "brut" = réponse exacte de l'API par
   activité, rien n'est perdu) et exploitées par l'analyse IA
+- Graphiques (demande de Cyril du 26/10/2026) : matplotlib génère des PNG
+  (distance/jour par sport, VFC, sommeil & FC repos) intégrés directement
+  dans l'email HTML (multipart/alternative + related, images cid). Best
+  effort : sans matplotlib ou en cas d'erreur, l'email part en texte seul.
 - Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
 """
 import datetime as dt
+import html as html_lib
 import json
 import os
 import pathlib
+import shutil
 import smtplib
 import ssl
 import statistics
+import tempfile
 import urllib.error
 import urllib.request
 from email.message import EmailMessage
@@ -41,6 +48,12 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
 MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
+JOURS_FR = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"]
+COULEURS_SPORT = {
+    "Ride": "#3b82f6", "VirtualRide": "#60a5fa", "Run": "#f97316",
+    "TrailRun": "#fb923c", "Hike": "#a3a3a3",
+}
+COULEUR_AUTRE = "#9ca3af"
 
 
 def _heure_paris_valide() -> bool:
@@ -136,9 +149,157 @@ def _cle_mistral() -> str | None:
     return None
 
 
-def _envoi_email(contenu: str) -> str | None:
+# ---------------------------------------------------------------------------
+# Graphiques (demande de Cyril du 26/10/2026) — best effort, ne lève jamais
+# ---------------------------------------------------------------------------
+
+def _libelle_jour(date_iso) -> str:
+    """'2026-10-26' → 'lun 26' (robuste si la date est sale)."""
+    try:
+        d = dt.date.fromisoformat(str(date_iso)[:10])
+    except ValueError:
+        return str(date_iso)[:10]
+    return f"{JOURS_FR[d.weekday()]} {d.day}"
+
+
+def _style_ax(ax, titre: str, ylabel: str, xlabels: list) -> None:
+    ax.set_title(titre, fontsize=11, fontweight="bold", loc="left", pad=10)
+    ax.set_ylabel(ylabel, fontsize=9)
+    ax.set_xticks(range(len(xlabels)))
+    ax.set_xticklabels(xlabels, fontsize=9)
+    ax.grid(axis="y", alpha=0.3)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+
+def _graphe_distance(data: dict, ax) -> bool:
+    """Barres empilées : km par jour, une couleur par sport."""
+    activites = [a for a in (data.get("activites") or []) if a.get("km")]
+    if not activites:
+        return False
+    debut = dt.date.fromisoformat(data["periode"]["debut"])
+    dates = [debut + dt.timedelta(days=i) for i in range(DAYS)]
+    types = sorted({a["type"] for a in activites})
+    cumul = [0.0] * DAYS
+    traces = 0
+    for t in types:
+        vals = [0.0] * DAYS
+        for a in activites:
+            if a["type"] != t:
+                continue
+            try:
+                idx = (dt.date.fromisoformat(a["date"][:10]) - debut).days
+            except ValueError:
+                continue
+            if 0 <= idx < DAYS:
+                vals[idx] += a["km"]
+        if sum(vals) <= 0:
+            continue
+        ax.bar(range(DAYS), vals, bottom=cumul, width=0.65,
+               color=COULEURS_SPORT.get(t, COULEUR_AUTRE), label=t)
+        cumul = [c + v for c, v in zip(cumul, vals)]
+        traces += 1
+    if traces == 0:
+        return False
+    xlabels = [_libelle_jour(d.isoformat()) for d in dates]
+    _style_ax(ax, "Distance par jour (km)", "km", xlabels)
+    ax.legend(frameon=False, fontsize=9, ncol=len(types))
+    return True
+
+
+def _graphe_vfc(data: dict, ax) -> bool:
+    """Courbe VFC nocturne (rMSSD) + ligne moyenne."""
+    jours = [j for j in ((data.get("vfc") or {}).get("jours") or [])
+             if j.get("vfc_ms") is not None]
+    if len(jours) < 2:
+        return False
+    xlabels = [_libelle_jour(j["date"]) for j in jours]
+    ys = [j["vfc_ms"] for j in jours]
+    ax.plot(range(len(ys)), ys, marker="o", color="#ef4444", linewidth=2)
+    for i, y in enumerate(ys):
+        ax.annotate(str(y), (i, y), textcoords="offset points", xytext=(0, 7),
+                    fontsize=8, ha="center", color="#6b7280")
+    moyenne = (data.get("vfc") or {}).get("vfc_moyenne_ms")
+    if moyenne is not None:
+        ax.axhline(moyenne, color="#9ca3af", linestyle="--", linewidth=1,
+                   label=f"moyenne {moyenne} ms")
+        ax.legend(frameon=False, fontsize=9)
+    _style_ax(ax, "VFC nocturne — rMSSD (ms)", "ms", xlabels)
+    marge = max(2.0, (max(ys) - min(ys)) * 0.25)
+    ax.set_ylim(min(ys) - marge, max(ys) + marge)
+    return True
+
+
+def _graphe_recuperation(data: dict, ax) -> bool:
+    """Sommeil (barres) et FC repos (courbe), double axe si les deux existent."""
+    jours = (data.get("vfc") or {}).get("jours") or []
+    sommeil = [j for j in jours if j.get("sommeil_h") is not None]
+    repos = [j for j in jours if j.get("fc_repos") is not None]
+    if not sommeil and not repos:
+        return False
+    xlabels = [_libelle_jour(j["date"]) for j in jours]
+    ax2 = None
+    if sommeil and repos:
+        ax2 = ax.twinx()
+        ax.spines["right"].set_visible(True)
+    if sommeil:
+        ax.bar(range(len(jours)), [j.get("sommeil_h") or 0 for j in jours],
+               width=0.6, color="#6366f1", label="Sommeil (h)")
+    if repos:
+        cible = ax2 if ax2 is not None else ax
+        cible.plot(range(len(jours)), [j.get("fc_repos") for j in jours],
+                   marker="o", color="#10b981", linewidth=2, label="FC repos (bpm)")
+    _style_ax(ax, "Sommeil & FC repos", "h", xlabels)
+    if ax2 is not None:
+        ax2.set_ylabel("FC repos (bpm)", fontsize=9)
+        ax2.spines["top"].set_visible(False)
+        ax2.grid(False)
+        lignes, etiquettes = ax.get_legend_handles_labels()
+        l2, e2 = ax2.get_legend_handles_labels()
+        ax.legend(lignes + l2, etiquettes + e2, frameon=False, fontsize=9)
+    else:
+        ax.legend(frameon=False, fontsize=9)
+    return True
+
+
+def _generer_graphiques(data: dict, dossier: pathlib.Path) -> tuple[list, str | None]:
+    """Génère les PNG du résumé dans `dossier`. Retourne
+    ([(cid, titre, chemin)], erreur_ou_None). Best effort, ne lève jamais."""
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception as e:
+        return [], f"matplotlib indisponible : {type(e).__name__} : {e}"
+    specs = [
+        ("graphe_distance", "Distance par jour", _graphe_distance),
+        ("graphe_vfc", "VFC nocturne (rMSSD)", _graphe_vfc),
+        ("graphe_recup", "Sommeil & FC repos", _graphe_recuperation),
+    ]
+    graphiques = []
+    problemes = []
+    for cid, titre, fabricant in specs:
+        try:
+            fig, ax = plt.subplots(figsize=(7.2, 3.4), dpi=150)
+            if fabricant(data, ax):
+                chemin = dossier / f"{cid}.png"
+                fig.savefig(chemin, dpi=150, bbox_inches="tight", facecolor="white")
+                graphiques.append((cid, titre, chemin))
+            plt.close(fig)
+        except Exception as e:
+            problemes.append(f"{titre} : {type(e).__name__} : {e}")
+            plt.close("all")
+    return graphiques, ("; ".join(problemes) if problemes else None)
+
+
+# ---------------------------------------------------------------------------
+
+
+def _envoi_email(contenu: str, graphiques: list | None = None) -> str | None:
     """Envoie le résumé par email via SMTP (Gmail par défaut).
-    Retourne None si succès, ou la raison de l'échec. Best effort."""
+    Si des graphiques sont fournis, ils sont intégrés inline dans une partie
+    HTML (images cid). Retourne None si succès, ou la raison de l'échec.
+    Best effort."""
     user = os.environ.get("SMTP_USER")
     password = os.environ.get("SMTP_PASSWORD")
     to = os.environ.get("MAIL_TO") or user
@@ -150,6 +311,33 @@ def _envoi_email(contenu: str) -> str | None:
     msg["From"] = f"Intervals Bot <{user}>"
     msg["To"] = to
     msg.set_content(contenu)
+    if graphiques:
+        corps_html = html_lib.escape(contenu).replace("\n", "<br>")
+        blocs = "".join(
+            f'<p style="margin:20px 0 4px;font-weight:bold;color:#374151;'
+            f'font-size:13px;">{html_lib.escape(titre)}</p>'
+            f'<img src="cid:{cid}" alt="{html_lib.escape(titre)}" '
+            f'style="max-width:680px;width:100%;height:auto;'
+            f'border:1px solid #e5e7eb;border-radius:8px;">'
+            for cid, titre, _chemin in graphiques
+        )
+        html = (
+            '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;'
+            'color:#111827;line-height:1.5;max-width:680px;">'
+            + corps_html
+            + '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">'
+            + '<p style="margin:0 0 12px;font-weight:bold;font-size:16px;">📈 Aperçu de la semaine</p>'
+            + blocs
+            + "</div>"
+        )
+        msg.add_alternative(html, subtype="html")
+        for cid, _titre, chemin in graphiques:
+            try:
+                with open(chemin, "rb") as f:
+                    msg.get_payload()[1].add_related(
+                        f.read(), maintype="image", subtype="png", cid=f"<{cid}>")
+            except Exception as e:
+                return f"intégration image {cid} : {type(e).__name__} : {e}"
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
             server.starttls(context=ssl.create_default_context())
@@ -331,6 +519,21 @@ def main() -> None:
     elif raison_erreur:
         result["analyse_ia_erreur"] = raison_erreur
 
+    # Graphiques (demande de Cyril du 26/10/2026) — best effort, jamais bloquant.
+    dossier_graphes = pathlib.Path(tempfile.mkdtemp(prefix="graphes_"))
+    try:
+        graphiques, erreur_graphiques = _generer_graphiques(result, dossier_graphes)
+        if erreur_graphiques:
+            print(f"⚠️ Graphiques partiels ou absents : {erreur_graphiques}")
+            result["graphiques_erreur"] = erreur_graphiques
+        if graphiques:
+            result["graphiques"] = [titre for _cid, titre, _p in graphiques]
+            print(f"📈 {len(graphiques)} graphique(s) généré(s)")
+    except Exception as e:
+        graphiques = []
+        result["graphiques_erreur"] = f"{type(e).__name__} : {e}"
+        print(f"⚠️ Graphiques non générés : {result['graphiques_erreur']}")
+
     (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     archive = _fichier_historique(maintenant)
     archive.write_text(json.dumps(result, ensure_ascii=False, indent=2))
@@ -364,13 +567,15 @@ def main() -> None:
     (OUT_DIR / "summary.txt").write_text("\n".join(lignes))
 
     # Envoi email (best effort : n'interrompt jamais le résumé)
-    erreur_email = _envoi_email("\n".join(lignes))
+    erreur_email = _envoi_email("\n".join(lignes), graphiques)
     if erreur_email:
         print(f"Email non envoyé — raison : {erreur_email}")
         result["email_erreur"] = erreur_email
         (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         print("Résumé envoyé par email ✉️")
+
+    shutil.rmtree(dossier_graphes, ignore_errors=True)
 
     print("\n".join(lignes))
 

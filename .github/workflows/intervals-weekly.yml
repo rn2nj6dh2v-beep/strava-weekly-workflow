@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Installer matplotlib (graphiques du résumé)
+        run: pip install --quiet matplotlib
+
       - name: Générer le résumé intervals.icu (uniquement s'il est 23h à Paris)
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
