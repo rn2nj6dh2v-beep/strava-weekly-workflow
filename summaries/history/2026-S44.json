@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-26T09:49:45.463821+00:00",
+  "genere_le": "2026-10-26T10:00:01.845586+00:00",
   "source": "intervals.icu",
   "fenetre_jours": 7,
   "periode": {
@@ -2552,7 +2552,7 @@
     "vfc_min_ms": 38.0,
     "vfc_max_ms": 51.0,
     "fc_repos_moyenne": 43.6,
-    "sommeil_moyen_h": 7.9,
+    "sommeil_moyen_h": 8.1,
     "ctl_dernier": 37.283794,
     "atl_dernier": 39.288887,
     "tsb_dernier": null,
@@ -2657,7 +2657,7 @@
         "date": "2026-10-26",
         "vfc_ms": 46.0,
         "fc_repos": 44,
-        "sommeil_h": 7.2,
+        "sommeil_h": 8.8,
         "qualite_sommeil": 2,
         "fatigue": null,
         "humeur": null,
@@ -2672,7 +2672,7 @@
     ]
   },
   "vfc_erreur": null,
-  "analyse_ia": "Bravo pour cette semaine intense où tu as enchaîné **92 km et 30 km de course** avec une régularité impressionnante ! Tes performances en vélo (comme ce 32 km à 28 km/h en FC élevée) et en running (8 km à 9,7 km/h en endurance) montrent une excellente capacité à gérer l’intensité. La **charge globale** (344 min d’effort) est bien répartie, avec des pics stratégiques (comme les runs en FC 140-170 bpm) qui renforcent ton endurance sans excès. Tes cadences élevées (88-92 tr/min en course) et ta puissance pondérée stable (autour de 300 W) confirment que tu es dans une zone d’adaptation optimale.\n\nCependant, la **VFC minimale à 38 ms** et une **FC de repos légèrement élevée** (43-46 bpm) sur certains jours, notamment le 20 et le 23, suggèrent que ton corps a été sollicité à la limite. Le sommeil a chuté à **7h10** le 23, ce qui peut expliquer cette baisse de récupération. Pour la semaine prochaine, **privilégie un jour de repos actif ou une sortie très légère** (30 min en FC < 120 bpm) pour laisser ton système nerveux se régénérer. Écoute ton corps : si la fatigue persiste, réduis légèrement la durée ou l’intensité d’une séance. Tu es sur la bonne voie, mais l’équilibre entre effort et récupération fera la différence !",
+  "analyse_ia": "Tu as enchaîné une semaine **très productive** avec des efforts bien dosés ! Les sorties longues en vélo (comme les 32 km à 28 km/h avec une FC entre 125 et 158 bpm) et les runs en endurance fondamentale (FC stable autour de 140-150 bpm) montrent que tu as maintenu une intensité optimale, sans excès. La puissance pondérée (200-320 W) et la cadence élevée (88-92 tr/min à pied) confirment une bonne efficacité mécanique, surtout pour les runs. Tes pics de charge (jusqu’à 87) sont gérés sans surréaction, signe d’une bonne adaptation.\n\nCependant, la **VFC a légèrement chuté** le 23 octobre (38 ms, contre 43-51 ms d’habitude), coïncidant avec une FC de repos plus basse (42 bpm) et un sommeil réduit (7h10). Même si la moyenne reste correcte (45,7 ms), ce petit creux pourrait indiquer un stress residual après les longues sorties. Un point de vigilance aussi : les runs du 25 et 26 octobre, bien que bien dosés (FC dans la zone cible), ont été suivis de nuits courtes (7h30-7h70), ce qui peut freiner la récupération. Pour la semaine prochaine, **privilégie une sortie très légère le matin** (30 min à 60% FC max) pour activer la récupération avant une séance plus intense, et vérifie que tes nuits dépassent 7h30. Tu es sur la bonne voie, mais écoute ton corps pour ajuster !",
   "modele_ia": "mistral-small-latest",
   "graphiques": [
     "Distance par jour",
