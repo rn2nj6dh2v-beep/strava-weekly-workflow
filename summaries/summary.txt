@@ -1,9 +1,6 @@
 📊 Résumé sportif des 7 derniers jours (intervals.icu)
-• 11 activité(s), 104.0 km, 6h04, 801.7 m de D+
-• ❤️ VFC moyenne (7 j) : 45.7 ms (38.0–51.0), FC repos 43.4 bpm, sommeil moyen 8.3 h
-  - Run : 5.06 km, 27 min
-  - Ride : 7.34 km, 22 min
-  - Ride : 7.27 km, 21 min
+• 9 activité(s), 92.35 km, 5h44, 883.4 m de D+
+• ❤️ VFC moyenne (7 j) : 45.7 ms (38.0–51.0), FC repos 43.6 bpm, sommeil moyen 7.9 h
   - Ride : 32.75 km, 69 min
   - Run : 8.57 km, 51 min
   - Ride : 7.29 km, 21 min
@@ -12,8 +9,9 @@
   - Ride : 6.73 km, 21 min
   - Ride : 8.11 km, 27 min
   - Run : 8.52 km, 52 min
+  - Run : 8.02 km, 50 min
 
 🧠 Analyse IA :
-Tu as enchaîné une semaine intense et variée, avec un volume global très bien géré (104 km) et des efforts bien dosés ! Tes sorties en vélo montrent une belle régularité, notamment le long effort du 20 octobre (32 km à 125-158 bpm) qui prouve ta capacité à maintenir une intensité soutenue. Les runs, bien que courts, sont explosifs (FC max souvent proche de 160 bpm) et optimisent ton endurance grâce à la cadence élevée (90+ spm). La VFC reste globalement stable autour de 45 ms, sauf le 23 octobre où elle chute à 43 ms – signe possible de stress accumulé, compensé par une FC de repos revenue à la normale le lendemain.
+Bravo pour cette semaine intense où tu as enchaîné **92 km et 30 km de course** avec une régularité impressionnante ! Tes performances en vélo (comme ce 32 km à 28 km/h en FC élevée) et en running (8 km à 9,7 km/h en endurance) montrent une excellente capacité à gérer l’intensité. La **charge globale** (344 min d’effort) est bien répartie, avec des pics stratégiques (comme les runs en FC 140-170 bpm) qui renforcent ton endurance sans excès. Tes cadences élevées (88-92 tr/min en course) et ta puissance pondérée stable (autour de 300 W) confirment que tu es dans une zone d’adaptation optimale.
 
-Attention à la baisse de sommeil le 23 et 24 octobre (7h15-7h45) et à la VFC minimale à 38 ms le 20 octobre, coïncidant avec une FC de repos à 46 bpm. Ces indicateurs suggèrent un léger surmenage ce jour-là, peut-être lié à l’accumulation des efforts (charge totale de 87+55+34+13=189). Pour la semaine prochaine, privilégie une sortie *active* (marche ou vélo très léger) le lendemain d’un jour chargé comme le 20, et vérifie que tes nuits dépassent 8h. Ton corps est résilient, mais écoute ces signaux pour maintenir ta performance !
+Cependant, la **VFC minimale à 38 ms** et une **FC de repos légèrement élevée** (43-46 bpm) sur certains jours, notamment le 20 et le 23, suggèrent que ton corps a été sollicité à la limite. Le sommeil a chuté à **7h10** le 23, ce qui peut expliquer cette baisse de récupération. Pour la semaine prochaine, **privilégie un jour de repos actif ou une sortie très légère** (30 min en FC < 120 bpm) pour laisser ton système nerveux se régénérer. Écoute ton corps : si la fatigue persiste, réduis légèrement la durée ou l’intensité d’une séance. Tu es sur la bonne voie, mais l’équilibre entre effort et récupération fera la différence !
