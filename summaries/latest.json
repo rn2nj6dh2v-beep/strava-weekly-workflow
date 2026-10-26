@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-26T10:00:01.845586+00:00",
+  "genere_le": "2026-10-26T11:09:21.389760+00:00",
   "source": "intervals.icu",
   "fenetre_jours": 7,
   "periode": {
@@ -2553,6 +2553,7 @@
     "vfc_max_ms": 51.0,
     "fc_repos_moyenne": 43.6,
     "sommeil_moyen_h": 8.1,
+    "poids_moyen_kg": null,
     "ctl_dernier": 37.283794,
     "atl_dernier": 39.288887,
     "tsb_dernier": null,
@@ -2672,7 +2673,8 @@
     ]
   },
   "vfc_erreur": null,
-  "analyse_ia": "Tu as enchaîné une semaine **très productive** avec des efforts bien dosés ! Les sorties longues en vélo (comme les 32 km à 28 km/h avec une FC entre 125 et 158 bpm) et les runs en endurance fondamentale (FC stable autour de 140-150 bpm) montrent que tu as maintenu une intensité optimale, sans excès. La puissance pondérée (200-320 W) et la cadence élevée (88-92 tr/min à pied) confirment une bonne efficacité mécanique, surtout pour les runs. Tes pics de charge (jusqu’à 87) sont gérés sans surréaction, signe d’une bonne adaptation.\n\nCependant, la **VFC a légèrement chuté** le 23 octobre (38 ms, contre 43-51 ms d’habitude), coïncidant avec une FC de repos plus basse (42 bpm) et un sommeil réduit (7h10). Même si la moyenne reste correcte (45,7 ms), ce petit creux pourrait indiquer un stress residual après les longues sorties. Un point de vigilance aussi : les runs du 25 et 26 octobre, bien que bien dosés (FC dans la zone cible), ont été suivis de nuits courtes (7h30-7h70), ce qui peut freiner la récupération. Pour la semaine prochaine, **privilégie une sortie très légère le matin** (30 min à 60% FC max) pour activer la récupération avant une séance plus intense, et vérifie que tes nuits dépassent 7h30. Tu es sur la bonne voie, mais écoute ton corps pour ajuster !",
+  "alerte_fatigue": null,
+  "analyse_ia": "Ta semaine est **très bien structurée** avec une bonne alternance entre vélo et course, et des efforts bien dosés : tes sorties longues (comme le 32 km à vélo en FC élevée) montrent une excellente endurance, tandis que tes runs en charge modérée (55-61) optimisent ta puissance aérobie. La cadence élevée en course (88-92) prouve aussi que tu gères bien ta foulée, un vrai plus pour éviter les blessures.\n\n**Attention** à la **VFC en chute libre** le 23 octobre (43 ms, contre 48-51 ms d’habitude) et à la **FC de repos légèrement plus élevée** (46 bpm le 20 vs 42-43 les autres jours), surtout avec un sommeil réduit à 7h1. Ces signes pointent vers un **petit coup de fatigue** ou un stress accumulé : ton corps a peut-être besoin d’un jour de repos actif ou d’une nuit plus longue pour récupérer. La semaine prochaine, privilégie une sortie **ultra-légère** (30 min vélo très doux à 70-80 bpm) ou une marche en forêt pour laisser ton système nerveux se régénérer sans pression. Écoute-toi !",
   "modele_ia": "mistral-small-latest",
   "graphiques": [
     "Distance par jour",
