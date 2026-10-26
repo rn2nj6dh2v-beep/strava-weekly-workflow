@@ -18,8 +18,21 @@ Cyril le 25/10/2026) : plus AUCUNE donnée Strava.
   (distance/jour par sport, VFC, sommeil & FC repos) intégrés directement
   dans l'email HTML (multipart/alternative + related, images cid). Best
   effort : sans matplotlib ou en cas d'erreur, l'email part en texte seul.
+- Alerte fatigue & poids (demande de Cyril du 26/10/2026) : VFC sous 90 % de
+  la moyenne hebdo sur au moins 3 jours, ou forme (TSB) < -20 → ligne
+  ⚠️ ALERTE FATIGUE dans le résumé + champ alerte_fatigue dans latest.json
+  (l'analyse IA est priée de la mettre en avant) ; poids moyen 7 j affiché.
+- Tendances 8 semaines (demande de Cyril du 26/10/2026) :
+  summaries/intervals/tendances.json — fichier compact (km vélo/course,
+  heures, VFC moyenne, CTL/TSB, puissance pondérée moyenne vélo, vitesse
+  moyenne course par semaine) lu par le coach du matin pour suivre la
+  progression sur plusieurs semaines.
+- Tableau de bord (demande de Cyril du 26/10/2026) : dashboard/index.html,
+  page autonome (PNG en base64) régénérée chaque semaine — VFC 45 j, forme
+  CTL/ATL/TSB 45 j, volume 12 semaines, records. Publiable via GitHub Pages.
 - Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
 """
+import base64
 import datetime as dt
 import html as html_lib
 import json
@@ -131,11 +144,34 @@ def _stats_wellness(jours: list[dict]) -> dict | None:
         "vfc_max_ms": max(vfcs) if vfcs else None,
         "fc_repos_moyenne": _moy([j.get("fc_repos") for j in jours]),
         "sommeil_moyen_h": _moy([j.get("sommeil_h") for j in jours]),
+        "poids_moyen_kg": _moy([j.get("poids_kg") for j in jours], 1),
         "ctl_dernier": jours[-1].get("ctl"),
         "atl_dernier": jours[-1].get("atl"),
         "tsb_dernier": jours[-1].get("tsb"),
         "jours": jours,
     }
+
+
+def _detecter_alerte_fatigue(jours: list[dict]) -> dict | None:
+    """Alerte fatigue (demande de Cyril du 26/10/2026) : VFC sous 90 % de la
+    moyenne de la semaine sur au moins 3 jours, ou forme (TSB) sous -20.
+    Retourne {'alertes': [...], 'depuis': date} ou None."""
+    alertes = []
+    vfcs = [j.get("vfc_ms") for j in jours if j.get("vfc_ms") is not None]
+    if len(vfcs) >= 3:
+        moyenne = statistics.mean(vfcs)
+        baisse = [v for v in vfcs if v < moyenne * 0.9]
+        if len(baisse) >= 3:
+            alertes.append(
+                f"VFC sous 90 % de la moyenne hebdomadaire ({round(moyenne, 1)} ms) "
+                f"sur {len(baisse)} jour(s) — récupération insuffisante"
+            )
+    tsbs = [j.get("tsb") for j in jours if j.get("tsb") is not None]
+    if tsbs and min(tsbs) < -20:
+        alertes.append(f"forme (TSB) au plus bas à {min(tsbs)} — attention à la surcharge")
+    if not alertes:
+        return None
+    return {"alertes": alertes, "depuis": jours[0].get("date") if jours else None}
 
 
 def _cle_mistral() -> str | None:
@@ -404,6 +440,13 @@ def _resume_court(data: dict) -> str:
                     f"    {j['date']} : VFC {j.get('vfc_ms')} ms, FC repos "
                     f"{j.get('fc_repos')}, sommeil {j.get('sommeil_h')} h"
                 )
+        if v.get("poids_moyen_kg"):
+            lignes.append(f"    Poids moyen : {v['poids_moyen_kg']} kg")
+    if data.get("alerte_fatigue"):
+        lignes.append(
+            "⚠️ ALERTE FATIGUE : "
+            + " ; ".join(data["alerte_fatigue"]["alertes"])
+        )
     return "\n".join(lignes)
 
 
@@ -419,6 +462,8 @@ def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | N
         "de repos et le sommeil pour évaluer la récupération et l'état de forme : signale "
         "les baisses de VFC ou élévations de FC de repos qui suggèrent un surmenage ou un "
         "sommeil insuffisant. "
+        "Si une alerte fatigue est signalée dans les données, mets-la en évidence "
+        "en priorité dans ta réponse. "
         "Réponds en français, en 150 mots maximum : 2-3 points forts, 1-2 points de "
         "vigilance, 1 conseil concret pour la semaine suivante. Ton direct et encourageant, "
         "pas de listes à puces, du texte fluide en 2 paragraphes courts.\n\n"
@@ -449,6 +494,294 @@ def _analyse_ia(data: dict, precedent: dict | None) -> tuple[str | None, str | N
         except (urllib.error.URLError, KeyError, IndexError) as e:
             derniere_erreur = f"{type(e).__name__} (modèle {modele}) : {e}"
     return None, derniere_erreur or "erreur inconnue"
+
+
+# ---------------------------------------------------------------------------
+# Tendances & tableau de bord (demande de Cyril du 26/10/2026) — best effort
+# ---------------------------------------------------------------------------
+
+def _stats_semaine_historique(data: dict) -> dict | None:
+    """Extrait les stats compactes d'une semaine depuis un fichier history/."""
+    if not isinstance(data, dict):
+        return None
+    velo = course = 0.0
+    for t, v in (data.get("par_type") or {}).items():
+        if t in ("Ride", "VirtualRide"):
+            velo += v.get("km") or 0
+        elif t in ("Run", "TrailRun"):
+            course += v.get("km") or 0
+    act = data.get("activites") or []
+    puiss = [a.get("puissance_ponderee_w") for a in act
+             if a.get("type") in ("Ride", "VirtualRide") and a.get("puissance_ponderee_w")]
+    allures = [a.get("vitesse_moyenne_kmh") for a in act
+               if a.get("type") in ("Run", "TrailRun") and a.get("vitesse_moyenne_kmh")]
+    vfc = data.get("vfc") or {}
+    return {
+        "km_velo": round(velo, 1),
+        "km_course": round(course, 1),
+        "heures": round((data.get("temps_total_min") or 0) / 60, 1),
+        "vfc_moyenne_ms": vfc.get("vfc_moyenne_ms"),
+        "ctl": vfc.get("ctl_dernier"),
+        "tsb": vfc.get("tsb_dernier"),
+        "puissance_pond_moy_velo_w": round(statistics.mean(puiss), 1) if puiss else None,
+        "vitesse_moy_course_kmh": round(statistics.mean(allures), 1) if allures else None,
+    }
+
+
+def _ecrire_tendances(maintenant: dt.datetime) -> dict | None:
+    """Écrit summaries/intervals/tendances.json : stats compactes des 9
+    dernières semaines (8 précédentes + la semaine qui vient d'être
+    archivée). Fichier lu par le coach du matin pour la progression
+    multi-semaines. Best effort : n'interrompt jamais le résumé."""
+    try:
+        semaines = []
+        for i in range(8, -1, -1):
+            d = maintenant - dt.timedelta(weeks=i)
+            chemin = _fichier_historique(d)
+            if not chemin.exists():
+                continue
+            try:
+                data = json.loads(chemin.read_text())
+            except (json.JSONDecodeError, OSError):
+                continue
+            compact = _stats_semaine_historique(data)
+            if not compact:
+                continue
+            annee, semaine, _ = d.isocalendar()
+            compact["semaine"] = f"{annee}-S{semaine:02d}"
+            semaines.append(compact)
+        if not semaines:
+            return None
+        contenu = {
+            "genere_le": maintenant.isoformat(),
+            "nb_semaines": len(semaines),
+            "semaines": semaines,
+        }
+        (OUT_DIR / "intervals").mkdir(exist_ok=True)
+        (OUT_DIR / "intervals" / "tendances.json").write_text(
+            json.dumps(contenu, ensure_ascii=False, indent=2)
+        )
+        return contenu
+    except Exception as e:
+        print(f"⚠️ Tendances non écrites : {type(e).__name__} : {e}")
+        return None
+
+
+def _jours_wellness_archives(nb_jours: int, aujourd_hui: dt.date) -> list[dict]:
+    """Lit les archives mensuelles wellness (summaries/intervals/<YYYY>-MM.json)
+    et retourne les jours disponibles des nb_jours derniers jours, triés par date."""
+    jours = []
+    for offset in range(nb_jours):
+        d = aujourd_hui - dt.timedelta(days=offset)
+        chemin = OUT_DIR / "intervals" / f"{d.strftime('%Y-%m')}.json"
+        if not chemin.exists():
+            continue
+        try:
+            mois = json.loads(chemin.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        j = mois.get(d.isoformat())
+        if j:
+            jours.append(j)
+    jours.sort(key=lambda j: j.get("date") or "")
+    return jours
+
+
+def _serie_wellness(jours: list[dict], cle: str) -> tuple[list, list]:
+    """(indices, valeurs) des jours où `cle` est présente."""
+    xs, ys = [], []
+    for i, j in enumerate(jours):
+        if j.get(cle) is not None:
+            xs.append(i)
+            ys.append(j[cle])
+    return xs, ys
+
+
+def _generer_dashboard(result: dict, dossier: pathlib.Path, maintenant: dt.datetime) -> str | None:
+    """Génère dashboard/index.html : VFC 45 j, forme (CTL/ATL/TSB) 45 j,
+    volume des 12 dernières semaines, records. Page autonome : les PNG sont
+    intégrés en base64. Retourne None si succès, la raison sinon."""
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception as e:
+        return f"matplotlib indisponible : {type(e).__name__} : {e}"
+    problemes = []
+    images: list[tuple[str, str]] = []  # (titre, chemin PNG)
+    aujourdhui = dt.date.fromisoformat(result["periode"]["fin"])
+    jours = _jours_wellness_archives(45, aujourdhui)
+
+    def _graphe(titre: str, fabricant) -> None:
+        try:
+            fig, ax = plt.subplots(figsize=(8.6, 3.2), dpi=150)
+            if fabricant(ax):
+                chemin = str(dossier / f"dash_{len(images)}.png")
+                fig.savefig(chemin, dpi=150, bbox_inches="tight", facecolor="white")
+                images.append((titre, chemin))
+            plt.close(fig)
+        except Exception as e:
+            problemes.append(f"{titre} : {type(e).__name__} : {e}")
+            plt.close("all")
+
+    def _vfc_45(ax) -> bool:
+        vj = [j for j in jours if j.get("vfc_ms") is not None]
+        if len(vj) < 4:
+            return False
+        ax.plot([j["date"][5:] for j in vj], [j["vfc_ms"] for j in vj],
+                marker="o", markersize=3, linewidth=1.5, color="#ef4444")
+        moyenne = statistics.mean(j["vfc_ms"] for j in vj)
+        ax.axhline(moyenne, color="#9ca3af", linestyle="--", linewidth=1,
+                   label=f"moyenne {round(moyenne, 1)} ms")
+        ax.legend(frameon=False, fontsize=9)
+        ax.set_title(f"VFC nocturne — rMSSD ({len(vj)} jours)", fontsize=11,
+                     fontweight="bold", loc="left")
+        ax.grid(axis="y", alpha=0.3)
+        ax.tick_params(axis="x", labelsize=7, rotation=45)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        return True
+
+    def _forme(ax) -> bool:
+        xs_c, ys_c = _serie_wellness(jours, "ctl")
+        xs_a, ys_a = _serie_wellness(jours, "atl")
+        if not xs_c and not xs_a:
+            return False
+        if xs_c:
+            ax.plot(xs_c, ys_c, color="#3b82f6", linewidth=1.8, label="CTL (fitness)")
+        if xs_a:
+            ax.plot(xs_a, ys_a, color="#f97316", linewidth=1.8, label="ATL (fatigue)")
+        xs_t, ys_t = _serie_wellness(jours, "tsb")
+        if xs_t:
+            ax.plot(xs_t, ys_t, color="#10b981", linewidth=1.4, linestyle="--",
+                    label="TSB (fraîcheur)")
+            ax.axhline(0, color="#d1d5db", linewidth=0.8)
+        ax.legend(frameon=False, fontsize=9)
+        ax.set_title("Forme — CTL / ATL / TSB (45 jours)", fontsize=11,
+                     fontweight="bold", loc="left")
+        ax.grid(axis="y", alpha=0.3)
+        if jours:
+            pas = max(1, len(jours) // 8)
+            ax.set_xticks(range(0, len(jours), pas))
+            ax.set_xticklabels([jours[i]["date"][5:] for i in range(0, len(jours), pas)],
+                               fontsize=7)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        return True
+
+    def _volume_semaines(ax) -> bool:
+        semaines = []
+        for i in range(12, 0, -1):
+            d = maintenant - dt.timedelta(weeks=i)
+            chemin = _fichier_historique(d)
+            if not chemin.exists():
+                continue
+            try:
+                data = json.loads(chemin.read_text())
+            except (json.JSONDecodeError, OSError):
+                continue
+            compact = _stats_semaine_historique(data)
+            if not compact:
+                continue
+            annee, semaine, _ = d.isocalendar()
+            semaines.append((f"S{semaine:02d}", compact["km_velo"], compact["km_course"]))
+        if not semaines:
+            return False
+        ax.bar(range(len(semaines)), [v for _l, v, _c in semaines],
+               width=0.65, color="#3b82f6", label="Vélo")
+        ax.bar(range(len(semaines)), [c for _l, _v, c in semaines],
+               width=0.65, bottom=[v for _l, v, _c in semaines],
+               color="#f97316", label="Course")
+        ax.set_title("Volume des 12 dernières semaines (km)", fontsize=11,
+                     fontweight="bold", loc="left")
+        ax.set_xticks(range(len(semaines)))
+        ax.set_xticklabels([l for l, _v, _c in semaines], fontsize=8)
+        ax.set_ylabel("km", fontsize=9)
+        ax.grid(axis="y", alpha=0.3)
+        ax.legend(frameon=False, fontsize=9)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        return True
+
+    _graphe("VFC nocturne (45 jours)", _vfc_45)
+    _graphe("Forme (CTL / ATL / TSB)", _forme)
+    _graphe("Volume par semaine (12 semaines)", _volume_semaines)
+
+    # Assemblage HTML autonome (images base64)
+    try:
+        sections = "".join(
+            f"<section><h2>{html_lib.escape(titre)}</h2>"
+            f'<img src="data:image/png;base64,'
+            f'{base64.b64encode(pathlib.Path(chemin).read_bytes()).decode()}"'
+            f' alt="{html_lib.escape(titre)}"></section>'
+            for titre, chemin in images
+        )
+    except Exception as e:
+        return f"intégration images : {type(e).__name__} : {e}" + (
+            f" ; {'; '.join(problemes)}" if problemes else "")
+
+    records_html = ""
+    try:
+        chemin_records = BASE / "summaries" / "monthly" / "records.json"
+        if chemin_records.exists():
+            recs = json.loads(chemin_records.read_text()).get("records", {})
+            if recs:
+                corps = "".join(
+                    f"<tr><td>{cle.replace('_', ' ')}</td>"
+                    f"<td><b>{r['valeur']} {r['unite']}</b></td>"
+                    f"<td>{r.get('date', '')}</td></tr>"
+                    for cle, r in sorted(recs.items())
+                )
+                records_html = (
+                    "<section><h2>Records 🏆</h2><table>"
+                    "<tr><th>Record</th><th>Valeur</th><th>Date</th></tr>"
+                    + corps + "</table></section>"
+                )
+    except Exception as e:
+        problemes.append(f"records : {type(e).__name__} : {e}")
+
+    html = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de bord sportif — Cyril PIAU</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         margin: 0; background: #f8fafc; color: #111827; }}
+  header {{ background: #111827; color: white; padding: 20px 24px; }}
+  header h1 {{ margin: 0; font-size: 20px; }}
+  header p {{ margin: 4px 0 0; color: #9ca3af; font-size: 13px; }}
+  main {{ max-width: 920px; margin: 0 auto; padding: 16px; }}
+  section {{ background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+            padding: 12px 16px; margin: 14px 0; }}
+  h2 {{ font-size: 14px; margin: 4px 0 8px; color: #374151; }}
+  img {{ max-width: 100%; height: auto; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
+  th {{ text-align: left; color: #6b7280; font-weight: 600; padding: 6px 8px;
+       border-bottom: 1px solid #e5e7eb; }}
+  td {{ padding: 6px 8px; border-bottom: 1px solid #f3f4f6; }}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏃🚴 Tableau de bord sportif — Cyril PIAU</h1>
+  <p>Généré automatiquement chaque dimanche 23h depuis les données intervals.icu —
+     dernière mise à jour : {result['periode']['fin']}</p>
+</header>
+<main>
+{sections}
+{records_html}
+</main>
+</body>
+</html>
+"""
+    try:
+        (BASE / "dashboard").mkdir(exist_ok=True)
+        (BASE / "dashboard" / "index.html").write_text(html, encoding="utf-8")
+    except Exception as e:
+        return f"écriture dashboard : {type(e).__name__} : {e}"
+    return "; ".join(problemes) if problemes else None
 
 
 def main() -> None:
@@ -483,6 +816,11 @@ def main() -> None:
         erreur_vfc = str(e)
         print(f"⚠️ Wellness non récupéré (résumé sans VFC) : {erreur_vfc}")
 
+    # Alerte fatigue (demande de Cyril du 26/10/2026)
+    alerte = _detecter_alerte_fatigue(jours)
+    if alerte:
+        print(f"⚠️ Alerte fatigue détectée : {alerte['alertes']}")
+
     parsed = [_parse_activite(a) for a in activites_brutes if isinstance(a, dict)]
     parsed.sort(key=lambda p: (p["date"], p["nom"]))
 
@@ -512,6 +850,7 @@ def main() -> None:
         "activites": parsed,
         "vfc": _stats_wellness(jours),
         "vfc_erreur": erreur_vfc,
+        "alerte_fatigue": alerte,
     }
 
     precedent = None
@@ -548,6 +887,11 @@ def main() -> None:
     archive = _fichier_historique(maintenant)
     archive.write_text(json.dumps(result, ensure_ascii=False, indent=2))
 
+    # Tendances 8 semaines (demande de Cyril du 26/10/2026) — best effort.
+    tendances = _ecrire_tendances(maintenant)
+    if tendances:
+        print(f"📈 Tendances écrites : {tendances['nb_semaines']} semaine(s)")
+
     # Résumé volontairement épuré (demande de Cyril du 24/10/2026) :
     # jour + date (repère ajouté à sa demande le 26/10/2026), type, distance
     # et temps. Toutes les données détaillées restent archivées dans
@@ -567,6 +911,10 @@ def main() -> None:
                 f"FC repos {vfc.get('fc_repos_moyenne')} bpm, "
                 f"sommeil moyen {vfc.get('sommeil_moyen_h')} h"
             )
+            if vfc.get("poids_moyen_kg"):
+                lignes.append(f"• ⚖️ Poids moyen (7 j) : {vfc['poids_moyen_kg']} kg")
+        if alerte:
+            lignes.append(f"• ⚠️ ALERTE FATIGUE : {' ; '.join(alerte['alertes'])}")
         for p in parsed:
             lignes.append(
                 f"  - {_libelle_date(p['date'])} — {p['type']} : "
@@ -588,6 +936,15 @@ def main() -> None:
         (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         print("Résumé envoyé par email ✉️")
+
+    # Tableau de bord (demande de Cyril du 26/10/2026) — best effort.
+    erreur_dashboard = _generer_dashboard(result, dossier_graphes, maintenant)
+    if erreur_dashboard:
+        print(f"⚠️ Dashboard partiel ou absent : {erreur_dashboard}")
+        result["dashboard_erreur"] = erreur_dashboard
+        (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print("🖥️ Dashboard mis à jour (dashboard/index.html)")
 
     shutil.rmtree(dossier_graphes, ignore_errors=True)
 

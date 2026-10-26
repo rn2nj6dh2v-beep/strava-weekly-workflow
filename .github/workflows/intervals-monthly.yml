@@ -1,0 +1,45 @@
+name: Bulletin mensuel (intervals.icu)
+
+on:
+  schedule:
+    # 9h00 Paris le 1er du mois : 08:00 UTC en hiver, 07:00 UTC en été.
+    # Le script vérifie l'heure réelle de Paris avant de s'exécuter.
+    - cron: "0 7 1 * *"
+    - cron: "0 8 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mensuel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe des scripts
+        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py
+
+      - name: Installer matplotlib (graphiques du bulletin)
+        run: pip install --quiet matplotlib
+
+      - name: Générer le bulletin mensuel (uniquement s'il est 9h à Paris)
+        env:
+          INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python scripts/intervals_monthly.py
+
+      - name: Enregistrer les résultats
+        run: |
+          git config user.name "intervals-bot"
+          git config user.email "intervals-bot@users.noreply.github.com"
+          git add summaries/
+          git commit -m "Bulletin mensuel intervals.icu $(date +'%Y-%m')" || echo "Rien à commiter"
+          git push

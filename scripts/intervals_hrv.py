@@ -277,6 +277,31 @@ def _completer_archive(athlete_id: str, aujourd_hui) -> None:
         print(f"  {libelle} : {len(activites)} activité(s) archivée(s)")
 
 
+def _fusionner_mois_courant(athlete_id: str, aujourd_hui) -> int:
+    """Récupère TOUT le mois courant en cours (du 1er à aujourd'hui) et le
+    fusionne dans l'archive. Garantit qu'aucune activité du mois n'échappe à
+    l'archive au-delà de la fenêtre glissante de 14 jours (ex. activités du
+    début du mois), et rafraîchit les éditions rétroactives du mois.
+    Best effort : un échec est réessayé au run suivant."""
+    debut_mois = dt.date(aujourd_hui.year, aujourd_hui.month, 1)
+    try:
+        acts = _get(f"/athlete/{athlete_id}/activities", {
+            "oldest": debut_mois.isoformat(),
+            "newest": aujourd_hui.isoformat(),
+        })
+    except SystemExit as e:
+        print(f"⚠️ Mois courant non complété (réessayé au prochain run) : {e}")
+        return 0
+    if not isinstance(acts, list):
+        print("⚠️ Mois courant : réponse inattendue — ignoré ce run")
+        return 0
+    activites = [a for a in acts if isinstance(a, dict)]
+    nb = _fusionner_archive(activites)
+    if nb:
+        print(f"Mois courant complet : {nb} activité(s) fusionnée(s)")
+    return nb
+
+
 def _archive_activites(athlete_id: str, aujourd_hui) -> None:
     """Récupère les activités des JOURS_ACTIVITES derniers jours (endpoint
     /athlete/{id}/activities) et les archive de deux façons :
@@ -318,13 +343,14 @@ def _archive_activites(athlete_id: str, aujourd_hui) -> None:
     for a in activites[-5:]:
         print(f"  {a.get('startTime')} — {a.get('type')} : {a.get('name')}")
 
-    # Archive cumulée illimitée : fusion de la fenêtre du jour + rattrapage
-    # automatique des mois manquants de l'historique (best effort).
+    # Archive cumulée illimitée : fusion de la fenêtre du jour + mois courant
+    # complet + rattrapage automatique des mois passés manquants (best effort).
     nb_fusionnes = _fusionner_archive(activites)
+    nb_courant = _fusionner_mois_courant(athlete_id, aujourd_hui)
     if JOURS_ARCHIVE_BACKFILL > 0:
         _completer_archive(athlete_id, aujourd_hui)
-    if nb_fusionnes:
-        print(f"Archive cumulée : {nb_fusionnes} activité(s) fusionnée(s) ce run")
+    if nb_fusionnes or nb_courant:
+        print(f"Archive cumulée : {nb_fusionnes} activité(s) fenêtre 14 j + {nb_courant} mois courant")
 
 
 def _stats_semaine() -> dict | None:

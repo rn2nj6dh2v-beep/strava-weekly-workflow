@@ -30,6 +30,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Vérifier la syntaxe des scripts
+        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py
+
       - name: Récupérer les données wellness intervals.icu (si ~8h à Paris)
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}

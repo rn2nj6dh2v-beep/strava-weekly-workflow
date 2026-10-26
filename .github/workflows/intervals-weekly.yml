@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Vérifier la syntaxe des scripts
+        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py
+
       - name: Installer matplotlib (graphiques du résumé)
         run: pip install --quiet matplotlib
 
@@ -39,5 +42,6 @@ jobs:
           git config user.name "intervals-bot"
           git config user.email "intervals-bot@users.noreply.github.com"
           git add summaries/
+          git add dashboard/ 2>/dev/null || echo "Pas de dashboard"
           git commit -m "Résumé intervals.icu du $(date +'%Y-%m-%d')" || echo "Rien à commiter"
           git push
