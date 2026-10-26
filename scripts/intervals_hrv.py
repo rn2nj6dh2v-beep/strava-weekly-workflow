@@ -12,9 +12,18 @@
   UNIQUE source d'activités du coach quotidien Vibe (Strava abandonné pour le
   coach le 25/10/2026, demande de Cyril). Best effort : un échec de cet appel
   n'interrompt jamais l'archivage wellness.
+- summaries/intervals/activities_archive/<YYYY>-MM.json : ARCHIVE CUMULÉE
+  ILLIMITÉE des activités (demande de Cyril du 26/10/2026). Chaque activité est
+  fusionnée par identifiant dans le fichier du mois de sa date : rien n'est
+  jamais supprimé, et une activité modifiée écrase son ancienne version. Le
+  cadre de rattrapage INTERVALS_ACTIVITES_BACKFILL_JOURS (défaut 365, 0 =
+  désactivé, ex. 730 via workflow_dispatch pour aller plus loin) récupère
+  automatiquement les mois manquants de l'historique intervals.icu. Le coach
+  du matin continue de lire activities.json (fenêtre glissante 14 jours) ;
+  l'archive sert aux analyses long terme.
 - Exécuté par GitHub Actions vers 8h heure de Paris (double cron été/hiver,
   le script vérifie l'heure réelle à Paris).
-- INTERVALS_BACKFILL_DAYS (défaut 3) : fenêtre de récupération — permet le
+- INTERVALS_BACKFILL_DAYS (défaut 3) : fenêtre de récupération wellness — permet le
   rattrapage historique (ex. 90 jours) via workflow_dispatch.
 """
 import base64
@@ -30,11 +39,13 @@ import zoneinfo
 
 BASE = pathlib.Path(__file__).resolve().parent.parent
 OUT_DIR = BASE / "summaries" / "intervals"
+ARCHIVE_DIR = OUT_DIR / "activities_archive"
 CONFIG_PATH = BASE / "config" / "intervals.json"
 API = "https://intervals.icu/api/v1"
 JOURS_FENETRE = int(os.environ.get("INTERVALS_BACKFILL_DAYS", "3"))  # jours récupérés (rattrapage possible)
 JOURS_SEMAINE = 7  # fenêtre des stats hebdo écrites dans week.json
 JOURS_ACTIVITES = 14  # fenêtre des activités archivées dans activities.json
+JOURS_ARCHIVE_BACKFILL = int(os.environ.get("INTERVALS_ACTIVITES_BACKFILL_JOURS", "365"))  # horizon de l'archive cumulée
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 HEURE_EXECUTION = 8  # heure de Paris
 
@@ -157,12 +168,125 @@ def _archive_mensuelle(jours: list[dict]) -> None:
         chemin.write_text(json.dumps(existant, ensure_ascii=False, indent=2, sort_keys=True))
 
 
+def _date_activite(a: dict) -> str | None:
+    """Date locale d'une activité : start_date_local (champ confirmé par l'API
+    intervals.icu), sinon startTime/start_time. Retourne YYYY-MM-DD ou None."""
+    for cle in ("start_date_local", "startTime", "start_time", "start_date"):
+        v = a.get(cle)
+        if isinstance(v, str) and len(v) >= 10 and v[:4].isdigit():
+            return v[:10]
+    return None
+
+
+def _cle_activite(a: dict) -> str:
+    """Clé de fusion d'une activité dans l'archive : son id intervals.icu,
+    sinon un composite date|type|distance stable pour un même enregistrement."""
+    identifiant = a.get("id")
+    if identifiant not in (None, ""):
+        return str(identifiant)
+    return "|".join(
+        str(x) for x in (
+            _date_activite(a),
+            a.get("type"),
+            a.get("distance"),
+        )
+    )
+
+
+def _fusionner_archive(activites: list[dict]) -> int:
+    """Fusionne des activités dans l'archive cumulée
+    summaries/intervals/activities_archive/<YYYY>-MM.json, regroupées par mois
+    de leur date locale. Fusion par clé (id) : une activité déjà archivée est
+    mise à jour, jamais dupliquée ; les autres mois ne sont jamais perdus."""
+    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    par_mois: dict[str, dict[str, dict]] = {}
+    sans_date = 0
+    for a in activites:
+        date = _date_activite(a)
+        if not date:
+            sans_date += 1
+            continue
+        par_mois.setdefault(date[:7], {})[_cle_activite(a)] = a
+    for mois, par_id in par_mois.items():
+        chemin = ARCHIVE_DIR / f"{mois}.json"
+        existant: dict[str, dict] = {}
+        if chemin.exists():
+            try:
+                existant = json.loads(chemin.read_text())
+            except (json.JSONDecodeError, OSError):
+                existant = {}
+        existant.update(par_id)
+        chemin.write_text(json.dumps(existant, ensure_ascii=False, indent=2, sort_keys=True))
+    if sans_date:
+        print(f"⚠️ {sans_date} activité(s) sans date lisible — non fusionnée(s) dans l'archive")
+    return len(activites) - sans_date
+
+
+def _mois_manquants(aujourd_hui) -> list[tuple[str, dt.date, dt.date]]:
+    """Mois du cadre de rattrapage (JOURS_ARCHIVE_BACKFILL jours) sans fichier
+    d'archive, avec la plage de dates à récupérer pour chacun. Le mois courant
+    est exclu : il est couvert par les fusions quotidiennes de la fenêtre
+    glissante."""
+    debut = aujourd_hui - dt.timedelta(days=JOURS_ARCHIVE_BACKFILL - 1)
+    mois_courant = aujourd_hui.strftime("%Y-%m")
+    manquants: list[tuple[str, dt.date, dt.date]] = []
+    curseur = dt.date(debut.year, debut.month, 1)
+    while curseur.strftime("%Y-%m") < mois_courant:
+        libelle = curseur.strftime("%Y-%m")
+        if curseur.month == 12:
+            fin_mois = dt.date(curseur.year, 12, 31)
+            suivant = dt.date(curseur.year + 1, 1, 1)
+        else:
+            fin_mois = dt.date(curseur.year, curseur.month + 1, 1) - dt.timedelta(days=1)
+            suivant = dt.date(curseur.year, curseur.month + 1, 1)
+        if not (ARCHIVE_DIR / f"{libelle}.json").exists():
+            manquants.append((libelle, max(curseur, debut), fin_mois))
+        curseur = suivant
+    return manquants
+
+
+def _completer_archive(athlete_id: str, aujourd_hui) -> None:
+    """Récupère les mois d'activités manquants de l'historique intervals.icu
+    dans le cadre du rattrapage (initialisation de l'archive, ou élargissement
+    via workflow_dispatch). Best effort : un mois en échec est réessayé au run
+    suivant ; un mois sans activité reçoit un fichier vide pour ne pas être
+    redemandé chaque jour."""
+    manquants = _mois_manquants(aujourd_hui)
+    if not manquants:
+        return
+    print(
+        f"Archive cumulée : {len(manquants)} mois à récupérer "
+        f"(rattrapage {JOURS_ARCHIVE_BACKFILL} jours)"
+    )
+    for libelle, plus_ancien, plus_recent in manquants:
+        try:
+            acts = _get(f"/athlete/{athlete_id}/activities", {
+                "oldest": plus_ancien.isoformat(),
+                "newest": plus_recent.isoformat(),
+            })
+        except SystemExit as e:
+            print(f"⚠️ Mois {libelle} non récupéré (réessayé au prochain run) : {e}")
+            continue
+        if not isinstance(acts, list):
+            print(f"⚠️ Mois {libelle} : réponse inattendue — ignoré ce run")
+            continue
+        activites = [a for a in acts if isinstance(a, dict)]
+        _fusionner_archive(activites)
+        if not activites:
+            (ARCHIVE_DIR / f"{libelle}.json").write_text("{}")
+        print(f"  {libelle} : {len(activites)} activité(s) archivée(s)")
+
+
 def _archive_activites(athlete_id: str, aujourd_hui) -> None:
     """Récupère les activités des JOURS_ACTIVITES derniers jours (endpoint
-    /athlete/{id}/activities, tri du plus récent au plus ancien selon la doc
-    intervals.icu) et les archive dans summaries/intervals/activities.json.
-    Re-exécutable : le fichier est remplacé à chaque exécution.
-    Best effort : une erreur n'interrompt pas l'archivage wellness."""
+    /athlete/{id}/activities) et les archive de deux façons :
+    - summaries/intervals/activities.json : fenêtre glissante remplacée à
+      chaque exécution, lue par le coach quotidien Vibe ;
+    - summaries/intervals/activities_archive/<YYYY>-MM.json : archive cumulée
+      illimitée, fusionnée par identifiant (les mois manquants du cadre de
+      rattrapage sont récupérés automatiquement).
+    Re-exécutable. Best effort : une erreur n'interrompt pas l'archivage
+    wellness."""
     plus_ancien = aujourd_hui - dt.timedelta(days=JOURS_ACTIVITES - 1)
     try:
         acts = _get(f"/athlete/{athlete_id}/activities", {
@@ -193,6 +317,14 @@ def _archive_activites(athlete_id: str, aujourd_hui) -> None:
     print(f"Activités archivées : {len(activites)} sur {JOURS_ACTIVITES} jours")
     for a in activites[-5:]:
         print(f"  {a.get('startTime')} — {a.get('type')} : {a.get('name')}")
+
+    # Archive cumulée illimitée : fusion de la fenêtre du jour + rattrapage
+    # automatique des mois manquants de l'historique (best effort).
+    nb_fusionnes = _fusionner_archive(activites)
+    if JOURS_ARCHIVE_BACKFILL > 0:
+        _completer_archive(athlete_id, aujourd_hui)
+    if nb_fusionnes:
+        print(f"Archive cumulée : {nb_fusionnes} activité(s) fusionnée(s) ce run")
 
 
 def _stats_semaine() -> dict | None:

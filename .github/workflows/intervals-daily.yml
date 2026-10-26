@@ -9,9 +9,13 @@ on:
   workflow_dispatch:
     inputs:
       backfill_days:
-        description: "Nombre de jours à récupérer (3 par défaut ; 90 pour un rattrapage historique)"
+        description: "Nombre de jours wellness à récupérer (3 par défaut ; 90 pour un rattrapage historique)"
         required: false
         default: "3"
+      archive_backfill_days:
+        description: "Archive cumulée d'activités : horizon de rattrapage en jours (365 par défaut ; 0 pour désactiver ; ex. 730 pour 2 ans)"
+        required: false
+        default: "365"
 
 permissions:
   contents: write
@@ -31,6 +35,7 @@ jobs:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
           INTERVALS_BACKFILL_DAYS: ${{ github.event.inputs.backfill_days || '3' }}
+          INTERVALS_ACTIVITES_BACKFILL_JOURS: ${{ github.event.inputs.archive_backfill_days || '365' }}
         run: python scripts/intervals_hrv.py
 
       - name: Enregistrer les résultats
