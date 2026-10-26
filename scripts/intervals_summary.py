@@ -11,9 +11,9 @@ Cyril le 25/10/2026) : plus AUCUNE donnée Strava.
   "API_KEY":clé + User-Agent navigateur, sinon Cloudflare bloque)
 - Archivage hebdomadaire dans summaries/history/<année>-S<semaine ISO>.json
 - Analyse IA via l'API Mistral (comparaison avec la semaine précédente archivée)
-- Résumé épuré (type/distance/temps) : les données détaillées restent
-  archivées dans latest.json (champ "brut" = réponse exacte de l'API par
-  activité, rien n'est perdu) et exploitées par l'analyse IA
+- Résumé épuré (jour + date, type, distance, temps) : les données détaillées
+  restent archivées dans latest.json (champ "brut" = réponse exacte de l'API
+  par activité, rien n'est perdu) et exploitées par l'analyse IA
 - Graphiques (demande de Cyril du 26/10/2026) : matplotlib génère des PNG
   (distance/jour par sport, VFC, sommeil & FC repos) intégrés directement
   dans l'email HTML (multipart/alternative + related, images cid). Best
@@ -49,6 +49,7 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
 MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
 JOURS_FR = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"]
+JOURS_FR_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 COULEURS_SPORT = {
     "Ride": "#3b82f6", "VirtualRide": "#60a5fa", "Run": "#f97316",
     "TrailRun": "#fb923c", "Hike": "#a3a3a3",
@@ -160,6 +161,15 @@ def _libelle_jour(date_iso) -> str:
     except ValueError:
         return str(date_iso)[:10]
     return f"{JOURS_FR[d.weekday()]} {d.day}"
+
+
+def _libelle_date(date_iso) -> str:
+    """'2026-10-19' → 'lundi 19/10' — repère demandé par Cyril le 26/10/2026."""
+    try:
+        d = dt.date.fromisoformat(str(date_iso)[:10])
+    except ValueError:
+        return str(date_iso)[:10]
+    return f"{JOURS_FR_LONG[d.weekday()]} {d.day:02d}/{d.month:02d}"
 
 
 def _style_ax(ax, titre: str, ylabel: str, xlabels: list) -> None:
@@ -539,8 +549,9 @@ def main() -> None:
     archive.write_text(json.dumps(result, ensure_ascii=False, indent=2))
 
     # Résumé volontairement épuré (demande de Cyril du 24/10/2026) :
-    # type, distance et temps uniquement. Toutes les données détaillées restent
-    # archivées dans latest.json et summaries/history/ et exploitées par l'IA.
+    # jour + date (repère ajouté à sa demande le 26/10/2026), type, distance
+    # et temps. Toutes les données détaillées restent archivées dans
+    # latest.json et summaries/history/ et exploitées par l'IA.
     if parsed:
         h, m = divmod(total_min, 60)
         duree = f"{h}h{m:02d}" if h else f"{m} min"
@@ -557,7 +568,10 @@ def main() -> None:
                 f"sommeil moyen {vfc.get('sommeil_moyen_h')} h"
             )
         for p in parsed:
-            lignes.append(f"  - {p['type']} : {p['km']} km, {p['minutes']} min")
+            lignes.append(
+                f"  - {_libelle_date(p['date'])} — {p['type']} : "
+                f"{p['km']} km, {p['minutes']} min"
+            )
         if analyse:
             lignes += ["", "🧠 Analyse IA :", analyse]
         else:
