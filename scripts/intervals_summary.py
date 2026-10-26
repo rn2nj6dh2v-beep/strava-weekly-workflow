@@ -27,7 +27,7 @@ Cyril le 25/10/2026) : plus AUCUNE donnée Strava.
   heures, VFC moyenne, CTL/TSB, puissance pondérée moyenne vélo, vitesse
   moyenne course par semaine) lu par le coach du matin pour suivre la
   progression sur plusieurs semaines.
-- Tableau de bord (demande de Cyril du 26/10/2026) : dashboard/index.html,
+- Tableau de bord (demande de Cyril du 26/10/2026) : docs/index.html,
   page autonome (PNG en base64) régénérée chaque semaine — VFC 45 j, forme
   CTL/ATL/TSB 45 j, volume 12 semaines, records. Publiable via GitHub Pages.
 - Envoi du résumé par email (SMTP) si SMTP_USER/SMTP_PASSWORD/MAIL_TO présents
@@ -598,7 +598,7 @@ def _serie_wellness(jours: list[dict], cle: str) -> tuple[list, list]:
 
 
 def _generer_dashboard(result: dict, dossier: pathlib.Path, maintenant: dt.datetime) -> str | None:
-    """Génère dashboard/index.html : VFC 45 j, forme (CTL/ATL/TSB) 45 j,
+    """Génère docs/index.html : VFC 45 j, forme (CTL/ATL/TSB) 45 j,
     volume des 12 dernières semaines, records. Page autonome : les PNG sont
     intégrés en base64. Retourne None si succès, la raison sinon."""
     try:
@@ -777,8 +777,8 @@ def _generer_dashboard(result: dict, dossier: pathlib.Path, maintenant: dt.datet
 </html>
 """
     try:
-        (BASE / "dashboard").mkdir(exist_ok=True)
-        (BASE / "dashboard" / "index.html").write_text(html, encoding="utf-8")
+        (BASE / "docs").mkdir(exist_ok=True)
+        (BASE / "docs" / "index.html").write_text(html, encoding="utf-8")
     except Exception as e:
         return f"écriture dashboard : {type(e).__name__} : {e}"
     return "; ".join(problemes) if problemes else None
@@ -944,7 +944,7 @@ def main() -> None:
         result["dashboard_erreur"] = erreur_dashboard
         (OUT_DIR / "latest.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        print("🖥️ Dashboard mis à jour (dashboard/index.html)")
+        print("🖥️ Dashboard mis à jour (docs/index.html)")
 
     shutil.rmtree(dossier_graphes, ignore_errors=True)
 
