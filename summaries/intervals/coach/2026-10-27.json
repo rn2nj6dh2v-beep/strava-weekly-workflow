@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-27",
+  "genere_le": "2026-10-27T07:44:17.319839+00:00",
+  "sujet": "🏃🚴 Séances du jour — mardi 27 octobre",
+  "donnees": {
+    "date": "2026-10-27",
+    "wellness_7j": {
+      "vfc_moyenne_ms": 46.9,
+      "vfc_min_ms": 43.0,
+      "vfc_max_ms": 51.0,
+      "fc_repos_moyenne": 43.1,
+      "sommeil_moyen_h": 8.0,
+      "tsb_moyen": null,
+      "nb_jours_vfc": 7
+    },
+    "veille": {
+      "atl": 34.058666,
+      "ctl": 36.40657,
+      "date": "2026-10-27",
+      "douleurs": null,
+      "fatigue": null,
+      "fc_repos": 43,
+      "humeur": null,
+      "poids_kg": null,
+      "qualite_sommeil": 2,
+      "readiness": null,
+      "sommeil_h": 6.8,
+      "stress": null,
+      "tsb": null,
+      "vfc_ms": 46.0
+    },
+    "vfc_veille_vs_moy_7j_pct": -1.9,
+    "ctl_atl_tsb": {
+      "ctl": 36.40657,
+      "atl": 34.058666,
+      "tsb": null,
+      "date": "2026-10-27"
+    },
+    "volume": {
+      "7j": {
+        "velo": {
+          "seances": 4,
+          "km": 29.4,
+          "heures": 1.5,
+          "charge_entrainement": 34.0
+        },
+        "course": {
+          "seances": 4,
+          "km": 30.2,
+          "heures": 3.0,
+          "charge_entrainement": 208.0
+        }
+      },
+      "14j": {
+        "velo": {
+          "seances": 14,
+          "km": 151.0,
+          "heures": 6.6,
+          "charge_entrainement": 263.0
+        },
+        "course": {
+          "seances": 6,
+          "km": 40.4,
+          "heures": 3.9,
+          "charge_entrainement": 275.0
+        }
+      }
+    },
+    "activites_7j": [
+      "2026-10-21 Run : 8.6 km, 51 min, charge 55, FC moy 136, puis. pond. 297 W",
+      "2026-10-21 Ride : 7.3 km, 24 min, charge 11, FC moy 108",
+      "2026-10-21 Ride : 7.3 km, 21 min, charge 5, FC moy 89",
+      "2026-10-22 Run : 5.1 km, 28 min, charge 34, FC moy 145, puis. pond. 317 W",
+      "2026-10-22 Ride : 8.1 km, 26 min, charge 13, FC moy 110",
+      "2026-10-22 Ride : 6.7 km, 20 min, charge 5, FC moy 87",
+      "2026-10-25 Run : 8.5 km, 52 min, charge 61, FC moy 140, puis. pond. 309 W",
+      "2026-10-26 Run : 8.0 km, 50 min, charge 58, FC moy 144, puis. pond. 310 W"
+    ],
+    "tendances_semaines": "{\"genere_le\": \"2026-10-26T11:09:21.389760+00:00\", \"nb_semaines\": 2, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 62.2, \"km_course\": 30.2, \"heures\": 5.7, \"vfc_moyenne_ms\": 45.7, \"ctl\": 37.283794, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S44\"}]}",
+    "records": null
+  },
+  "seances": "**Forme du jour** : VFC veille en léger baisse (-1.9% vs 7j), sommeil court (6.8h) et qualité médiocre (note 2/5). Charge 7j élevée (208 CTL en course, 34 CTL en vélo), mais pas de surentraînement visible. Pas de TSB pour ajuster.\n\n---\n\n🚴 **SÉANCE VÉLO — Endurance Fondamentale + Frais (priorité du jour)**\nObjectif : Récupération active et fluidité technique. 60 min à 70-80% FCmax (130-145 bpm), cadence 85-95 rpm, puissance 120-150 W. Échauffement : 10 min libre + 3x10s accélérations douces. Contenu : 4x5 min à 105-115 rpm (FC 120-130 bpm) avec 2 min de récup à 60 rpm entre chaque. Retour au calme : 10 min très léger.\n\n---\n🏃 **SÉANCE COURSE À PIED — Récupération Dynamique**\nObjectif : Détendre les jambes sans stress. 45 min à 65-75% FCmax (115-130 bpm), allure 5:30-6:00/km. Échauffement : 10 min très lent + 4x20s montées de rythme (marche active). Contenu : 6x1 min à allure 5:00/km (FC 140-150 bpm) avec 1 min de trottinement entre chaque. Retour au calme : 10 min étirements dynamiques.\n\n---\n**Justification** : La charge 7j est élevée (surtout en course), mais sans pic de fatigue (CTL stable). Privilégie le vélo pour son effet moins traumatisant sur les articulations. Les séances sont douces pour préserver la récupération, malgré un léger déficit de sommeil.\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "modele_ia": "open-mistral-nemo",
+  "ia_erreur": null,
+  "email_erreur": null
+}
