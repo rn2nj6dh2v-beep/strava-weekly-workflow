@@ -50,6 +50,7 @@ jobs:
           MAIL_TO: ${{ secrets.MAIL_TO }}
           INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: python scripts/intervals_coach.py
+
       - name: Enregistrer les résultats
         run: |
           git config user.name "intervals-bot"
