@@ -1,0 +1,49 @@
+name: Coach à la demande — données fraîches + séances par email
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "triggers/demande-coach.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  coach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe des scripts
+        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_coach.py
+
+      - name: Récupérer les données wellness intervals.icu (fraîches, nuit incluse)
+        env:
+          INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
+          INTERVALS_FORCE_RUN: "1"
+          INTERVALS_BACKFILL_DAYS: "3"
+          INTERVALS_ACTIVITES_BACKFILL_JOURS: "0"
+        run: python scripts/intervals_hrv.py
+
+      - name: Coach — deux séances (vélo + course) par email
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          INTERVALS_FORCE_RUN: "1"
+        run: python scripts/intervals_coach.py
+
+      - name: Enregistrer les résultats
+        run: |
+          git config user.name "intervals-bot"
+          git config user.email "intervals-bot@users.noreply.github.com"
+          git add summaries/intervals/
+          git commit -m "Coach à la demande du $(date +'%Y-%m-%d %H:%M') UTC" || echo "Rien à commiter"
+          git push
