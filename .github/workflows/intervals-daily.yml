@@ -31,7 +31,7 @@ jobs:
           python-version: "3.12"
 
       - name: Vérifier la syntaxe des scripts
-        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py
+        run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py scripts/intervals_coach.py
 
       - name: Récupérer les données wellness intervals.icu (si ~8h à Paris)
         env:
@@ -41,6 +41,15 @@ jobs:
           INTERVALS_ACTIVITES_BACKFILL_JOURS: ${{ github.event.inputs.archive_backfill_days || '365' }}
         run: python scripts/intervals_hrv.py
 
+      - name: Coach du matin — deux séances par email (si ~8h à Paris)
+        if: always()
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+        run: python scripts/intervals_coach.py
       - name: Enregistrer les résultats
         run: |
           git config user.name "intervals-bot"
