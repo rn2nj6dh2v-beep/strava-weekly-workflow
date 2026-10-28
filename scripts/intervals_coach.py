@@ -211,6 +211,20 @@ def _digester(aujourdhui) -> dict:
         for a in legeres if a["date"] and a["date"] >= limite7
     ]
 
+    # --- Bloc de repos imposé à venir (adapte l'intensité) ---
+    # Trêve ≤ 3 jours : juste avant, on peut charger un peu plus ; le repos
+    # total qui suit assure la récupération.
+    repos_prochains = [j for j in JOURS_SANS_SPORT
+                       if aujourdhui < dt.date.fromisoformat(j)
+                       <= aujourdhui + dt.timedelta(days=3)]
+    if repos_prochains:
+        d["repos_imposes_prochains"] = {
+            "jours": repos_prochains,
+            "note": ("repos complet décidé par Cyril ces jours-là ; juste "
+                     "avant la trêve, une charge un peu plus élevée ou une "
+                     "séance de qualité est pertinente"),
+        }
+
     # --- Tendances (4-8 semaines) et records : best effort, dump compact ---
     d["tendances_semaines"] = _extrait_compact(
         _charger(INTERVALS_DIR / "tendances.json"), 1200)
@@ -239,6 +253,11 @@ def _construire_prompt(digest: dict) -> str:
         "(séries, zones de FC, puissance en W au vélo), retour au calme.\n"
         "- Si les tendances sont fournies : orients-en la priorité du jour et "
         "annonce la tendance en une phrase.\n"
+        "- Si « repos_imposes_prochains » figure dans les données : un bloc "
+        "de repos complet décidé par Cyril arrive sous peu. Juste avant la "
+        "trêve, une séance de qualité ou un peu plus longue est pertinente "
+        "(la récupération est assurée juste après) ; mentionne la trêve à "
+        "venir en une phrase pour que Cyril organise sa semaine.\n"
         "- Si un record de moins de 2 semaines apparaît dans les données : "
         "mentionne-le brièvement, de façon motivante.\n"
         "- Réponds en français, format EMAIL en texte brut (pas de markdown, "
