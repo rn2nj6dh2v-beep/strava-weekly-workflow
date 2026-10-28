@@ -1,6 +1,6 @@
 {
   "date": "2026-10-28",
-  "genere_le": "2026-10-28T07:54:52.479796+00:00",
+  "genere_le": "2026-10-28T09:13:36.185878+00:00",
   "sujet": "🏃🚴 Séances du jour — mercredi 28 octobre",
   "donnees": {
     "date": "2026-10-28",
@@ -14,8 +14,8 @@
       "nb_jours_vfc": 7
     },
     "veille": {
-      "atl": 33.90993,
-      "ctl": 36.423023,
+      "atl": 35.861187,
+      "ctl": 35.110947,
       "date": "2026-10-28",
       "douleurs": null,
       "fatigue": null,
@@ -31,8 +31,8 @@
     },
     "vfc_veille_vs_moy_7j_pct": -6.7,
     "ctl_atl_tsb": {
-      "ctl": 36.423023,
-      "atl": 33.90993,
+      "ctl": 35.110947,
+      "atl": 35.861187,
       "tsb": null,
       "date": "2026-10-28"
     },
@@ -45,10 +45,10 @@
           "charge_entrainement": 18.0
         },
         "course": {
-          "seances": 4,
-          "km": 27.2,
-          "heures": 2.8,
-          "charge_entrainement": 191.0
+          "seances": 5,
+          "km": 32.1,
+          "heures": 3.3,
+          "charge_entrainement": 207.0
         }
       },
       "14j": {
@@ -59,10 +59,10 @@
           "charge_entrainement": 249.0
         },
         "course": {
-          "seances": 7,
-          "km": 46.0,
-          "heures": 4.5,
-          "charge_entrainement": 313.0
+          "seances": 8,
+          "km": 50.9,
+          "heures": 5.0,
+          "charge_entrainement": 321.0
         }
       }
     },
@@ -70,14 +70,15 @@
       "2026-10-22 Run : 5.1 km, 28 min, charge 34, FC moy 145, puis. pond. 317 W",
       "2026-10-22 Ride : 8.1 km, 26 min, charge 13, FC moy 110",
       "2026-10-22 Ride : 6.7 km, 20 min, charge 5, FC moy 87",
-      "2026-10-25 Run : 8.5 km, 52 min, charge 61, FC moy 140, puis. pond. 309 W",
-      "2026-10-26 Run : 8.0 km, 50 min, charge 58, FC moy 144, puis. pond. 310 W",
-      "2026-10-27 Run : 5.6 km, 36 min, charge 38, FC moy 128, puis. pond. 298 W"
+      "2026-10-25 Run : 8.5 km, 52 min, charge 57, FC moy 140, puis. pond. 309 W",
+      "2026-10-26 Run : 8.0 km, 50 min, charge 61, FC moy 144, puis. pond. 310 W",
+      "2026-10-27 Run : 5.6 km, 36 min, charge 28, FC moy 128, puis. pond. 298 W",
+      "2026-10-28 Run : 4.9 km, 31 min, charge 27, FC moy 132, puis. pond. 302 W"
     ],
     "tendances_semaines": "{\"genere_le\": \"2026-10-26T11:09:21.389760+00:00\", \"nb_semaines\": 2, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 62.2, \"km_course\": 30.2, \"heures\": 5.7, \"vfc_moyenne_ms\": 45.7, \"ctl\": 37.283794, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S44\"}]}",
     "records": null
   },
-  "seances": "**Forme du jour** : VFC veille en baisse de 6,7 % vs moyenne (43 ms vs 46,1 ms), sommeil moyen (7,7 h) et qualité 2/5. Charge 7j élevée (18 + 191 = 210 AU), avec 2 séances de qualité en course ces 3 derniers jours (309-317 W). **Priorité aujourd’hui : endurance légère pour digérer la charge.**\n\n---\n🚴 **SÉANCE VÉLO — Endurance récup’ (priorité du jour)**\nObjectif : Réduire le stress métabolique après 2 séances de qualité en course.\nDurée : 45 min (échauffement inclus).\nÉchauffement : 10 min à 60-70 W (FC < 120), 3 x 30 s à 80 W (récup 1 min).\nContenu : 30 min en endurance fondamentale (Z2, 65-75 W, FC 120-135) avec 2 x 1 min à 85 W (récup passive). Retour au calme : 10 min très léger (50 W).\n\n---\n🏃 **SÉANCE COURSE À PIED — Fraisement aérobie**\nObjectif : Maintenir l’endurance sans surcharge.\nDurée : 30 min (échauffement inclus).\nÉchauffement : 5 min footing + 4 x 20 s accélérations légères.\nContenu : 20 min en Z2 (FC 130-140, 6:30-7:00/km) avec 3 x 30 s à 5:30/km (récup 30 s). Retour au calme : 5 min très lent.\n\n---\n**Justification** : La VFC basse et la charge accumulée (surtout en course) exigent une journée ultra-légère. Les tendances montrent une stabilité (VFC 45,7 ms sur 2 semaines), mais le TSB absent et la fatigue latente (qualité sommeil 2/5) imposent la priorité vélo. *Motivation* : Ton dernier effort en course (317 W) date de 6 jours – profitons-en pour digérer avant la prochaine séance de qualité !\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**VFC veille : 43 ms (-6,7% vs 7j), sommeil : 7h30 (qualité moyenne), charge course élevée (207/7j).**\n\n🚴 **SÉANCE VÉLO — Endurance fondamentale légère (priorité du jour)**\nÉchauffement : 15 min zone 2 (75-80% FCmax, 60-70% FTP) + 5 min accélérations légères.\nContenu : 45 min en endurance fondamentale (zone 2, 60-70% FTP, 120-130 W) + 10 min très léger (50-60% FTP).\nRetour au calme : 10 min zone 1 + étirements dynamiques.\n\n🏃 **SÉANCE COURSE À PIED — Récupération active**\nÉchauffement : 10 min footing très léger (60-70% FCmax) + 2 min montées courtes.\nContenu : 30 min footing continu en zone 2 (65-75% FCmax, 5:30-6:00/km) + 5 min très lent.\nRetour au calme : 10 min marche active + étirements.\n\n**Justification** : VFC basse et charge course saturée (207/7j) → privilégie le vélo pour décompresser. La tendance montre une stabilité (VFC ~45,7 ms), mais évite la surcharge aujourd’hui.\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
