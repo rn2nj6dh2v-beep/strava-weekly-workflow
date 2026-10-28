@@ -430,5 +430,21 @@
     "stress": null,
     "tsb": null,
     "vfc_ms": 46.0
+  },
+  "2026-10-28": {
+    "atl": 33.90993,
+    "ctl": 36.423023,
+    "date": "2026-10-28",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 46,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.7,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 43.0
   }
 }
