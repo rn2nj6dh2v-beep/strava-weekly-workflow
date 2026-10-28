@@ -1,2 +1,1 @@
-Déclencheur du coach à la demande — ce fichier déclenche le workflow « Coach à la demande » à chaque push.
-Demande : 2026-10-27T10:16:57.704Z (test initial de la chaîne à la demande)
+Test après ajout des jours sans sport (31/10, 01/11) — 2026-10-28T09:13:19.006Z
