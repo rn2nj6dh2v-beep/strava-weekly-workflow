@@ -59,6 +59,9 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
 MODELES_FALLBACK = ["mistral-small-latest", "open-mistral-nemo", "ministral-3b-latest"]
+# Jours de repos imposés (demande de Cyril) : aucune séance ces jours-là,
+# un email « Jour de repos » est envoyé à la place. Format YYYY-MM-DD.
+JOURS_SANS_SPORT = ["2026-10-31", "2026-11-01"]
 JOURS_FR_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
            "août", "septembre", "octobre", "novembre", "décembre"]
@@ -352,6 +355,36 @@ def main() -> None:
 
     maintenant = dt.datetime.now(PARIS)
     aujourdhui = maintenant.date()
+
+    # --- Jour sans sport (repos imposé, décidé par Cyril) ---
+    if aujourdhui.isoformat() in JOURS_SANS_SPORT:
+        sujet = (f"🧘 Jour de repos — {JOURS_FR_LONG[aujourdhui.weekday()]} "
+                 f"{aujourdhui.day} {MOIS_FR[aujourdhui.month - 1]}")
+        texte = (
+            "Repos complet aujourd'hui : journée sans sport décidée par "
+            "Cyril — ni vélo, ni course à pied.\n"
+            "Profites-en pour bien récupérer : hydratation, étirements "
+            "doux, marche légère si besoin, et un bon sommeil.\n"
+            "Les séances reprennent le lendemain matin comme d'habitude."
+        ) + "\n\n— Ton coach (GitHub Actions + intervals.icu)"
+        erreur_email = _envoi_email(texte, sujet)
+        COACH_DIR.mkdir(parents=True, exist_ok=True)
+        enregistrement = {
+            "date": aujourdhui.isoformat(),
+            "genere_le": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "sujet": sujet,
+            "repos_impose": True,
+            "seances": texte,
+            "email_erreur": erreur_email,
+        }
+        (COACH_DIR / f"{aujourdhui.isoformat()}.json").write_text(
+            json.dumps(enregistrement, ensure_ascii=False, indent=2))
+        if erreur_email:
+            print(f"⚠️ Email non envoyé : {erreur_email}")
+        else:
+            print("Jour de repos imposé — email repos envoyé ✉️")
+        return
+
     sujet = (f"🏃🚴 Séances du jour — {JOURS_FR_LONG[aujourdhui.weekday()]} "
              f"{aujourdhui.day} {MOIS_FR[aujourdhui.month - 1]}")
 
