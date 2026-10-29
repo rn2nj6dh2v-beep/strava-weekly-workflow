@@ -2,7 +2,9 @@
 """Coach quotidien — deux séances (vélo + course à pied) adaptées à la forme.
 
 Exécuté par GitHub Actions (.github/workflows/intervals-daily.yml) juste après
-scripts/intervals_hrv.py, chaque matin à 8h heure de Paris.
+scripts/intervals_hrv.py, chaque matin à 7h30 heure de Paris (créneau
+7h30-8h30 — le cron GitHub partant avec ~45 min de retard, l'email part en
+pratique vers 8h15).
 
 Pourquoi ce script (27/10/2026) : la tâche planifiée Vibe « Coach sportif
 quotidien » ne peut PAS envoyer d'email — les tâches planifiées tournent sans
@@ -54,7 +56,11 @@ INTERVALS_DIR = OUT_DIR / "intervals"
 COACH_DIR = INTERVALS_DIR / "coach"
 MISTRAL_CONFIG_PATH = BASE / "config" / "mistral.json"
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
-HEURE_EXECUTION = 8  # heure de Paris
+# Créneau d'exécution à Paris : planifié 7h30 (le cron GitHub part souvent
+# avec ~45 min de retard → l'email part en pratique vers 8h15), toléré
+# jusqu'à 8h29 pour absorber ce retard.
+CRENEAU_DEBUT = dt.time(7, 30)
+CRENEAU_FIN = dt.time(8, 30)
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
@@ -68,12 +74,13 @@ MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
 
 
 def _heure_paris_valide() -> bool:
-    """Vrai s'il est HEURE_EXECUTION à Paris (le workflow se déclenche aux
-    deux créneaux UTC possibles été/hiver, on n'exécute que le bon).
+    """Vrai s'il est entre 7h30 et 8h30 à Paris (le workflow se déclenche aux
+    deux créneaux UTC possibles été/hiver, on n'exécute que le bon ; la
+    fenêtre d'une heure absorbe le retard du cron GitHub).
     INTERVALS_FORCE_RUN=1 (workflow_dispatch) force l'exécution."""
     if os.environ.get("INTERVALS_FORCE_RUN"):
         return True
-    return dt.datetime.now(PARIS).hour == HEURE_EXECUTION
+    return CRENEAU_DEBUT <= dt.datetime.now(PARIS).time() < CRENEAU_FIN
 
 
 def _charger(chemin: pathlib.Path):
@@ -368,7 +375,7 @@ def _envoi_email(contenu: str, sujet: str) -> str | None:
 
 def main() -> None:
     if not _heure_paris_valide():
-        print(f"Pas {HEURE_EXECUTION}h à Paris — pas de séances aujourd'hui "
+        print("Hors créneau 7h30-8h30 à Paris — pas de séances aujourd'hui "
               "(ajustement heure été/hiver).")
         return
 

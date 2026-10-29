@@ -2,10 +2,11 @@ name: intervals.icu — données VFC quotidiennes
 
 on:
   schedule:
-    # 8h00 Paris : 07:00 UTC en hiver, 06:00 UTC en été.
-    # Le script vérifie l'heure réelle de Paris avant de s'exécuter.
-    - cron: "0 6 * * *"
-    - cron: "0 7 * * *"
+    # 7h30 Paris : 06:30 UTC en hiver, 05:30 UTC en été. Le cron GitHub part
+    # souvent avec ~45 min de retard : l'email part en pratique vers 8h15.
+    # Les scripts vérifient le créneau réel à Paris (7h30-8h30).
+    - cron: "30 5 * * *"
+    - cron: "30 6 * * *"
   workflow_dispatch:
     inputs:
       backfill_days:
@@ -33,7 +34,7 @@ jobs:
       - name: Vérifier la syntaxe des scripts
         run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py scripts/intervals_coach.py
 
-      - name: Récupérer les données wellness intervals.icu (si ~8h à Paris)
+      - name: Récupérer les données wellness intervals.icu (si créneau 7h30-8h30 à Paris)
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
@@ -41,7 +42,7 @@ jobs:
           INTERVALS_ACTIVITES_BACKFILL_JOURS: ${{ github.event.inputs.archive_backfill_days || '365' }}
         run: python scripts/intervals_hrv.py
 
-      - name: Coach du matin — deux séances par email (si ~8h à Paris)
+      - name: Coach du matin — deux séances par email (si créneau 7h30-8h30 à Paris)
         if: always()
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}

@@ -21,8 +21,9 @@
   automatiquement les mois manquants de l'historique intervals.icu. Le coach
   du matin continue de lire activities.json (fenêtre glissante 14 jours) ;
   l'archive sert aux analyses long terme.
-- Exécuté par GitHub Actions vers 8h heure de Paris (double cron été/hiver,
-  le script vérifie l'heure réelle à Paris).
+- Exécuté par GitHub Actions à 7h30 heure de Paris (double cron été/hiver,
+  le script vérifie l'heure réelle à Paris — créneau 7h30-8h30 toléré pour
+  absorber le retard systématique du cron GitHub, ~45 min).
 - INTERVALS_BACKFILL_DAYS (défaut 3) : fenêtre de récupération wellness — permet le
   rattrapage historique (ex. 90 jours) via workflow_dispatch.
 """
@@ -47,15 +48,19 @@ JOURS_SEMAINE = 7  # fenêtre des stats hebdo écrites dans week.json
 JOURS_ACTIVITES = 14  # fenêtre des activités archivées dans activities.json
 JOURS_ARCHIVE_BACKFILL = int(os.environ.get("INTERVALS_ACTIVITES_BACKFILL_JOURS", "365"))  # horizon de l'archive cumulée
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
-HEURE_EXECUTION = 8  # heure de Paris
+# Créneau d'exécution à Paris : planifié 7h30 (le cron GitHub part souvent
+# avec ~45 min de retard), toléré jusqu'à 8h29 pour absorber ce retard.
+CRENEAU_DEBUT = dt.time(7, 30)
+CRENEAU_FIN = dt.time(8, 30)
 
 
 def _heure_paris_valide() -> bool:
-    """Vrai s'il est HEURE_EXECUTION à Paris (ajustement été/hiver : GitHub
-    déclenche aux deux créneaux UTC possibles, on n'exécute que le bon)."""
+    """Vrai s'il est entre 7h30 et 8h30 à Paris (ajustement été/hiver :
+    GitHub déclenche aux deux créneaux UTC possibles, on n'exécute que le
+    bon ; la fenêtre d'une heure absorbe le retard du cron GitHub)."""
     if os.environ.get("INTERVALS_FORCE_RUN"):
         return True  # déclenchement manuel : toujours exécuter
-    return dt.datetime.now(PARIS).hour == HEURE_EXECUTION
+    return CRENEAU_DEBUT <= dt.datetime.now(PARIS).time() < CRENEAU_FIN
 
 
 def _headers() -> dict:
@@ -392,7 +397,7 @@ def _stats_semaine() -> dict | None:
 
 def main() -> None:
     if not _heure_paris_valide():
-        print(f"Pas {HEURE_EXECUTION}h à Paris — rien à faire (ajustement heure été/hiver).")
+        print("Hors créneau 7h30-8h30 à Paris — rien à faire (ajustement heure été/hiver).")
         return
 
     athlete_id = _athlete_id()
