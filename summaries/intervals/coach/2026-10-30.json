@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-30",
+  "genere_le": "2026-10-30T08:02:44.236925+00:00",
+  "sujet": "🏃🚴 Séances du jour — vendredi 30 octobre",
+  "donnees": {
+    "date": "2026-10-30",
+    "wellness_7j": {
+      "vfc_moyenne_ms": 47.6,
+      "vfc_min_ms": 43.0,
+      "vfc_max_ms": 51.0,
+      "fc_repos_moyenne": 43.6,
+      "sommeil_moyen_h": 8.3,
+      "tsb_moyen": null,
+      "nb_jours_vfc": 7
+    },
+    "veille": {
+      "atl": 31.103289,
+      "ctl": 34.30527,
+      "date": "2026-10-30",
+      "douleurs": null,
+      "fatigue": null,
+      "fc_repos": 43,
+      "humeur": null,
+      "poids_kg": null,
+      "qualite_sommeil": 2,
+      "readiness": null,
+      "sommeil_h": 8.2,
+      "stress": null,
+      "tsb": null,
+      "vfc_ms": 51.0
+    },
+    "vfc_veille_vs_moy_7j_pct": 7.1,
+    "ctl_atl_tsb": {
+      "ctl": 34.30527,
+      "atl": 31.103289,
+      "tsb": null,
+      "date": "2026-10-30"
+    },
+    "volume": {
+      "7j": {
+        "velo": {
+          "seances": 0,
+          "km": 0,
+          "heures": 0.0,
+          "charge_entrainement": 0
+        },
+        "course": {
+          "seances": 5,
+          "km": 33.2,
+          "heures": 3.5,
+          "charge_entrainement": 209.0
+        }
+      },
+      "14j": {
+        "velo": {
+          "seances": 9,
+          "km": 88.9,
+          "heures": 4.0,
+          "charge_entrainement": 152.0
+        },
+        "course": {
+          "seances": 9,
+          "km": 57.1,
+          "heures": 5.7,
+          "charge_entrainement": 357.0
+        }
+      }
+    },
+    "activites_7j": [
+      "2026-10-25 Run : 8.5 km, 52 min, charge 57, FC moy 140, puis. pond. 309 W",
+      "2026-10-26 Run : 8.0 km, 50 min, charge 61, FC moy 144, puis. pond. 310 W",
+      "2026-10-27 Run : 5.6 km, 36 min, charge 28, FC moy 128, puis. pond. 298 W",
+      "2026-10-28 Run : 4.9 km, 31 min, charge 27, FC moy 132, puis. pond. 302 W",
+      "2026-10-29 Run : 6.2 km, 39 min, charge 36, FC moy 134, puis. pond. 307 W"
+    ],
+    "repos_imposes_prochains": {
+      "jours": [
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "note": "repos complet décidé par Cyril ces jours-là ; juste avant la trêve, une charge un peu plus élevée ou une séance de qualité est pertinente"
+    },
+    "tendances_semaines": "{\"genere_le\": \"2026-10-26T11:09:21.389760+00:00\", \"nb_semaines\": 2, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 62.2, \"km_course\": 30.2, \"heures\": 5.7, \"vfc_moyenne_ms\": 45.7, \"ctl\": 37.283794, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S44\"}]}",
+    "records": null
+  },
+  "seances": "**Objet : Plan du jour – Priorité vélo (trêve à venir)**\n\nVFC veille : +7% vs moyenne 7j (51 ms), sommeil correct (8h2, qualité 2/5). Pas de TSB, mais charge course élevée ces 7j (209 AU en 5 séances).\n\n🚴 SÉANCE VÉLO — **Qualité : Intervalles puissants en zone 4 (priorité du jour)**\nÉchauffement : 20 min (zone 2, 60-70% FCmax, 100-120W).\nSéries : 6x3 min à 110-115% FTP (280-300W), 3 min récup actif (zone 3, 80-85% FCmax, 150W).\nRetour au calme : 15 min (zone 1, <60% FCmax, 80W).\n\n🏃 SÉANCE COURSE À PIED — **Endurance fondamentale légère**\nÉchauffement : 10 min footing lent (FC <70% max).\nContenu : 45 min footing continu (FC 65-75% max), 2x1 min accélération légère (80-85% FCmax) en fin de séance.\nRetour au calme : 10 min marche.\n\n**Justification** : Charge course récente élevée (5 séances en 7j) + trêve à venir (31 oct-1 nov) → séance vélo qualitative pour optimiser la récup après. Course à pied douce pour maintenir l’endurance sans surcharge.\n\n---\n*PS : Profites-en pour enchaîner avec un sommeil réparateur avant les jours de repos !*\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "modele_ia": "open-mistral-nemo",
+  "ia_erreur": null,
+  "email_erreur": null
+}
