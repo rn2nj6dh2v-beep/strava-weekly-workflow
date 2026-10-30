@@ -3,7 +3,7 @@
 
 Exécuté par GitHub Actions (.github/workflows/intervals-daily.yml) juste après
 scripts/intervals_hrv.py, chaque matin à 7h30 heure de Paris (créneau
-7h30-8h30 — le cron GitHub partant avec ~45 min de retard, l'email part en
+7h00-9h00 — le cron GitHub partant avec ~45 min de retard, l'email part en
 pratique vers 8h15).
 
 Pourquoi ce script (27/10/2026) : la tâche planifiée Vibe « Coach sportif
@@ -57,10 +57,10 @@ COACH_DIR = INTERVALS_DIR / "coach"
 MISTRAL_CONFIG_PATH = BASE / "config" / "mistral.json"
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 # Créneau d'exécution à Paris : planifié 7h30 (le cron GitHub part souvent
-# avec ~45 min de retard → l'email part en pratique vers 8h15), toléré
-# jusqu'à 8h29 pour absorber ce retard.
-CRENEAU_DEBUT = dt.time(7, 30)
-CRENEAU_FIN = dt.time(8, 30)
+# avec ~45 min de retard → l'email part en pratique vers 8h15), élargi à
+# 7h00-9h00 le 30/10/2026 pour absorber les retards > 1 h.
+CRENEAU_DEBUT = dt.time(7, 0)
+CRENEAU_FIN = dt.time(9, 0)
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 MISTRAL_CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
@@ -74,9 +74,9 @@ MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
 
 
 def _heure_paris_valide() -> bool:
-    """Vrai s'il est entre 7h30 et 8h30 à Paris (le workflow se déclenche aux
+    """Vrai s'il est entre 7h00 et 9h00 à Paris (le workflow se déclenche aux
     deux créneaux UTC possibles été/hiver, on n'exécute que le bon ; la
-    fenêtre d'une heure absorbe le retard du cron GitHub).
+    fenêtre de deux heures absorbe le retard du cron GitHub).
     INTERVALS_FORCE_RUN=1 (workflow_dispatch) force l'exécution."""
     if os.environ.get("INTERVALS_FORCE_RUN"):
         return True
@@ -375,7 +375,7 @@ def _envoi_email(contenu: str, sujet: str) -> str | None:
 
 def main() -> None:
     if not _heure_paris_valide():
-        print("Hors créneau 7h30-8h30 à Paris — pas de séances aujourd'hui "
+        print("Hors créneau 7h00-9h00 à Paris — pas de séances aujourd'hui "
               "(ajustement heure été/hiver).")
         return
 
@@ -457,3 +457,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

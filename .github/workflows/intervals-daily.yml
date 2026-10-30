@@ -4,7 +4,8 @@ on:
   schedule:
     # 7h30 Paris : 06:30 UTC en hiver, 05:30 UTC en été. Le cron GitHub part
     # souvent avec ~45 min de retard : l'email part en pratique vers 8h15.
-    # Les scripts vérifient le créneau réel à Paris (7h30-8h30).
+    # Les scripts vérifient le créneau réel à Paris (7h00-9h00, élargi le
+    # 30/10/2026 pour absorber les retards > 1 h).
     - cron: "30 5 * * *"
     - cron: "30 6 * * *"
   workflow_dispatch:
@@ -34,7 +35,7 @@ jobs:
       - name: Vérifier la syntaxe des scripts
         run: python -m py_compile scripts/intervals_hrv.py scripts/intervals_summary.py scripts/intervals_monthly.py scripts/intervals_coach.py
 
-      - name: Récupérer les données wellness intervals.icu (si créneau 7h30-8h30 à Paris)
+      - name: Récupérer les données wellness intervals.icu (si créneau 7h00-9h00 à Paris)
         env:
           INTERVALS_API_KEY: ${{ secrets.INTERVALS_API_KEY }}
           INTERVALS_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
@@ -42,7 +43,7 @@ jobs:
           INTERVALS_ACTIVITES_BACKFILL_JOURS: ${{ github.event.inputs.archive_backfill_days || '365' }}
         run: python scripts/intervals_hrv.py
 
-      - name: Coach du matin — deux séances par email (si créneau 7h30-8h30 à Paris)
+      - name: Coach du matin — deux séances par email (si créneau 7h00-9h00 à Paris)
         if: always()
         env:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
