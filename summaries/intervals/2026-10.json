@@ -474,7 +474,7 @@
     "poids_kg": null,
     "qualite_sommeil": 2,
     "readiness": null,
-    "sommeil_h": 8.2,
+    "sommeil_h": 8.8,
     "stress": null,
     "tsb": null,
     "vfc_ms": 51.0
@@ -485,12 +485,12 @@
     "date": "2026-10-31",
     "douleurs": null,
     "fatigue": null,
-    "fc_repos": 48,
+    "fc_repos": 47,
     "humeur": null,
     "poids_kg": null,
     "qualite_sommeil": 4,
     "readiness": null,
-    "sommeil_h": 7.3,
+    "sommeil_h": 8.0,
     "stress": null,
     "tsb": null,
     "vfc_ms": 32.0

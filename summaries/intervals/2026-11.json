@@ -1,0 +1,18 @@
+{
+  "2026-11-01": {
+    "atl": 30.176014,
+    "ctl": 34.235497,
+    "date": "2026-11-01",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 43,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.8,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 45.0
+  }
+}
