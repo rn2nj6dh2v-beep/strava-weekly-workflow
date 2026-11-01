@@ -1,0 +1,140 @@
+{
+  "genere_le": "2026-11-01T08:32:02.643767+00:00",
+  "mois": "2026-10",
+  "source": "archives intervals.icu (activities_archive + wellness mensuel)",
+  "stats": {
+    "activites": 44,
+    "km": 403.1,
+    "minutes": 1426,
+    "denivele_m": 3262.8,
+    "velo": {
+      "sorties": 29,
+      "km": 309.3,
+      "minutes": 866,
+      "denivele_m": 1759.0,
+      "puissance_ponderee_moyenne_w": 181.7,
+      "fc_moyenne": 99.8
+    },
+    "course": {
+      "sorties": 15,
+      "km": 93.8,
+      "minutes": 560,
+      "denivele_m": 1503.8,
+      "puissance_ponderee_moyenne_w": 306.7,
+      "fc_moyenne": 136.9
+    },
+    "autres": {
+      "sorties": 0,
+      "km": 0,
+      "minutes": 0,
+      "denivele_m": 0,
+      "puissance_ponderee_moyenne_w": null,
+      "fc_moyenne": null
+    },
+    "nb_jours_vfc": 31,
+    "vfc_moyenne_ms": 42.0,
+    "vfc_min_ms": 27.0,
+    "vfc_max_ms": 54.0,
+    "fc_repos_moyenne": 44.3,
+    "sommeil_moyen_h": 7.9,
+    "poids_moyen_kg": null,
+    "ctl_debut": 40.942482,
+    "ctl_fin": 35.06041,
+    "tsb_moyen": null
+  },
+  "comparaison_mois_precedent": {
+    "activites": 54,
+    "km": 462.5,
+    "minutes": 1506,
+    "denivele_m": 2658.9,
+    "velo": {
+      "sorties": 45,
+      "km": 407.3,
+      "minutes": 1176,
+      "denivele_m": 2314.0,
+      "puissance_ponderee_moyenne_w": 158,
+      "fc_moyenne": 100.5
+    },
+    "course": {
+      "sorties": 9,
+      "km": 55.2,
+      "minutes": 330,
+      "denivele_m": 344.9,
+      "puissance_ponderee_moyenne_w": 303.6,
+      "fc_moyenne": 134.9
+    },
+    "autres": {
+      "sorties": 0,
+      "km": 0,
+      "minutes": 0,
+      "denivele_m": 0,
+      "puissance_ponderee_moyenne_w": null,
+      "fc_moyenne": null
+    },
+    "nb_jours_vfc": 30,
+    "vfc_moyenne_ms": 42.9,
+    "vfc_min_ms": 32.0,
+    "vfc_max_ms": 56.0,
+    "fc_repos_moyenne": 43.5,
+    "sommeil_moyen_h": 7.5,
+    "poids_moyen_kg": null,
+    "ctl_debut": 51.16546,
+    "ctl_fin": 39.06167,
+    "tsb_moyen": null
+  },
+  "records": {
+    "plus_longue_sortie_course_km": {
+      "valeur": 21.2,
+      "unite": "km",
+      "date": "2026-09-13",
+      "activite": "Semi marathon Auray Vannes"
+    },
+    "meilleure_allure_course_kmh": {
+      "valeur": 12.1,
+      "unite": "km/h",
+      "date": "2026-04-22",
+      "activite": "Nantes Course à pied"
+    },
+    "fc_max_bpm": {
+      "valeur": 177,
+      "unite": "bpm",
+      "date": "2025-11-29",
+      "activite": "Nantes Course à pied"
+    },
+    "plus_longue_sortie_velo_km": {
+      "valeur": 109.9,
+      "unite": "km",
+      "date": "2026-04-26",
+      "activite": "Nantes Cyclisme sur route"
+    },
+    "plus_gros_denivele_velo_m": {
+      "valeur": 914.0,
+      "unite": "m",
+      "date": "2026-04-26",
+      "activite": "Nantes Cyclisme sur route"
+    },
+    "puissance_ponderee_max_w": {
+      "valeur": 208,
+      "unite": "W",
+      "date": "2026-05-22",
+      "activite": "Nantes Cyclisme sur route"
+    },
+    "vitesse_max_velo_kmh": {
+      "valeur": 67.7,
+      "unite": "km/h",
+      "date": "2026-07-16",
+      "activite": "Nantes Cyclisme"
+    }
+  },
+  "records_nouveaux": [
+    "plus_longue_sortie_course_km",
+    "meilleure_allure_course_kmh",
+    "fc_max_bpm",
+    "plus_longue_sortie_velo_km",
+    "plus_gros_denivele_velo_m",
+    "puissance_ponderee_max_w",
+    "vitesse_max_velo_kmh"
+  ],
+  "analyse_ia": "**Bravo pour ce mois explosif !** Tu as cartonné sur tous les fronts : records à la course (km, allure, FC max) et au vélo (distance, dénivelé, puissance), avec une progression nette en intensité (puissance +14% vélo, +1% course). Le CTL a chuté de 51 à 35, signe d’une **meilleure récupération** malgré un volume global légèrement réduit (-12% km). Ta VFC reste stable (42ms), preuve d’une endurance solide, et ton FC de repos (44bpm) confirme une adaptation cardiaque optimale. **Félicitations pour cette régularité et cette explosivité gagnante !**\n\n**Pour le mois prochain**, vise **2 axes ciblés** :\n1. **Privilégie la qualité à la quantité** : Réduis légèrement le volume vélo (ex : 280km) pour préserver ta récupération, mais ajoute **2-3 séances de puissance pure** (ex : intervalles courts à 120% FTP) pour booster ta vitesse max (objectif : +1km/h).\n2. **Optimise la course** : Remplace 1 sortie longue par un **fractionné en côte** (ex : 6x1km à allure 5km) pour renforcer ton endurance spécifique et éviter la stagnation sur les allures de semi.\n\n**À toi de jouer : ce mois prouve que tu peux tout donner sans te brûler. On vise encore plus haut !** 🚀",
+  "modele_ia": "mistral-small-latest"
+}

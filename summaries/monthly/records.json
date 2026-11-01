@@ -1,0 +1,47 @@
+{
+  "genere_le": "2026-11-01T08:31:58.103716+00:00",
+  "records": {
+    "fc_max_bpm": {
+      "activite": "Nantes Course à pied",
+      "date": "2025-11-29",
+      "unite": "bpm",
+      "valeur": 177
+    },
+    "meilleure_allure_course_kmh": {
+      "activite": "Nantes Course à pied",
+      "date": "2026-04-22",
+      "unite": "km/h",
+      "valeur": 12.1
+    },
+    "plus_gros_denivele_velo_m": {
+      "activite": "Nantes Cyclisme sur route",
+      "date": "2026-04-26",
+      "unite": "m",
+      "valeur": 914.0
+    },
+    "plus_longue_sortie_course_km": {
+      "activite": "Semi marathon Auray Vannes",
+      "date": "2026-09-13",
+      "unite": "km",
+      "valeur": 21.2
+    },
+    "plus_longue_sortie_velo_km": {
+      "activite": "Nantes Cyclisme sur route",
+      "date": "2026-04-26",
+      "unite": "km",
+      "valeur": 109.9
+    },
+    "puissance_ponderee_max_w": {
+      "activite": "Nantes Cyclisme sur route",
+      "date": "2026-05-22",
+      "unite": "W",
+      "valeur": 208
+    },
+    "vitesse_max_velo_kmh": {
+      "activite": "Nantes Cyclisme",
+      "date": "2026-07-16",
+      "unite": "km/h",
+      "valeur": 67.7
+    }
+  }
+}
