@@ -1,17 +1,13 @@
 📊 Résumé sportif des 7 derniers jours (intervals.icu)
-• 9 activité(s), 92.35 km, 5h44, 883.4 m de D+
-• ❤️ VFC moyenne (7 j) : 45.7 ms (38.0–51.0), FC repos 43.6 bpm, sommeil moyen 8.1 h
-  - mardi 20/10 — Ride : 32.75 km, 69 min
-  - mercredi 21/10 — Run : 8.57 km, 51 min
-  - mercredi 21/10 — Ride : 7.29 km, 21 min
-  - mercredi 21/10 — Ride : 7.29 km, 25 min
-  - jeudi 22/10 — Run : 5.07 km, 28 min
-  - jeudi 22/10 — Ride : 6.73 km, 21 min
-  - jeudi 22/10 — Ride : 8.11 km, 27 min
-  - dimanche 25/10 — Run : 8.52 km, 52 min
+• 5 activité(s), 35.5 km, 3h42, 974.8 m de D+
+• ❤️ VFC moyenne (7 j) : 44.4 ms (32.0–51.0), FC repos 44.1 bpm, sommeil moyen 8.2 h
   - lundi 26/10 — Run : 8.02 km, 50 min
+  - mardi 27/10 — Run : 5.61 km, 36 min
+  - mercredi 28/10 — Run : 4.88 km, 31 min
+  - jeudi 29/10 — Run : 6.18 km, 39 min
+  - vendredi 30/10 — Run : 10.81 km, 66 min
 
 🧠 Analyse IA :
-Ta semaine est **très bien structurée** avec une bonne alternance entre vélo et course, et des efforts bien dosés : tes sorties longues (comme le 32 km à vélo en FC élevée) montrent une excellente endurance, tandis que tes runs en charge modérée (55-61) optimisent ta puissance aérobie. La cadence élevée en course (88-92) prouve aussi que tu gères bien ta foulée, un vrai plus pour éviter les blessures.
+Ta semaine montre une **bonne régularité** avec des efforts bien dosés : tes sorties à allure soutenue (FC entre 130-170 bpm) et une puissance pondérée stable (~300-310 W) prouvent que tu restes dans une zone efficace pour le fond. La cadence élevée (88-90 spm) optimise ton efficacité mécanique, et la progression en dénivelé (+329 m le 30/10) démontre une capacité à gérer l’intensité en montagne. Tes performances sont même **plus performantes** que la semaine dernière (moins de km pour des charges similaires), signe d’une adaptation physique solide.
 
-**Attention** à la **VFC en chute libre** le 23 octobre (43 ms, contre 48-51 ms d’habitude) et à la **FC de repos légèrement plus élevée** (46 bpm le 20 vs 42-43 les autres jours), surtout avec un sommeil réduit à 7h1. Ces signes pointent vers un **petit coup de fatigue** ou un stress accumulé : ton corps a peut-être besoin d’un jour de repos actif ou d’une nuit plus longue pour récupérer. La semaine prochaine, privilégie une sortie **ultra-légère** (30 min vélo très doux à 70-80 bpm) ou une marche en forêt pour laisser ton système nerveux se régénérer sans pression. Écoute-toi !
+Cependant, **un signal d’alerte fatigue apparaît clairement** : la VFC chute à **32 ms le 31/10** (contre 43-51 ms habituellement), tandis que ta FC de repos monte à **47 bpm** (contre 42-44 bpm). Le sommeil a aussi baissé à **7h** cette nuit-là, avec une nuit à **6h8** le 27/10. Ces indicateurs combinés suggèrent un **surcharge passagère** : ton corps a peut-être accumulé trop de stress sans récupération suffisante. **Mon conseil concret** : prends **une journée complète sans effort** demain (même une marche légère), priorise **10 min de méditation ou respiration lente** le soir pour relancer ta VFC, et vérifie ton sommeil cette nuit. Écoute ton corps : une récupération active légère (natation ou vélo très doux) peut aider, mais pas de sortie intense ! Tu as le potentiel, maintenant fais confiance à ton système nerveux. 💪
