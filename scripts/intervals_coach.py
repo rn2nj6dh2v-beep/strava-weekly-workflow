@@ -237,7 +237,66 @@ def _digester(aujourdhui) -> dict:
         _charger(INTERVALS_DIR / "tendances.json"), 1200)
     d["records"] = _extrait_compact(
         _charger(OUT_DIR / "monthly" / "records.json"), 1500)
+    d["intensite_conseillee"] = _intensite_conseillee(d)
     return d
+
+
+def _intensite_conseillee(digest: dict) -> dict:
+    """Décide l'intensité du jour de façon DÉTERMINISTE (ajouté le 02/11/2026) :
+    l'IA ne choisit plus l'intensité, elle rédige les séances dans le cadre
+    imposé. Motif : le double run du 02/11/2026 a produit deux emails aux
+    consignes opposées (« qualité » vs « doux ») à partir des mêmes données
+    — la marge d'interprétation est supprimée."""
+    vfc_pct = digest.get("vfc_veille_vs_moy_7j_pct")
+    tsb = (digest.get("ctl_atl_tsb") or {}).get("tsb")
+    veille = digest.get("veille") or {}
+    sommeil = veille.get("sommeil_h")
+    qualite = veille.get("qualite_sommeil")
+    if (vfc_pct is not None and vfc_pct < -10) or (tsb is not None and tsb < -20):
+        motif = (f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j"
+                 if vfc_pct is not None and vfc_pct < -10
+                 else f"TSB {tsb:.0f}")
+        return {
+            "intensite": "douce",
+            "definition": ("endurance/récupération uniquement, aucune séance "
+                           "de qualité ; raccourcir si fatigue ressentie"),
+            "motif": motif + " → récupération prioritaire",
+        }
+    if digest.get("repos_imposes_prochains"):
+        return {
+            "intensite": "qualite",
+            "definition": ("une des deux séances peut être de qualité ou un "
+                           "peu plus longue (récupération assurée juste "
+                           "après par le repos imposé à venir)"),
+            "motif": "trêve sans sport dans les 3 prochains jours",
+        }
+    motifs = []
+    if vfc_pct is not None and -10 <= vfc_pct < -5:
+        motifs.append(f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j")
+    if tsb is not None and -20 <= tsb < -5:
+        motifs.append(f"TSB {tsb:.0f}")
+    if sommeil is not None and sommeil < 6.5:
+        motifs.append(f"sommeil {sommeil} h")
+    if qualite is not None and qualite <= 2:
+        motifs.append(f"qualité de sommeil {qualite}/5")
+    if motifs or not veille:
+        return {
+            "intensite": "moderee",
+            "definition": ("endurance fondamentale avec au maximum quelques "
+                           "accélérations courtes ; pas de travail de "
+                           "qualité aujourd'hui"),
+            "motif": ("; ".join(motifs) if motifs
+                      else "données wellness indisponibles — prudence"),
+        }
+    motif = (f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j"
+             if vfc_pct is not None else "aucun signal de fatigue")
+    return {
+        "intensite": "qualite",
+        "definition": ("une des deux séances peut contenir du travail de "
+                       "qualité (2-3 séances de qualité par sport et par "
+                       "semaine maximum)"),
+        "motif": motif + " — forme au vert",
+    }
 
 
 def _construire_prompt(digest: dict) -> str:
@@ -252,10 +311,13 @@ def _construire_prompt(digest: dict) -> str:
         "- Indique la PRIORITÉ DU JOUR (la séance à privilégier s'il n'en fait "
         "qu'une) sans imposer le choix. Maximum 2-3 séances de qualité par "
         "sport et par semaine : alterne qualité et endurance fondamentale.\n"
-        "- Adapte l'intensité à la forme : VFC de la veille en baisse de plus "
-        "de 10 % vs moyenne 7 j, sommeil insuffisant ou TSB très négatif "
-        "(< -20) → séances douces/endurance, voire repos ; VFC stable ou en "
-        "hausse et TSB positif → une séance de qualité est possible.\n"
+        "- INTENSITÉ IMPOSÉE : le champ « intensite_conseillee » des données "
+        "décide de l'intensité du jour — douce = endurance/récupération "
+        "uniquement ; moderee = endurance fondamentale avec au maximum "
+        "quelques accélérations courtes ; qualite = une des deux séances "
+        "peut contenir du travail de qualité. Applique cette intensité aux "
+        "DEUX séances, sans la discuter et sans inventer d'autre "
+        "intensité.\n"
         "- Chaque séance : objectif, durée, échauffement, contenu précis "
         "(séries, zones de FC, puissance en W au vélo), retour au calme.\n"
         "- Si les tendances sont fournies : orients-en la priorité du jour et "
@@ -264,11 +326,19 @@ def _construire_prompt(digest: dict) -> str:
         "de repos complet décidé par Cyril arrive sous peu. Juste avant la "
         "trêve, une séance de qualité ou un peu plus longue est pertinente "
         "(la récupération est assurée juste après) ; mentionne la trêve à "
-        "venir en une phrase pour que Cyril organise sa semaine.\n"
+        "venir en une phrase pour que Cyril organise sa semaine. Si ce "
+        "champ est ABSENT des données, n'évoque aucun repos ni trêve à "
+        "venir.\n"
         "- Si un record de moins de 2 semaines apparaît dans les données : "
-        "mentionne-le brièvement, de façon motivante.\n"
-        "- Réponds en français, format EMAIL en texte brut (pas de markdown, "
-        "pas d'astérisques), direct et court :\n"
+        "mentionne-le brièvement, de façon motivante. Sinon, n'en "
+        "mentionne aucun. N'utilise jamais les records pour fixer des "
+        "objectifs chiffrés du jour, et attention : les « puis. pond. » "
+        "des activités Run sont des watts de course à pied, pas "
+        "comparables au vélo.\n"
+        "- Réponds en français, format EMAIL en texte brut : aucun "
+        "markdown, jamais d'astérisques (pas de **), pas de « # », pas de "
+        "listes markdown — seulement du texte, des tirets simples « - » "
+        "et les emojis demandés. Direct et court :\n"
         "1. une ligne d'état de forme (VFC veille, sommeil, TSB) ;\n"
         "2. « 🚴 SÉANCE VÉLO — <nom> » + « (priorité du jour) » si applicable, "
         "contenu en 4-6 lignes ;\n"
@@ -305,7 +375,7 @@ def _generer(prompt: str) -> tuple[str | None, str | None, str | None]:
             "model": modele,
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 900,
-            "temperature": 0.6,
+            "temperature": 0.2,
         }).encode()
         req = urllib.request.Request(
             MISTRAL_CHAT_URL, data=payload, method="POST", headers={
@@ -381,6 +451,18 @@ def main() -> None:
 
     maintenant = dt.datetime.now(PARIS)
     aujourdhui = maintenant.date()
+
+    # --- Garde anti-double-run (02/11/2026) : les deux crons du matin
+    # peuvent tous deux tomber dans le créneau 7h-9h quand le premier part
+    # en retard (cas du 02/11 : runs à 7h25 et 8h52 → deux emails aux
+    # séances différentes). Si l'archive du jour existe déjà, on ne
+    # régénère rien. INTERVALS_FORCE_RUN=1 contourne la garde (coach à
+    # la demande, double email volontaire). ---
+    archive_du_jour = COACH_DIR / f"{aujourdhui.isoformat()}.json"
+    if archive_du_jour.exists() and not os.environ.get("INTERVALS_FORCE_RUN"):
+        print(f"Coach du {aujourdhui.isoformat()} déjà généré — pas de "
+              "second email (garde anti-double-run).")
+        return
 
     # --- Jour sans sport (repos imposé, décidé par Cyril) ---
     if aujourdhui.isoformat() in JOURS_SANS_SPORT:
