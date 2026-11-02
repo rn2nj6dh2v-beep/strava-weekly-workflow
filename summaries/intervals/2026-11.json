@@ -5,7 +5,7 @@
     "date": "2026-11-01",
     "douleurs": null,
     "fatigue": null,
-    "fc_repos": 43,
+    "fc_repos": 42,
     "humeur": null,
     "poids_kg": null,
     "qualite_sommeil": 2,
@@ -14,5 +14,21 @@
     "stress": null,
     "tsb": null,
     "vfc_ms": 45.0
+  },
+  "2026-11-02": {
+    "atl": 27.35702,
+    "ctl": 33.641747,
+    "date": "2026-11-02",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 45,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.8,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 51.0
   }
 }
