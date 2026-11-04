@@ -26,14 +26,14 @@
     "poids_kg": null,
     "qualite_sommeil": 2,
     "readiness": null,
-    "sommeil_h": 7.8,
+    "sommeil_h": 9.3,
     "stress": null,
     "tsb": null,
     "vfc_ms": 51.0
   },
   "2026-11-03": {
-    "atl": 24.522999,
-    "ctl": 33.011036,
+    "atl": 33.30906,
+    "ctl": 34.563908,
     "date": "2026-11-03",
     "douleurs": null,
     "fatigue": null,
@@ -42,9 +42,25 @@
     "poids_kg": null,
     "qualite_sommeil": 2,
     "readiness": null,
-    "sommeil_h": 8.8,
+    "sommeil_h": 9.7,
     "stress": null,
     "tsb": null,
     "vfc_ms": 47.0
+  },
+  "2026-11-04": {
+    "atl": 30.33923,
+    "ctl": 34.009487,
+    "date": "2026-11-04",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 44,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.2,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 44.0
   }
 }
