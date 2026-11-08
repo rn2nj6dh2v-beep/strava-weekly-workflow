@@ -7,6 +7,9 @@ on:
     # pour éviter toute collision de commit/push entre les deux workflows.
     # En été les DEUX crons tombent dans le créneau : le marqueur
     # anti-double-run (summaries/garmin/dernier_run.txt) arrête le second.
+    # ⚠️ Budget Garmin ≈60 requêtes/run (observé le 08/11/2026) : si le run
+    # s'arrête sur un 429, le marqueur n'est PAS écrit — relancer le workflow
+    # pour poursuivre le rattrapage (les runs sont idempotents).
     - cron: "30 10 * * *"
     - cron: "30 11 * * *"
   workflow_dispatch:
@@ -19,6 +22,10 @@ on:
         description: "Nb max de .FIT traités par run (60 par défaut ; ex. 300 pour rattraper toutes les courbes de puissance d'un coup)"
         required: false
         default: "60"
+      mois_rattrapage:
+        description: "Nb max de mois de rattrapage par run (2 par défaut — budget de requêtes limité)"
+        required: false
+        default: "2"
 
 permissions:
   contents: write
@@ -45,6 +52,7 @@ jobs:
           GARMIN_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
           GARMIN_JOURS_BACKFILL: ${{ github.event.inputs.backfill_days || '365' }}
           GARMIN_FIT_MAX: ${{ github.event.inputs.fit_max || '60' }}
+          GARMIN_MOIS_RATTRAPAGE: ${{ github.event.inputs.mois_rattrapage || '2' }}
         run: python scripts/garmin_personal.py
 
       - name: Enregistrer les résultats

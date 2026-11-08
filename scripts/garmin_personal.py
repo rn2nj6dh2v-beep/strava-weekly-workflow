@@ -19,6 +19,24 @@ quotidien) :
 Endpoints documentés (Swagger Personal API + client officiel
 garmin/connect-personal-api-python), base https://personal.connectapi.garmin.com.
 
+⚠️ BUDGET DE REQUÊTES (observé le 08/11/2026, 1er run réel) : l'API répond
+seulement ~60 requêtes par exécution, puis renvoie des erreurs (429/403) — le
+premier run a rempli 4 mois de rattrapage puis tout a échoué d'un coup. Le
+script s'adapte :
+- détection du 429 → arrêt PROPRE de tout le run (plus aucune requête
+  gaspillée, aucune activité marquée en échec à tort) ;
+- au 429 : renouvellement du token UNE fois puis nouvelle tentative (si le
+  budget est compté par token, le run continue ; sinon arrêt propre) ;
+- rattrapage étalé : au plus GARMIN_MOIS_RATTRAPAGE mois (défaut 2) par run ;
+- les mois wellness/activités incomplets (budget épuisé en cours de route,
+  drapeau « complet: false ») ou vides (rattrapage du 08/11) sont re-demandés
+  aux runs suivants ;
+- le marqueur anti-double-run n'est PAS écrit si le budget s'est épuisé :
+  un second run dans la journée (cron ou manuel) poursuit le rattrapage ;
+- l'ordre du run met TOUJOURS les données du jour d'abord (wellness courant +
+  fenêtre d'activités), le rattrapage et les .FIT ensuite — un budget épuisé
+  ne bloque jamais les données fraîches.
+
 Archives écrites (cumulatives, rien n'est jamais supprimé, re-exécutable) :
 - summaries/garmin/wellness/<YYYY>-MM.json :
     plages   = réponses brutes des endpoints à plage de dates (stress, pas,
@@ -29,24 +47,25 @@ Archives écrites (cumulatives, rien n'est jamais supprimé, re-exécutable) :
                mois complètes) ;
     par_jour = endpoints à date unique (sommeil détaillé, VFC, SpO2, âge
                fitness, FC, alimentation) pour hier et aujourd'hui, fusionnés
-               par date. Rattrapage automatique des mois manquants
-               (GARMIN_JOURS_BACKFILL, défaut 365, 0 = désactivé — plages
-               uniquement, les endpoints à date unique seraient trop nombreux).
+               par date ;
+    complet  = drapeau (false si le budget s'est épuisé en cours de mois —
+               le mois sera re-demandé au rattrapage).
 - summaries/garmin/activities/<YYYY>-MM.json : activités (endpoint de
     recherche, fusion par activityId) — archive cumulée illimitée ; fenêtre
-    hier→aujourd'hui + mois complet + rattrapage des mois manquants (365 j).
+    hier→aujourd'hui + mois complet + rattrapage étalé. Drapeau
+    « __complet__ » : false = mois à re-demander.
 - summaries/garmin/power_curves/<YYYY>-MM.json : courbes de puissance par
     activité (moyenne max sur 1 s / 5 s / 1 min / 5 min / 20 min), calculées
     depuis le .FIT original téléchargé à la demande. Les .FIT bruts ne sont
     PAS committés (trop volumineux pour git) : seules les courbes le sont.
 - summaries/garmin/fit_traites.json : état .FIT par activité (ok /
     sans_puissance / sans_fit ; les téléchargements en échec sont réessayés,
-    3 tentatives max avant abandon).
+    3 tentatives max — un arrêt pour budget épuisé ne compte PAS comme échec).
 - summaries/garmin/records.json : records de puissance (1 s, 5 s, 1 min,
     5 min, 20 min), recalculés sur TOUTES les courbes archivées. Ce fichier
     est INDÉPENDANT de summaries/monthly/records.json (intervals.icu), qui
     n'est ni renommé ni écrasé.
-- summaries/garmin/profil.json : zones FC + profil (rafraîchis chaque run).
+- summaries/garmin/profil.json : zones FC + profil (cache 30 jours).
 - summaries/garmin/dernier_run.txt : marqueur anti-double-run (en été les
     DEUX crons tombent dans le créneau ; un second run du jour s'arrête sans
     rien refaire — GARMIN_FORCE_RUN=1 court-circuite créneau ET marqueur).
@@ -75,6 +94,7 @@ OUT_DIR = BASE / "summaries" / "garmin"
 WELLNESS_DIR = OUT_DIR / "wellness"
 ACTIVITES_DIR = OUT_DIR / "activities"
 COURBES_DIR = OUT_DIR / "power_curves"
+MARQUEUR_RUN = OUT_DIR / "dernier_run.txt"
 PARIS = zoneinfo.ZoneInfo("Europe/Paris")
 API = "https://personal.connectapi.garmin.com"
 TOKEN_URL = API + "/personalapitoken-service/personal-api/personal-api-key/token"
@@ -86,7 +106,19 @@ CRENEAU_FIN = dt.time(14, 0)
 TENTATIVES_MAX = 3   # téléchargements .FIT en échec avant abandon définitif
 DUREES_COURBE = [1, 5, 60, 300, 1200]  # secondes
 LIBELLES_COURBE = {1: "1s", 5: "5s", 60: "1min", 300: "5min", 1200: "20min"}
-PAUSE = 0.3          # pause (s) entre requêtes — API personnelle, pas de limite documentée
+PAUSE = 0.3          # pause (s) entre requêtes
+
+# Budget de requêtes limité (≈60/run observé le 08/11/2026) : dès un 429, on
+# renouvelle le token une fois (au cas où le budget serait compté par token),
+# puis on arrête PROPREMENT le run pour ne rien gaspiller.
+QUOTA_EPUISE = False
+
+
+class QuotaEpuse(SystemExit):
+    """Budget de requêtes Garmin épuisé (HTTP 429). Les traitements restants
+    s'arrêtent proprement et reprennent au prochain run ; les mois interrompus
+    sont marqués incomplets pour être re-demandés."""
+
 
 # Endpoints à plage de dates (réponses brutes archivées telles quelles dans
 # la clé « plages » du fichier mensuel wellness).
@@ -123,6 +155,7 @@ def _env_int(nom: str, defaut: int) -> int:
 
 JOURS_BACKFILL = _env_int("GARMIN_JOURS_BACKFILL", 365)  # horizon de rattrapage (0 = désactivé)
 FIT_MAX = _env_int("GARMIN_FIT_MAX", 60)  # nb max de .FIT traités par run
+MOIS_RATTRAPAGE = _env_int("GARMIN_MOIS_RATTRAPAGE", 2)  # nb max de mois rattrapés par run (budget limité)
 
 
 def _creneau_valide() -> bool:
@@ -163,27 +196,46 @@ def _jeton() -> str:
     return jeton
 
 
-def _get(jeton: str, chemin: str, params: dict | None = None):
-    """GET authentifié (Bearer) — retourne le JSON décodé, None si corps vide."""
+def _get(session: dict, chemin: str, params: dict | None = None):
+    """GET authentifié (Bearer) — retourne le JSON décodé, None si corps vide.
+    Au premier 429 : renouvellement du token puis NOUVELLE TENTATIVE (le
+    budget est peut-être compté par token) ; au second 429 : QuotaEpuse →
+    tout le run s'arrête proprement (plus aucune requête envoyée)."""
+    global QUOTA_EPUISE
+    if QUOTA_EPUISE:
+        raise QuotaEpuse("Budget Garmin épuisé — reprise au prochain run.")
     url = API + chemin
     if params:
         url += "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={
-        "Authorization": "Bearer " + jeton,
-        "Accept": "application/json",
-        "User-Agent": UA,
-    }, method="GET")
-    try:
-        with urllib.request.urlopen(req, timeout=60) as rep:
-            corps = rep.read()
-            if not corps:
-                return None
-            return json.loads(corps.decode())
-    except urllib.error.HTTPError as e:
-        extrait = e.read().decode(errors="replace")[:300]
-        raise SystemExit(f"ERREUR GARMIN {e.code} sur {chemin} : {extrait}")
-    except json.JSONDecodeError as e:
-        raise SystemExit(f"ERREUR GARMIN : réponse non JSON sur {chemin} : {e}")
+    renouvelle = False
+    while True:
+        req = urllib.request.Request(url, headers={
+            "Authorization": "Bearer " + session["jeton"],
+            "Accept": "application/json",
+            "User-Agent": UA,
+        }, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as rep:
+                corps = rep.read()
+                if not corps:
+                    return None
+                return json.loads(corps.decode())
+        except urllib.error.HTTPError as e:
+            extrait = e.read().decode(errors="replace")[:300]
+            if e.code == 429:
+                if not renouvelle:
+                    renouvelle = True
+                    print("⚠️ Garmin 429 (budget) — renouvellement du token, nouvelle tentative…")
+                    session["jeton"] = _jeton()
+                    continue
+                QUOTA_EPUISE = True
+                raise QuotaEpuse(
+                    f"ERREUR GARMIN 429 : budget de requêtes épuisé sur {chemin} "
+                    "(reprise au prochain run)"
+                )
+            raise SystemExit(f"ERREUR GARMIN {e.code} sur {chemin} : {extrait}")
+        except json.JSONDecodeError as e:
+            raise SystemExit(f"ERREUR GARMIN : réponse non JSON sur {chemin} : {e}")
 
 
 def _lire_json(chemin: pathlib.Path, defaut=None):
@@ -226,41 +278,59 @@ def _sport_activite(a: dict) -> str:
 # Wellness
 # ---------------------------------------------------------------------------
 
-def _plages(jeton: str, d1: str, d2: str) -> dict:
-    """Récupère tous les endpoints à plage de dates (best effort par endpoint :
-    un échec n'interrompt pas les autres, la plage est simplement vide)."""
+def _plages(session: dict, d1: str, d2: str) -> tuple[dict, bool]:
+    """Récupère tous les endpoints à plage de dates. Retourne (plages,
+    complet) : complet=False si le budget s'est épuisé en cours de route (le
+    mois sera re-demandé). Best effort par endpoint pour les autres erreurs."""
     plages = {}
+    complet = True
     for nom, modele in ENDPOINTS_PLAGE.items():
+        if QUOTA_EPUISE:
+            complet = False
+            break
         try:
-            reponse = _get(jeton, modele.format(d1=d1, d2=d2))
+            reponse = _get(session, modele.format(d1=d1, d2=d2))
             plages[nom] = reponse if reponse is not None else []
             time.sleep(PAUSE)
+        except QuotaEpuse as e:
+            print(f"⚠️ Plage « {nom} » interrompue ({d1} → {d2}) : {e}")
+            complet = False
+            break
         except SystemExit as e:
             print(f"⚠️ Plage « {nom} » non récupérée ({d1} → {d2}) : {e}")
             plages[nom] = []
-    return plages
+    return plages, complet
 
 
-def _journees(jeton: str, dates: list[str]) -> dict[str, dict]:
+def _journees(session: dict, dates: list[str]) -> dict[str, dict]:
     """Récupère les endpoints à date unique pour chaque date donnée (best
-    effort par endpoint)."""
+    effort par endpoint ; arrêt propre si budget épuisé)."""
     par_date = {}
     for d in dates:
         entrees = {}
         for nom, modele in ENDPOINTS_JOUR.items():
+            if QUOTA_EPUISE:
+                break
             try:
-                entrees[nom] = _get(jeton, modele.format(d=d))
+                entrees[nom] = _get(session, modele.format(d=d))
                 time.sleep(PAUSE)
+            except QuotaEpuse as e:
+                print(f"⚠️ Données du {d} interrompues : {e}")
+                break
             except SystemExit as e:
                 print(f"⚠️ Donnée « {nom} » du {d} non récupérée : {e}")
         if entrees:
             par_date[d] = entrees
+        if QUOTA_EPUISE:
+            break
     return par_date
 
 
-def _ecrire_mois_wellness(mois: str, plages: dict | None = None, par_jour: dict | None = None) -> None:
+def _ecrire_mois_wellness(mois: str, plages: dict | None = None, par_jour: dict | None = None,
+                          complet: bool | None = None) -> None:
     """Fusionne dans summaries/garmin/wellness/<YYYY>-MM.json. Re-exécutable :
-    chaque plage/écrase sa clé, chaque jour écrase sa date."""
+    chaque plage écrase sa clé, chaque jour écrase sa date. Le drapeau
+    « complet » est stocké si fourni (False = mois à re-demander)."""
     chemin = WELLNESS_DIR / (mois + ".json")
     data = _lire_json(chemin, {})
     if not isinstance(data, dict):
@@ -282,21 +352,35 @@ def _ecrire_mois_wellness(mois: str, plages: dict | None = None, par_jour: dict 
             jour.update(entrees)
             existant_pj[date] = jour
         data["par_jour"] = existant_pj
+    if complet is not None:
+        data["complet"] = complet
     _ecrire_json(chemin, data)
 
 
-def _rattraper_wellness(jeton: str, aujourd_hui) -> int:
-    """Récupère les mois wellness manquants de l'horizon de rattrapage
-    (GARMIN_JOURS_BACKFILL jours) — plages uniquement. Un mois sans donnée
-    reçoit quand même son fichier (plages vides) pour ne pas être redemandé
-    chaque jour ; un mois en échec réseau complet est réessayé au run
-    suivant."""
-    if JOURS_BACKFILL <= 0:
-        return 0
+def _mois_wellness_incomplet(chemin: pathlib.Path) -> bool:
+    """Un mois wellness est incomplet si : fichier absent, drapeau
+    « complet: false » (budget épuisé en cours de mois), ou TOUTES les plages
+    vides (ex. mois touchés par le budget avant la gestion du 429 le
+    08/11/2026 — leurs fichiers existent mais sont vides, il faut les
+    re-demander)."""
+    data = _lire_json(chemin, None)
+    if not isinstance(data, dict):
+        return True
+    if data.get("complet") is False:
+        return True
+    plages = data.get("plages")
+    if not isinstance(plages, dict) or not plages:
+        return True
+    return not any(plages.values())
+
+
+def _mois_a_rattraper(aujourd_hui) -> list[tuple[str, dt.date, dt.date]]:
+    """Mois de l'horizon de rattrapage (hors mois courant), du plus ancien au
+    plus récent, avec la plage de dates complète de chacun."""
     debut = aujourd_hui - dt.timedelta(days=JOURS_BACKFILL - 1)
     limite = aujourd_hui.strftime("%Y-%m")
+    mois_liste: list[tuple[str, dt.date, dt.date]] = []
     curseur = dt.date(debut.year, debut.month, 1)
-    faits = 0
     while curseur.strftime("%Y-%m") < limite:
         libelle = curseur.strftime("%Y-%m")
         if curseur.month == 12:
@@ -305,16 +389,38 @@ def _rattraper_wellness(jeton: str, aujourd_hui) -> int:
         else:
             fin = dt.date(curseur.year, curseur.month + 1, 1) - dt.timedelta(days=1)
             suivant = dt.date(curseur.year, curseur.month + 1, 1)
-        chemin = WELLNESS_DIR / (libelle + ".json")
-        if not chemin.exists():
-            plages = _plages(jeton, curseur.isoformat(), fin.isoformat())
-            _ecrire_mois_wellness(libelle, plages=plages)
-            vides = all(not v for v in plages.values())
-            print(f"  wellness {libelle} : rattrapé" + (" (aucune donnée)" if vides else ""))
-            faits += 1
+        mois_liste.append((libelle, curseur, fin))
         curseur = suivant
-    if faits:
-        print(f"Rattrapage wellness : {faits} mois récupéré(s) (horizon {JOURS_BACKFILL} jours).")
+    return mois_liste
+
+
+def _rattraper_wellness(session: dict, aujourd_hui) -> int:
+    """Re-demande les mois wellness incomplets ou absents — au plus
+    MOIS_RATTRAPAGE par run (budget de requêtes limité, cf. docstring)."""
+    if JOURS_BACKFILL <= 0:
+        return 0
+    manquants = [
+        (libelle, debut_mois, fin_mois)
+        for libelle, debut_mois, fin_mois in _mois_a_rattraper(aujourd_hui)
+        if _mois_wellness_incomplet(WELLNESS_DIR / (libelle + ".json"))
+    ]
+    if not manquants:
+        return 0
+    traites = manquants[:MOIS_RATTRAPAGE]
+    if len(manquants) > MOIS_RATTRAPAGE:
+        print(
+            f"Rattrapage wellness : {len(manquants)} mois incomplets, "
+            f"{len(traites)} traité(s) ce run (limite {MOIS_RATTRAPAGE}/run — budget limité)."
+        )
+    faits = 0
+    for libelle, debut_mois, fin_mois in traites:
+        if QUOTA_EPUISE:
+            break
+        plages, complet = _plages(session, debut_mois.isoformat(), fin_mois.isoformat())
+        _ecrire_mois_wellness(libelle, plages=plages, complet=complet)
+        vides = all(not v for v in plages.values())
+        print(f"  wellness {libelle} : rattrapé" + (" (aucune donnée)" if vides else ""))
+        faits += 1
     return faits
 
 
@@ -322,18 +428,29 @@ def _rattraper_wellness(jeton: str, aujourd_hui) -> int:
 # Activités
 # ---------------------------------------------------------------------------
 
-def _activites_plage(jeton: str, d1: str, d2: str) -> list[dict]:
+def _activites_plage(session: dict, d1: str, d2: str) -> tuple[list[dict], bool]:
     """Recherche des activités d'une plage de dates (pagination : 20 par page,
-    garde-fou 20 pages). La première page en échec propage l'erreur, les pages
-    suivantes en échec sont juste ignorées."""
+    garde-fou 20 pages). Retourne (activités, complet) : complet=False si le
+    budget s'est épuisé au milieu (les mois du rattrapage seront
+    re-demandés). La première page en erreur non-quota propage l'erreur,
+    les pages suivantes en échec sont juste ignorées."""
     toutes: list[dict] = []
     position = 0
     for _ in range(20):
-        page = _get(
-            jeton,
-            "/activitylist-service/activities/search/activities",
-            {"start": position, "limit": 20, "startDate": d1, "endDate": d2},
-        )
+        try:
+            page = _get(
+                session,
+                "/activitylist-service/activities/search/activities",
+                {"start": position, "limit": 20, "startDate": d1, "endDate": d2},
+            )
+        except QuotaEpuse as e:
+            print(f"⚠️ Recherche d'activités interrompue ({d1} → {d2}) : {e}")
+            return toutes, False
+        except SystemExit as e:
+            if position == 0:
+                raise
+            print(f"⚠️ Page d'activités suivante ignorée : {e}")
+            break
         if not isinstance(page, list):
             if position == 0:
                 raise SystemExit(f"ERREUR GARMIN : réponse activités inattendue ({d1} → {d2})")
@@ -344,13 +461,15 @@ def _activites_plage(jeton: str, d1: str, d2: str) -> list[dict]:
             break
         position += 20
         time.sleep(PAUSE)
-    return toutes
+    return toutes, True
 
 
-def _fusionner_activites(activites: list[dict]) -> int:
+def _fusionner_activites(activites: list[dict], complet: bool = True) -> int:
     """Fusionne des activités dans summaries/garmin/activities/<YYYY>-MM.json,
     regroupées par mois de leur date locale, fusion par activityId (une
-    activité modifiée écrase son ancienne version, jamais dupliquée)."""
+    activité modifiée écrase son ancienne version, jamais dupliquée). Le
+    drapeau « __complet__ » du mois touché est mis à jour (False = mois à
+    re-demander au rattrapage)."""
     ACTIVITES_DIR.mkdir(parents=True, exist_ok=True)
     par_mois: dict[str, dict[str, dict]] = {}
     sans_date = 0
@@ -369,84 +488,101 @@ def _fusionner_activites(activites: list[dict]) -> int:
         if not isinstance(existant, dict):
             existant = {}
         existant.update(par_id)
+        existant["__complet__"] = complet
         _ecrire_json(chemin, existant)
     if sans_date:
         print(f"⚠️ {sans_date} activité(s) sans date lisible — non fusionnée(s)")
     return len(activites) - sans_date
 
 
-def _rattraper_activites(jeton: str, aujourd_hui) -> int:
-    """Récupère les mois d'activités manquants de l'horizon de rattrapage
-    (best effort : un mois en échec est réessayé au run suivant ; un mois sans
-    activité reçoit un fichier vide pour ne pas être redemandé)."""
+def _mois_activites_incomplet(chemin: pathlib.Path) -> bool:
+    """Un mois d'activités est incomplet si : fichier absent, drapeau
+    « __complet__: false » (budget épuisé en cours de mois), ou fichier vide
+    SANS drapeau (ancien format). Un mois explicitement complet sans activité
+    (« __complet__ » présent) n'est PAS re-demandé."""
+    data = _lire_json(chemin, None)
+    if not isinstance(data, dict):
+        return True
+    if data.get("__complet__") is False:
+        return True
+    if "__complet__" not in data and not data:
+        return True
+    return False
+
+
+def _rattraper_activites(session: dict, aujourd_hui) -> int:
+    """Re-demande les mois d'activités incomplets ou absents — au plus
+    MOIS_RATTRAPAGE par run. Un mois sans activité reçoit un fichier marqué
+    complet pour ne pas être redemandé ; un mois interrompu par le budget est
+    re-demandé au run suivant."""
     if JOURS_BACKFILL <= 0:
         return 0
-    debut = aujourd_hui - dt.timedelta(days=JOURS_BACKFILL - 1)
-    limite = aujourd_hui.strftime("%Y-%m")
-    curseur = dt.date(debut.year, debut.month, 1)
+    manquants = [
+        (libelle, debut_mois, fin_mois)
+        for libelle, debut_mois, fin_mois in _mois_a_rattraper(aujourd_hui)
+        if _mois_activites_incomplet(ACTIVITES_DIR / (libelle + ".json"))
+    ]
+    if not manquants:
+        return 0
+    traites = manquants[:MOIS_RATTRAPAGE]
+    if len(manquants) > MOIS_RATTRAPAGE:
+        print(
+            f"Rattrapage activités : {len(manquants)} mois manquants, "
+            f"{len(traites)} traité(s) ce run (limite {MOIS_RATTRAPAGE}/run)."
+        )
     faits = 0
-    while curseur.strftime("%Y-%m") < limite:
-        libelle = curseur.strftime("%Y-%m")
-        if curseur.month == 12:
-            fin = dt.date(curseur.year, 12, 31)
-            suivant = dt.date(curseur.year + 1, 1, 1)
-        else:
-            fin = dt.date(curseur.year, curseur.month + 1, 1) - dt.timedelta(days=1)
-            suivant = dt.date(curseur.year, curseur.month + 1, 1)
-        chemin = ACTIVITES_DIR / (libelle + ".json")
-        if not chemin.exists():
-            try:
-                acts = _activites_plage(jeton, curseur.isoformat(), fin.isoformat())
-            except SystemExit as e:
-                print(f"⚠️ Activités {libelle} non récupérées (réessayé au prochain run) : {e}")
-                curseur = suivant
-                continue
-            _fusionner_activites(acts)
-            if not acts:
-                _ecrire_json(chemin, {})
-            print(f"  activités {libelle} : {len(acts)} archivée(s)")
-            faits += 1
-        curseur = suivant
-    if faits:
-        print(f"Rattrapage activités : {faits} mois récupéré(s) (horizon {JOURS_BACKFILL} jours).")
+    for libelle, debut_mois, fin_mois in traites:
+        if QUOTA_EPUISE:
+            break
+        try:
+            acts, complet = _activites_plage(session, debut_mois.isoformat(), fin_mois.isoformat())
+        except SystemExit as e:
+            print(f"⚠️ Activités {libelle} non récupérées (réessayé au prochain run) : {e}")
+            continue
+        _fusionner_activites(acts, complet=complet)
+        if not acts and complet:
+            _ecrire_json(ACTIVITES_DIR / (libelle + ".json"), {"__complet__": True})
+        print(f"  activités {libelle} : {len(acts)} archivée(s)")
+        faits += 1
     return faits
 
 
-def _archiver_activites(jeton: str, aujourd_hui, hier) -> bool:
-    """Activités : fenêtre hier→aujourd'hui (couvre la frontière de mois) +
-    mois complet courant + mois précédent les 3 premiers jours du mois
-    (rafraîchit les activités de fin de mois enregistrées le soir) +
-    rattrapage des mois manquants. Retourne Vrai si la fenêtre courante a
-    fonctionné (sinon le rattrapage est reporté — probable erreur systémique)."""
+def _archiver_activites_du_jour(session: dict, aujourd_hui, hier) -> bool:
+    """Activités fraîches : fenêtre hier→aujourd'hui (couvre la frontière de
+    mois) + mois complet courant + mois précédent les 3 premiers jours du
+    mois (rafraîchit les activités de fin de mois enregistrées le soir).
+    Retourne Vrai si OK (pas interrompu par le budget) — les données du jour
+    passent TOUJOURS avant le rattrapage."""
     total = 0
     ok = False
     try:
-        acts = _activites_plage(jeton, hier.isoformat(), aujourd_hui.isoformat())
-        total += _fusionner_activites(acts)
-        ok = True
+        acts, complet = _activites_plage(session, hier.isoformat(), aujourd_hui.isoformat())
+        if complet:
+            total += _fusionner_activites(acts)
+            ok = True
+        else:
+            print("⚠️ Budget Garmin épuisé avant les activités du jour — reprise au prochain run.")
     except SystemExit as e:
         print(f"⚠️ Activités hier→aujourd'hui non récupérées : {e}")
-    debut_mois = dt.date(aujourd_hui.year, aujourd_hui.month, 1)
-    try:
-        acts = _activites_plage(jeton, debut_mois.isoformat(), aujourd_hui.isoformat())
-        total += _fusionner_activites(acts)
-        ok = True
-    except SystemExit as e:
-        print(f"⚠️ Activités du mois courant non récupérées : {e}")
-    if aujourd_hui.day <= 3:
-        fin_prec = debut_mois - dt.timedelta(days=1)
-        debut_prec = dt.date(fin_prec.year, fin_prec.month, 1)
+    if not QUOTA_EPUISE:
+        debut_mois = dt.date(aujourd_hui.year, aujourd_hui.month, 1)
         try:
-            acts = _activites_plage(jeton, debut_prec.isoformat(), fin_prec.isoformat())
-            total += _fusionner_activites(acts)
-            print(f"Mois précédent rafraîchi : {len(acts)} activité(s)")
+            acts, complet = _activites_plage(session, debut_mois.isoformat(), aujourd_hui.isoformat())
+            if complet:
+                total += _fusionner_activites(acts)
         except SystemExit as e:
-            print(f"⚠️ Mois précédent d'activités non rafraîchi : {e}")
-    print(f"Activités : {total} fusionnée(s) (fenêtre hier→aujourd'hui + mois courant)")
-    if ok:
-        _rattraper_activites(jeton, aujourd_hui)
-    else:
-        print("⚠️ Fenêtre courante en échec — rattrapage activités reporté au prochain run.")
+            print(f"⚠️ Activités du mois courant non récupérées : {e}")
+        if aujourd_hui.day <= 3:
+            fin_prec = debut_mois - dt.timedelta(days=1)
+            debut_prec = dt.date(fin_prec.year, fin_prec.month, 1)
+            try:
+                acts, complet = _activites_plage(session, debut_prec.isoformat(), fin_prec.isoformat())
+                if complet:
+                    total += _fusionner_activites(acts)
+                    print(f"Mois précédent d'activités rafraîchi : {len(acts)} activité(s)")
+            except SystemExit as e:
+                print(f"⚠️ Mois précédent d'activités non rafraîchi : {e}")
+    print(f"Activités du jour : {total} fusionnée(s) (fenêtre hier→aujourd'hui + mois courant)")
     return ok
 
 
@@ -454,11 +590,11 @@ def _archiver_activites(jeton: str, aujourd_hui, hier) -> bool:
 # Fichiers .FIT et courbes de puissance
 # ---------------------------------------------------------------------------
 
-def _telecharger_zip(jeton: str, identifiant: str) -> bytes:
+def _telecharger_zip(session: dict, identifiant: str) -> bytes:
     """Télécharge le fichier original d'une activité (ZIP contenant le .FIT)."""
     url = f"{API}/download-service/files/activity/{identifiant}"
     req = urllib.request.Request(url, headers={
-        "Authorization": "Bearer " + jeton,
+        "Authorization": "Bearer " + session["jeton"],
         "Accept": "application/zip, application/octet-stream",
         "User-Agent": UA,
     }, method="GET")
@@ -467,6 +603,10 @@ def _telecharger_zip(jeton: str, identifiant: str) -> bytes:
             contenu = rep.read()
     except urllib.error.HTTPError as e:
         extrait = e.read().decode(errors="replace")[:200]
+        if e.code == 429:
+            raise QuotaEpuse(
+                f"ERREUR GARMIN 429 (téléchargement {identifiant}) : budget épuisé"
+            )
         raise SystemExit(f"ERREUR GARMIN {e.code} (téléchargement {identifiant}) : {extrait}")
     if not contenu:
         raise SystemExit(f"ERREUR GARMIN : téléchargement {identifiant} vide")
@@ -557,11 +697,12 @@ def _courbe_puissance(fit_bytes: bytes):
     return {"duree_s": duree, "nb_echantillons": len(echantillons), "watts": watts}, None
 
 
-def _traiter_fits(jeton: str, aujourd_hui) -> int:
+def _traiter_fits(session: dict, aujourd_hui) -> int:
     """Télécharge et calcule les courbes de puissance des activités non
     traitées (les plus récentes d'abord), dans la limite de FIT_MAX par run —
-    le rattrapage complet se fait donc en quelques jours, ou en un run manuel
-    avec GARMIN_FIT_MAX élevé. Les échecs sont réessayés (3 tentatives max)."""
+    le rattrapage complet se fait donc sur plusieurs runs (budget limité) ou
+    en un run manuel avec GARMIN_FIT_MAX élevé. Les échecs sont réessayés (3
+    tentatives max) ; un arrêt pour budget épuisé NE compte PAS comme échec."""
     if not ACTIVITES_DIR.exists():
         return 0
     try:
@@ -581,6 +722,8 @@ def _traiter_fits(jeton: str, aujourd_hui) -> int:
         if not isinstance(data, dict):
             continue
         for identifiant, a in data.items():
+            if not isinstance(a, dict):
+                continue  # ignore « __complet__ » et valeurs non-activité
             etat = etats.get(str(identifiant)) or {}
             if etat.get("etat") in ("ok", "sans_puissance", "sans_fit", "abandonne"):
                 continue
@@ -589,8 +732,6 @@ def _traiter_fits(jeton: str, aujourd_hui) -> int:
                     "etat": "abandonne",
                     "tentatives": int(etat.get("tentatives") or 0),
                 }
-                continue
-            if not isinstance(a, dict):
                 continue
             horodatage = str(a.get("startTimeLocal") or a.get("startTimeGMT") or "")
             candidates.append((horodatage, a))
@@ -603,14 +744,20 @@ def _traiter_fits(jeton: str, aujourd_hui) -> int:
     print(f"Fichiers .FIT : {len(candidates)} en attente, {nb} traité(s) ce run (max {FIT_MAX}).")
     courbes = 0
     for a in candidates[:nb]:
+        if QUOTA_EPUISE:
+            print("  ⚠️ Budget Garmin épuisé — .FIT restants reportés au prochain run (sans échec compté).")
+            break
         identifiant = str(a.get("activityId") or "")
         if not identifiant:
             continue
         etat = etats.get(identifiant) or {}
         tentatives = int(etat.get("tentatives") or 0) + 1
         try:
-            contenu = _telecharger_zip(jeton, identifiant)
+            contenu = _telecharger_zip(session, identifiant)
             fit = _extraire_fit(contenu)
+        except QuotaEpuse as e:
+            print(f"  ⚠️ Budget Garmin épuisé pendant les .FIT — reprise au prochain run : {e}")
+            break
         except SystemExit as e:
             print(f"  ⚠️ .FIT {identifiant} non traité (tentative {tentatives}) : {e}")
             etats[identifiant] = {"etat": "echec", "tentatives": tentatives}
@@ -692,16 +839,29 @@ def _calculer_records() -> dict:
 # Main
 # ---------------------------------------------------------------------------
 
+def _profil_frais() -> bool:
+    """Vrai si profil.json existe et a moins de 30 jours (économie de
+    requêtes : le profil et les zones FC changent rarement)."""
+    data = _lire_json(OUT_DIR / "profil.json", {})
+    if not isinstance(data, dict):
+        return False
+    genere = str(data.get("genere_le") or "")
+    try:
+        date_gen = dt.datetime.fromisoformat(genere)
+        return dt.datetime.now(dt.timezone.utc) - date_gen < dt.timedelta(days=30)
+    except (ValueError, TypeError):
+        return False
+
+
 def main() -> None:
     if not _creneau_valide():
         print("Hors créneau 12h00-14h00 à Paris — rien à faire (ajustement heure été/hiver).")
         return
 
     aujourd_hui = dt.datetime.now(PARIS).date()
-    marqueur = OUT_DIR / "dernier_run.txt"
-    if not os.environ.get("GARMIN_FORCE_RUN") and marqueur.exists():
+    if not os.environ.get("GARMIN_FORCE_RUN") and MARQUEUR_RUN.exists():
         try:
-            deja_fait = marqueur.read_text(encoding="utf-8").strip()
+            deja_fait = MARQUEUR_RUN.read_text(encoding="utf-8").strip()
         except OSError:
             deja_fait = ""
         if deja_fait == aujourd_hui.isoformat():
@@ -717,56 +877,74 @@ def main() -> None:
         )
         return
 
-    jeton = _jeton()
+    session = {"jeton": _jeton()}
     print("Token Garmin obtenu (valable 24 h).")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     hier = aujourd_hui - dt.timedelta(days=1)
 
-    # 1. Profil et zones FC — best effort, écrasés à chaque run
-    try:
-        zones = _get(jeton, "/biometric-service/heartRateZones/v2")
-        time.sleep(PAUSE)
-        profil = _get(jeton, "/userprofile-service/userprofile/settings")
-        _ecrire_json(OUT_DIR / "profil.json", {
-            "genere_le": dt.datetime.now(dt.timezone.utc).isoformat(),
-            "zones_fc": zones,
-            "profil": profil,
-        })
-        print("Profil et zones FC archivés.")
-    except SystemExit as e:
-        print(f"⚠️ Profil non archivé : {e}")
+    # ── Les données du jour d'ABORD (un budget épuisé ne les bloque jamais) ──
+
+    # 1. Profil et zones FC — cache 30 jours (2 requêtes économisées)
+    if not _profil_frais():
+        try:
+            zones = _get(session, "/biometric-service/heartRateZones/v2")
+            time.sleep(PAUSE)
+            profil = _get(session, "/userprofile-service/userprofile/settings")
+            _ecrire_json(OUT_DIR / "profil.json", {
+                "genere_le": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "zones_fc": zones,
+                "profil": profil,
+            })
+            print("Profil et zones FC archivés.")
+        except SystemExit as e:
+            print(f"⚠️ Profil non archivé : {e}")
+    else:
+        print("Profil déjà archivé (moins de 30 jours) — non re-téléchargé (économie de requêtes).")
 
     # 2. Wellness du mois courant : plages (1er → aujourd'hui) + par_jour
     #    (hier + aujourd'hui, données de fin de mois complétées les jours 1-2)
-    debut_mois = dt.date(aujourd_hui.year, aujourd_hui.month, 1)
-    plages = _plages(jeton, debut_mois.isoformat(), aujourd_hui.isoformat())
-    courant_ok = any(plages.values())
-    _ecrire_mois_wellness(aujourd_hui.strftime("%Y-%m"), plages=plages)
-    journees = _journees(jeton, [hier.isoformat(), aujourd_hui.isoformat()])
-    for d, entrees in journees.items():
-        _ecrire_mois_wellness(d[:7], par_jour={d: entrees})
-    if aujourd_hui.day <= 2:
-        fin_prec = debut_mois - dt.timedelta(days=1)
-        debut_prec = dt.date(fin_prec.year, fin_prec.month, 1)
-        plages_prec = _plages(jeton, debut_prec.isoformat(), fin_prec.isoformat())
-        _ecrire_mois_wellness(debut_prec.strftime("%Y-%m"), plages=plages_prec)
-        print("Mois précédent wellness re-rafraîchi (données de fin de mois complètes).")
-    print(f"Wellness du mois courant archivé ({len(journees)} jour(s) en détail).")
+    if not QUOTA_EPUISE:
+        debut_mois = dt.date(aujourd_hui.year, aujourd_hui.month, 1)
+        plages, complet = _plages(session, debut_mois.isoformat(), aujourd_hui.isoformat())
+        _ecrire_mois_wellness(aujourd_hui.strftime("%Y-%m"), plages=plages, complet=complet)
+        journees = _journees(session, [hier.isoformat(), aujourd_hui.isoformat()])
+        for d, entrees in journees.items():
+            _ecrire_mois_wellness(d[:7], par_jour={d: entrees})
+        if aujourd_hui.day <= 2 and not QUOTA_EPUISE:
+            fin_prec = debut_mois - dt.timedelta(days=1)
+            debut_prec = dt.date(fin_prec.year, fin_prec.month, 1)
+            plages_prec, complet_prec = _plages(
+                session, debut_prec.isoformat(), fin_prec.isoformat()
+            )
+            _ecrire_mois_wellness(
+                debut_prec.strftime("%Y-%m"), plages=plages_prec, complet=complet_prec
+            )
+            print("Mois précédent wellness re-rafraîchi (données de fin de mois complètes).")
+        print(f"Wellness du mois courant archivé ({len(journees)} jour(s) en détail).")
 
-    # 3. Rattrapage wellness (uniquement si le mois courant répond — sinon
-    #    erreur probablement systémique, on ne pollue pas l'historique)
-    if courant_ok:
-        _rattraper_wellness(jeton, aujourd_hui)
-    else:
-        print("⚠️ Plages du mois courant vides — rattrapage wellness reporté au prochain run.")
+    # 3. Activités du jour (fenêtre + mois courant + mois précédent en début de mois)
+    if not QUOTA_EPUISE:
+        _archiver_activites_du_jour(session, aujourd_hui, hier)
 
-    # 4. Activités (fenêtre + mois courant + rattrapage)
-    _archiver_activites(jeton, aujourd_hui, hier)
+    # ── Puis le rattrapage (étalé : MOIS_RATTRAPAGE mois par run) ──
 
-    # 5. Courbes de puissance depuis les .FIT originaux
-    _traiter_fits(jeton, aujourd_hui)
+    # 4. Rattrapage wellness
+    if not QUOTA_EPUISE:
+        nb = _rattraper_wellness(session, aujourd_hui)
+        if nb:
+            print(f"Rattrapage wellness : {nb} mois traité(s) ce run.")
 
-    # 6. Records de puissance, recalculés sur toutes les courbes
+    # 5. Rattrapage activités
+    if not QUOTA_EPUISE:
+        nb = _rattraper_activites(session, aujourd_hui)
+        if nb:
+            print(f"Rattrapage activités : {nb} mois traité(s) ce run.")
+
+    # 6. Courbes de puissance depuis les .FIT originaux (reste du budget)
+    if not QUOTA_EPUISE:
+        _traiter_fits(session, aujourd_hui)
+
+    # 7. Records de puissance, recalculés sur toutes les courbes
     records = _calculer_records()
     _ecrire_json(OUT_DIR / "records.json", {
         "genere_le": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -779,9 +957,16 @@ def main() -> None:
         if r:
             print(f"Record {libelle} : {r['watts']} W ({r['date']}, {r['sport']})")
 
-    # 7. Marqueur anti-double-run (seulement après un run complet)
-    marqueur.write_text(aujourd_hui.isoformat(), encoding="utf-8")
-    print("Archive Garmin terminée.")
+    # 8. Marqueur anti-double-run — SEULEMENT si le budget n'a pas été épuisé :
+    #    sinon un second run du jour (cron ou manuel) poursuit le rattrapage.
+    if QUOTA_EPUISE:
+        print(
+            "⚠️ Budget de requêtes Garmin épuisé — marqueur anti-double-run NON écrit : "
+            "relancer le workflow (ou attendre le prochain run) pour poursuivre le rattrapage."
+        )
+    else:
+        MARQUEUR_RUN.write_text(aujourd_hui.isoformat(), encoding="utf-8")
+        print("Archive Garmin terminée.")
 
 
 if __name__ == "__main__":
