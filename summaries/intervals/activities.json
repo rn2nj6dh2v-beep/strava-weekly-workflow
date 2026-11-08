@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-11-08T06:12:11.125823+00:00",
+  "genere_le": "2026-11-08T07:33:20.439083+00:00",
   "source": "intervals.icu /athlete/{id}/activities",
   "fenetre_jours": 14,
   "nb_activites": 15,
