@@ -1,0 +1,112 @@
+{
+  "genere_le": "2026-11-08T14:59:04.780341+00:00",
+  "profil": {
+    "availableTrainingDays": null,
+    "dateFormat": {
+      "displayFormat": "EEE, MMM d, yyyy",
+      "formatId": 23,
+      "formatKey": "mmddyyyy",
+      "groupingUsed": false,
+      "maxFraction": 0,
+      "minFraction": 0
+    },
+    "displayName": "44Cyril",
+    "firstDayOfWeek": {
+      "dayId": 3,
+      "dayName": "monday",
+      "isPossibleFirstDay": true,
+      "sortOrder": 3
+    },
+    "golfDistanceUnit": "statute_us",
+    "golfElevationUnit": null,
+    "golfSpeedUnit": null,
+    "heartRateFormat": {
+      "displayFormat": null,
+      "formatId": 21,
+      "formatKey": "bpm",
+      "groupingUsed": false,
+      "maxFraction": 0,
+      "minFraction": 0
+    },
+    "hydrationContainers": [
+      {
+        "name": "Conten. 1",
+        "unit": "milliliter",
+        "volume": 150
+      },
+      {
+        "name": "Conten. 2",
+        "unit": "milliliter",
+        "volume": 500
+      },
+      {
+        "name": "Conten. 3",
+        "unit": "milliliter",
+        "volume": 850
+      }
+    ],
+    "hydrationMeasurementUnit": "milliliter",
+    "measurementSystem": "metric",
+    "numberFormat": "decimal_period",
+    "powerFormat": {
+      "displayFormat": null,
+      "formatId": 30,
+      "formatKey": "watt",
+      "groupingUsed": true,
+      "maxFraction": 0,
+      "minFraction": 0
+    },
+    "preferredLocale": "fr",
+    "preferredLongTrainingDays": null,
+    "timeFormat": {
+      "displayFormat": "H:mm",
+      "formatId": 33,
+      "formatKey": "time_twenty_four_hr",
+      "groupingUsed": false,
+      "maxFraction": 0,
+      "minFraction": 0
+    },
+    "timeZone": "Europe/Paris"
+  },
+  "zones_fc": [
+    {
+      "lactateThresholdHeartRateUsed": 164,
+      "maxHeartRateUsed": 181,
+      "restingHeartRateUsed": 44,
+      "restingHrAutoUpdateUsed": true,
+      "sport": "DEFAULT",
+      "trainingMethod": "LACTATE_THRESHOLD",
+      "zone1Floor": 92,
+      "zone2Floor": 114,
+      "zone3Floor": 132,
+      "zone4Floor": 148,
+      "zone5Floor": 172
+    },
+    {
+      "lactateThresholdHeartRateUsed": 160,
+      "maxHeartRateUsed": 181,
+      "restingHeartRateUsed": 44,
+      "restingHrAutoUpdateUsed": true,
+      "sport": "RUNNING",
+      "trainingMethod": "LACTATE_THRESHOLD",
+      "zone1Floor": 112,
+      "zone2Floor": 139,
+      "zone3Floor": 157,
+      "zone4Floor": 168,
+      "zone5Floor": 174
+    },
+    {
+      "lactateThresholdHeartRateUsed": 150,
+      "maxHeartRateUsed": 170,
+      "restingHeartRateUsed": 44,
+      "restingHrAutoUpdateUsed": true,
+      "sport": "CYCLING",
+      "trainingMethod": "LACTATE_THRESHOLD",
+      "zone1Floor": 105,
+      "zone2Floor": 126,
+      "zone3Floor": 143,
+      "zone4Floor": 150,
+      "zone5Floor": 161
+    }
+  ]
+}

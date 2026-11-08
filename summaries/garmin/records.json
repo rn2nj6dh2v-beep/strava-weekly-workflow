@@ -1,0 +1,11 @@
+{
+  "genere_le": "2026-11-08T14:59:35.920356+00:00",
+  "records_puissance": {
+    "1min": null,
+    "1s": null,
+    "20min": null,
+    "5min": null,
+    "5s": null
+  },
+  "source": "Personal API Garmin — courbes calculées depuis les .FIT originaux (complément de summaries/monthly/records.json, intervals.icu)"
+}
