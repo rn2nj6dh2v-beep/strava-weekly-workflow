@@ -1,6 +1,6 @@
 {
-  "genere_le": "2026-11-01T22:29:24.296017+00:00",
-  "nb_semaines": 2,
+  "genere_le": "2026-11-08T22:30:52.610500+00:00",
+  "nb_semaines": 3,
   "semaines": [
     {
       "km_velo": 76.8,
@@ -23,6 +23,17 @@
       "puissance_pond_moy_velo_w": null,
       "vitesse_moy_course_kmh": 9.6,
       "semaine": "2026-S44"
+    },
+    {
+      "km_velo": 112.5,
+      "km_course": 27.1,
+      "heures": 7.4,
+      "vfc_moyenne_ms": 42.9,
+      "ctl": 37.064606,
+      "tsb": null,
+      "puissance_pond_moy_velo_w": 184.5,
+      "vitesse_moy_course_kmh": 10.1,
+      "semaine": "2026-S45"
     }
   ]
 }
