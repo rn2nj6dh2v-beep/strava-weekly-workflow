@@ -1,0 +1,60 @@
+name: Garmin Personal API — archive quotidienne
+
+on:
+  schedule:
+    # 12h30 Paris : 11:30 UTC en hiver, 10:30 UTC en été. Créneau vérifié
+    # 12h00-14h00 par le script — DISTINCT du pipeline intervals (7h00-9h00)
+    # pour éviter toute collision de commit/push entre les deux workflows.
+    # En été les DEUX crons tombent dans le créneau : le marqueur
+    # anti-double-run (summaries/garmin/dernier_run.txt) arrête le second.
+    - cron: "30 10 * * *"
+    - cron: "30 11 * * *"
+  workflow_dispatch:
+    inputs:
+      backfill_days:
+        description: "Horizon de rattrapage en jours (365 par défaut ; 0 pour désactiver)"
+        required: false
+        default: "365"
+      fit_max:
+        description: "Nb max de .FIT traités par run (60 par défaut ; ex. 300 pour rattraper toutes les courbes de puissance d'un coup)"
+        required: false
+        default: "60"
+
+permissions:
+  contents: write
+
+jobs:
+  garmin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe du script
+        run: python -m py_compile scripts/garmin_personal.py
+
+      - name: Installer le parseur .FIT
+        run: pip install --quiet fitparse
+
+      - name: Archiver les données Garmin (si créneau 12h00-14h00 à Paris)
+        env:
+          GARMIN_PERSONAL_API_KEY: ${{ secrets.GARMIN_PERSONAL_API_KEY }}
+          GARMIN_FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+          GARMIN_JOURS_BACKFILL: ${{ github.event.inputs.backfill_days || '365' }}
+          GARMIN_FIT_MAX: ${{ github.event.inputs.fit_max || '60' }}
+        run: python scripts/garmin_personal.py
+
+      - name: Enregistrer les résultats
+        run: |
+          git config user.name "garmin-bot"
+          git config user.email "garmin-bot@users.noreply.github.com"
+          if [ -d summaries/garmin ]; then
+            git add summaries/garmin/
+            git commit -m "Archive Garmin du $(date +'%Y-%m-%d')" || echo "Rien à commiter"
+            git push || (git pull --rebase && git push) || echo "Échec du push (réessayé au prochain run)"
+          else
+            echo "Aucune donnée à enregistrer (répertoire absent) — rien à commiter"
+          fi
