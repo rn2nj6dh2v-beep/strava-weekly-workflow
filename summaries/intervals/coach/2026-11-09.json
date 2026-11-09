@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-09",
+  "genere_le": "2026-11-09T06:30:04.258461+00:00",
+  "sujet": "🏃🚴 Séances du jour — lundi 9 novembre",
+  "donnees": {
+    "date": "2026-11-09",
+    "wellness_7j": {
+      "vfc_moyenne_ms": 42.3,
+      "vfc_min_ms": 29.0,
+      "vfc_max_ms": 48.0,
+      "fc_repos_moyenne": 44,
+      "sommeil_moyen_h": 8.6,
+      "tsb_moyen": null,
+      "nb_jours_vfc": 7
+    },
+    "veille": {
+      "atl": 38.973095,
+      "ctl": 36.19254,
+      "date": "2026-11-09",
+      "douleurs": null,
+      "fatigue": null,
+      "fc_repos": 45,
+      "humeur": null,
+      "poids_kg": null,
+      "qualite_sommeil": 3,
+      "readiness": null,
+      "sommeil_h": 7.8,
+      "stress": null,
+      "tsb": null,
+      "vfc_ms": 47.0
+    },
+    "vfc_veille_vs_moy_7j_pct": 11.1,
+    "ctl_atl_tsb": {
+      "ctl": 36.19254,
+      "atl": 38.973095,
+      "tsb": null,
+      "date": "2026-11-09"
+    },
+    "volume": {
+      "7j": {
+        "velo": {
+          "seances": 6,
+          "km": 97.9,
+          "heures": 3.9,
+          "charge_entrainement": 187.0
+        },
+        "course": {
+          "seances": 3,
+          "km": 27.2,
+          "heures": 2.7,
+          "charge_entrainement": 164.0
+        }
+      },
+      "14j": {
+        "velo": {
+          "seances": 8,
+          "km": 112.5,
+          "heures": 4.6,
+          "charge_entrainement": 203.0
+        },
+        "course": {
+          "seances": 7,
+          "km": 54.7,
+          "heures": 5.5,
+          "charge_entrainement": 323.0
+        }
+      }
+    },
+    "activites_7j": [
+      "2026-11-03 Ride : 32.6 km, 68 min, charge 66, FC moy 127, puis. pond. 177 W",
+      "2026-11-04 Ride : 7.4 km, 23 min, charge 11, FC moy 109",
+      "2026-11-04 Ride : 7.3 km, 21 min, charge 8, FC moy 101",
+      "2026-11-04 Run : 10.6 km, 62 min, charge 65, FC moy 139, puis. pond. 297 W",
+      "2026-11-05 Ride : 7.3 km, 23 min, charge 7, FC moy 95",
+      "2026-11-05 Ride : 8.2 km, 23 min, charge 9, FC moy 102",
+      "2026-11-06 Ride : 35.1 km, 75 min, charge 86, FC moy 125, puis. pond. 192 W",
+      "2026-11-07 Run : 8.4 km, 50 min, charge 47, FC moy 136, puis. pond. 298 W",
+      "2026-11-08 Run : 8.2 km, 48 min, charge 52, FC moy 140, puis. pond. 301 W"
+    ],
+    "tendances_semaines": "{\"genere_le\": \"2026-11-08T22:30:52.610500+00:00\", \"nb_semaines\": 3, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 0.0, \"km_course\": 35.5, \"heures\": 3.7, \"vfc_moyenne_ms\": 44.4, \"ctl\": 34.235497, \"tsb\": null, \"puissance_pond_moy_velo_w\": null, \"vitesse_moy_course_kmh\": 9.6, \"semaine\": \"2026-S44\"}, {\"km_velo\": 112.5, \"km_course\": 27.1, \"heures\": 7.4, \"vfc_moyenne_ms\": 42.9, \"ctl\": 37.064606, \"tsb\": null, \"puissance_pond_moy_velo_w\": 184.5, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S45\"}]}",
+    "records": "{\"genere_le\": \"2026-11-01T08:31:58.103716+00:00\", \"records\": {\"fc_max_bpm\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2025-11-29\", \"unite\": \"bpm\", \"valeur\": 177}, \"meilleure_allure_course_kmh\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2026-04-22\", \"unite\": \"km/h\", \"valeur\": 12.1}, \"plus_gros_denivele_velo_m\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"m\", \"valeur\": 914.0}, \"plus_longue_sortie_course_km\": {\"activite\": \"Semi marathon Auray Vannes\", \"date\": \"2026-09-13\", \"unite\": \"km\", \"valeur\": 21.2}, \"plus_longue_sortie_velo_km\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"km\", \"valeur\": 109.9}, \"puissance_ponderee_max_w\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-05-22\", \"unite\": \"W\", \"valeur\": 208}, \"vitesse_max_velo_kmh\": {\"activite\": \"Nantes Cyclisme\", \"date\": \"2026-07-16\", \"unite\": \"km/h\", \"valeur\": 67.7}}}",
+    "intensite_conseillee": {
+      "intensite": "qualite",
+      "definition": "une des deux séances peut contenir du travail de qualité (2-3 séances de qualité par sport et par semaine maximum)",
+      "motif": "VFC veille +11.1 % vs moyenne 7 j — forme au vert"
+    }
+  },
+  "seances": "**Objet : Séances du 09/11 – Forme dynamique, qualité à privilégier**\n\nBonjour Cyril,\n\nTa VFC est en hausse (+11% vs 7j) avec un sommeil correct (7.8h) et une FC au repos stable (45). Les tendances montrent une légère baisse de volume cette semaine (S44), idéal pour intégrer une séance de qualité. Profites-en pour enchaîner les deux sans hésiter !\n\n---\n🚴 **SÉANCE VÉLO — \"Intervalles courts en puissance (qualité)\"** *(priorité du jour)*\n- **Objectif** : Travailler la puissance anaérobie (2-3 séances/week max).\n- **Durée** : 1h15 (échauffement inclus).\n- **Échauffement** : 20 min en endurance (FC <140 bpm, 120-140 W) + 5 min accélérations progressives (150-170 W).\n- **Contenu** : 6 x 30 sec à 150% de ta puissance max (soit ~310 W, FC >180 bpm), récup 1 min 30 en endurance (100 W). Entre les séries, 2 min assis pour récupérer.\n- **Retour au calme** : 15 min très doux (80-100 W, FC <120 bpm).\n\n---\n🏃 **SÉANCE COURSE À PIED — \"Fartlek fractionné (qualité)\"**\n- **Objectif** : Améliorer la capacité lactique avec des changements d’allure.\n- **Durée** : 50 min (échauffement inclus).\n- **Échauffement** : 15 min en footing (FC <150 bpm) + 3 x 20 sec accélérations (80-85% FC max).\n- **Contenu** : 8 x 400 m à 90-95% FC max (allure ~10.5-11 km/h, récup 1 min 30 en footing lent). Alterne 2 séries de 4 x 400 m avec 2 min de récup active entre les blocs.\n- **Retour au calme** : 10 min en très léger (FC <130 bpm).\n\n---\nLa charge 7j reste élevée (187 W vélo + 164 W course), mais la VFC et le C:TL (36.2) indiquent que tu peux gérer une séance de qualité aujourd’hui. La semaine S44 était légère en course (35.5 km), ce qui justifie ce focus. Si tu ne fais qu’une séance, privilégie le vélo pour cibler la puissance. Bonne séance ! 💪\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "modele_ia": "open-mistral-nemo",
+  "ia_erreur": null,
+  "email_erreur": null
+}
