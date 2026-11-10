@@ -10411,8 +10411,8 @@
     "ignore_parts": null,
     "ignore_velocity": false,
     "interval_summary": [
-      "1x 91s 131bpm",
-      "1x 7m42s 137bpm"
+      "1x 91s 6:56",
+      "1x 7m42s 7:10"
     ],
     "kg_lifted": null,
     "lengths": null,
@@ -10474,7 +10474,7 @@
     "recording_stops": null,
     "route_id": null,
     "session_rpe": 61,
-    "skyline_chart_bytes": "CAcSCPABW13OA8UHGgVMUlNWUiIFAQEBAgEoAg==",
+    "skyline_chart_bytes": "CAcSCPABW13OA8UHGgVWeUVUUSIFAgcBAgIoAw==",
     "source": "GARMIN_CONNECT",
     "ss_cp": 38.762733,
     "ss_p_max": 0.019887285,
@@ -10710,8 +10710,8 @@
     "ignore_parts": null,
     "ignore_velocity": false,
     "interval_summary": [
-      "1x 3m31s 130bpm",
-      "1x 10m8s 137bpm"
+      "1x 3m31s 6:54",
+      "1x 10m8s 7:08"
     ],
     "kg_lifted": null,
     "lengths": null,
@@ -10773,7 +10773,7 @@
     "recording_stops": null,
     "route_id": null,
     "session_rpe": 77,
-    "skyline_chart_bytes": "CAcSCfUB0wEa4ATICRoFS1FUVlQiBQEBAgIBKAI=",
+    "skyline_chart_bytes": "CAcSB/UB0wEaqA4aBFZfUVMiBAIEAgIoAw==",
     "source": "GARMIN_CONNECT",
     "ss_cp": 49.351276,
     "ss_p_max": 0.05259471,
@@ -11009,9 +11009,9 @@
     "ignore_parts": null,
     "ignore_velocity": false,
     "interval_summary": [
-      "1x 11m50s 134bpm",
-      "1x 6m6s 144bpm",
-      "1x 4m47s 147bpm"
+      "1x 11m50s 6:57",
+      "1x 6m6s 7:07",
+      "1x 4m47s 7:43"
     ],
     "kg_lifted": null,
     "lengths": null,
@@ -11073,7 +11073,7 @@
     "recording_stops": null,
     "route_id": null,
     "session_rpe": 198,
-    "skyline_chart_bytes": "CAcSDvwBxgWdAu4CngKfAv8NGgdKVFdaW1xWIgcBAQIDAwMCKAI=",
+    "skyline_chart_bytes": "CAcSDvwBxgWdAu4CngKfAv8NGgdXWFpgXFBXIgcDAwMEAwICKAM=",
     "source": "GARMIN_CONNECT",
     "ss_cp": 87.03537,
     "ss_p_max": 0.053301744,

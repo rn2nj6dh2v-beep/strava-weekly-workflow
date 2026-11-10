@@ -1,6 +1,6 @@
 {
   "date": "2026-11-10",
-  "genere_le": "2026-11-10T06:18:45.666347+00:00",
+  "genere_le": "2026-11-10T08:37:29.525189+00:00",
   "sujet": "🏃🚴 Séances du jour — mardi 10 novembre",
   "donnees": {
     "date": "2026-11-10",
@@ -9,13 +9,13 @@
       "vfc_min_ms": 29.0,
       "vfc_max_ms": 49.0,
       "fc_repos_moyenne": 44,
-      "sommeil_moyen_h": 8.5,
+      "sommeil_moyen_h": 8.7,
       "tsb_moyen": null,
       "nb_jours_vfc": 7
     },
     "veille": {
-      "atl": 33.784916,
-      "ctl": 35.34099,
+      "atl": 43.369705,
+      "ctl": 37.035027,
       "date": "2026-11-10",
       "douleurs": null,
       "fatigue": null,
@@ -24,15 +24,15 @@
       "poids_kg": null,
       "qualite_sommeil": 3,
       "readiness": null,
-      "sommeil_h": 8.5,
+      "sommeil_h": 9.8,
       "stress": null,
       "tsb": null,
       "vfc_ms": 49.0
     },
     "vfc_veille_vs_moy_7j_pct": 15.0,
     "ctl_atl_tsb": {
-      "ctl": 35.34099,
-      "atl": 33.784916,
+      "ctl": 37.035027,
+      "atl": 43.369705,
       "tsb": null,
       "date": "2026-11-10"
     },
@@ -45,10 +45,10 @@
           "charge_entrainement": 121.0
         },
         "course": {
-          "seances": 3,
-          "km": 27.2,
-          "heures": 2.7,
-          "charge_entrainement": 164.0
+          "seances": 4,
+          "km": 36.0,
+          "heures": 3.6,
+          "charge_entrainement": 236.0
         }
       },
       "14j": {
@@ -59,10 +59,10 @@
           "charge_entrainement": 203.0
         },
         "course": {
-          "seances": 6,
-          "km": 49.1,
-          "heures": 4.9,
-          "charge_entrainement": 295.0
+          "seances": 7,
+          "km": 57.9,
+          "heures": 5.8,
+          "charge_entrainement": 367.0
         }
       }
     },
@@ -74,7 +74,8 @@
       "2026-11-05 Ride : 8.2 km, 23 min, charge 9, FC moy 102",
       "2026-11-06 Ride : 35.1 km, 75 min, charge 86, FC moy 125, puis. pond. 192 W",
       "2026-11-07 Run : 8.4 km, 50 min, charge 47, FC moy 136, puis. pond. 298 W",
-      "2026-11-08 Run : 8.2 km, 48 min, charge 52, FC moy 140, puis. pond. 301 W"
+      "2026-11-08 Run : 8.2 km, 48 min, charge 52, FC moy 140, puis. pond. 301 W",
+      "2026-11-10 Run : 8.8 km, 55 min, charge 72, FC moy 148, puis. pond. 294 W"
     ],
     "tendances_semaines": "{\"genere_le\": \"2026-11-08T22:30:52.610500+00:00\", \"nb_semaines\": 3, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 0.0, \"km_course\": 35.5, \"heures\": 3.7, \"vfc_moyenne_ms\": 44.4, \"ctl\": 34.235497, \"tsb\": null, \"puissance_pond_moy_velo_w\": null, \"vitesse_moy_course_kmh\": 9.6, \"semaine\": \"2026-S44\"}, {\"km_velo\": 112.5, \"km_course\": 27.1, \"heures\": 7.4, \"vfc_moyenne_ms\": 42.9, \"ctl\": 37.064606, \"tsb\": null, \"puissance_pond_moy_velo_w\": 184.5, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S45\"}]}",
     "records": "{\"genere_le\": \"2026-11-01T08:31:58.103716+00:00\", \"records\": {\"fc_max_bpm\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2025-11-29\", \"unite\": \"bpm\", \"valeur\": 177}, \"meilleure_allure_course_kmh\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2026-04-22\", \"unite\": \"km/h\", \"valeur\": 12.1}, \"plus_gros_denivele_velo_m\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"m\", \"valeur\": 914.0}, \"plus_longue_sortie_course_km\": {\"activite\": \"Semi marathon Auray Vannes\", \"date\": \"2026-09-13\", \"unite\": \"km\", \"valeur\": 21.2}, \"plus_longue_sortie_velo_km\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"km\", \"valeur\": 109.9}, \"puissance_ponderee_max_w\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-05-22\", \"unite\": \"W\", \"valeur\": 208}, \"vitesse_max_velo_kmh\": {\"activite\": \"Nantes Cyclisme\", \"date\": \"2026-07-16\", \"unite\": \"km/h\", \"valeur\": 67.7}}}",
@@ -84,7 +85,7 @@
       "motif": "VFC veille +15.0 % vs moyenne 7 j — forme au vert"
     }
   },
-  "seances": "**Objet : Séances du 10/11 – Qualité à privilégier (VFC +15%)**\n\nVFC veille à 49 ms (+15% vs 7j), sommeil correct (8h, qualité 3), charge vélo/course équilibrée mais course légèrement plus intense ces jours-ci.\n\n---\n🚴 **SÉANCE VÉLO — Endurance Qualitative (priorité du jour)**\nObjectif : Travailler la puissance aérobie en sortie longue avec accélérations courtes.\n- Échauffement : 20 min (FC <140 bpm, cadence 85-95 tr/min).\n- Contenu : 1h30 à 1h45 en zone 2 (120-135 W, FC 130-145 bpm), + 6x30s à 150-160% de FTP avec 1 min de récup à 80 W.\n- Retour au calme : 15 min (FC <120 bpm, pédalage léger).\n\n---\n🏃 **SÉANCE COURSE À PIED — Fractionné Lactique**\nObjectif : Améliorer la vitesse en seuil pour la course.\n- Échauffement : 15 min (FC <150 bpm, allure 7:30/km).\n- Contenu : 5x400m à 5km (allure 5:30-5:40/km, 1 min de récup au trot lent).\n- Retour au calme : 10 min (marche active).\n\n---\nLa VFC veille élevée (+15%) et le C:TL stable suggèrent une forme optimale pour du travail de qualité. Alterne bien les intensités cette semaine : la course a pris le dessus ces derniers jours (charge 164 vs 121 au vélo). Profites-en pour varier !\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**Objet : Séances du 10/11 – Forme dynamique, qualité à placer**\n\nVFC veille à 49 ms (+15% vs 7j), sommeil 9h8 (qualité 3/5), C/TL en hausse (37/43) : forme fraîche et réactive, idéal pour une séance de qualité aujourd’hui.\n\n---\n🚴 **SÉANCE VÉLO — *Sortie fractionnée en côte* (priorité du jour)**\nÉchauffement : 20 min en endurance (Z2, 60-70% FCmax, 100-120 W) + 5x30s accélérations légères.\nContenu : 4x5 min en côte simulée (12-14% pente, 250-280 W, 105-110% FCmax) avec 3 min récup (Z1, 80 W). Retour au calme : 15 min Z1 + étirements dynamiques.\n\n---\n🏃 **SÉANCE COURSE À PIED — *Fartlek varié en terrain mixte***\nÉchauffement : 15 min footing (Z2, 65-70% FCmax) + 4x20s sprints courts.\nContenu : 6x1 min à allure 5km (Z4, 85-90% FCmax) avec 1 min récup active (Z2), puis 4x30s accélérations en montée (Z5) avec 45s marche. Retour au calme : 10 min Z1 + étirements.\n\n---\nLa VFC élevée et le C/TL stable justifient une séance de qualité aujourd’hui, surtout sur le vélo pour capitaliser sur la forme. La course reste accessible mais moins prioritaire. Profites-en pour varier les sensations !\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
