@@ -1,1 +1,1 @@
-Demande coach + fetch frais le 2026-11-10T08:37:04.511Z — objectif : récupérer la séance du matin (test demi-Cooper) pour calcul VMA
+Analyse séance du jour — fetch frais intervals.icu — 2026-11-11T14:51:18.452Z
