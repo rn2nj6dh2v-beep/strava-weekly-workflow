@@ -1,1 +1,2 @@
-Analyse séance du jour — fetch frais intervals.icu — 2026-11-11T14:51:18.452Z
+Demande coach: 2026-11-11T15:32:55.775Z
+Objet: fetch frais intervals.icu pour analyse détaillée de la séance vélo du 2026-11-11 (2 blocs 30s/1min)
