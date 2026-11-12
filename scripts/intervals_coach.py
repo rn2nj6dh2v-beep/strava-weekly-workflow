@@ -20,6 +20,7 @@ jamais l'email) :
 - summaries/intervals/activities.json   : activités des 14 derniers jours (brut API)
 - summaries/intervals/tendances.json   : tendances 4-8 semaines (si présent)
 - summaries/monthly/records.json       : records (si présent)
+- summaries/intervals/coach/*.json     : propositions des jours précédents (12/11/2026)
 
 Fonctionnement :
 1. Digère les données : VFC veille vs moyenne 7 j (baisse > 10 % = fatigue),
@@ -237,8 +238,54 @@ def _digester(aujourdhui) -> dict:
         _charger(INTERVALS_DIR / "tendances.json"), 1200)
     d["records"] = _extrait_compact(
         _charger(OUT_DIR / "monthly" / "records.json"), 1500)
+    # --- Propositions précédentes vs réalisé (12/11/2026, demande de Cyril) ---
+    d["propositions_precedentes"] = _propositions_precedentes(aujourdhui, legeres)
     d["intensite_conseillee"] = _intensite_conseillee(d)
     return d
+
+
+def _propositions_precedentes(aujourdhui, legeres: list) -> list:
+    """Les 4 dernières propositions du coach (avant aujourd'hui), confrontées
+    à ce qui a réellement été fait (ajouté le 12/11/2026 à la demande de
+    Cyril) : l'IA voit son historique récent — séances proposées vs
+    activités réalisées — pour ne pas répéter une séance de qualité de trop
+    près, relancer un sport négligé et respecter la règle des 2-3 séances
+    de qualité par sport et par semaine."""
+    resultats = []
+    if not COACH_DIR.exists():
+        return resultats
+    jours_trouves = []
+    for retard in range(1, 8):
+        jour = (aujourdhui - dt.timedelta(days=retard)).isoformat()
+        if (COACH_DIR / f"{jour}.json").exists():
+            jours_trouves.append(jour)
+            if len(jours_trouves) >= 4:
+                break
+    for jour in jours_trouves:
+        a = _charger(COACH_DIR / f"{jour}.json") or {}
+        donnees = a.get("donnees") or a.get("digest") or {}
+        intensite = (donnees.get("intensite_conseillee") or {}).get("intensite")
+        seances_txt = a.get("seances")
+        if not isinstance(seances_txt, str):
+            seances_txt = ""
+        proposees = []
+        for ligne in seances_txt.splitlines():
+            ligne = ligne.strip()
+            if "SÉANCE VÉLO" in ligne or "SÉANCE COURSE" in ligne:
+                proposees.append(ligne[:90])
+        faites = [x for x in legeres if x["date"] == jour]
+        resume = " ; ".join(
+            f"{x['type']} {x['km']} km / {x['minutes']} min"
+            + (f" (charge {x['charge']:.0f})" if x["charge"] else "")
+            for x in faites) or "aucune activité enregistrée"
+        resultats.append({
+            "date": jour,
+            "repos_impose": bool(a.get("repos_impose")),
+            "intensite_proposee": intensite,
+            "seances_proposees": proposees,
+            "activites_reelles": resume,
+        })
+    return resultats
 
 
 def _intensite_conseillee(digest: dict) -> dict:
@@ -320,6 +367,17 @@ def _construire_prompt(digest: dict) -> str:
         "intensité.\n"
         "- Chaque séance : objectif, durée, échauffement, contenu précis "
         "(séries, zones de FC, puissance en W au vélo), retour au calme.\n"
+        "- ALLURES COURSE À PIED — VMA de Cyril : 13,5 km/h. Endurance "
+        "fondamentale 60-70 % VMA (~6:21-7:24/km) ; endurance active/seuil "
+        "75-90 % (~4:56-5:33/km) ; fractionné court 95-105 % (~4:14-4:44/km). "
+        "Règle absolue : l'allure de RÉCUPÉRATION entre les fractions est "
+        "toujours PLUS LENTE que l'allure d'effort (footing lent ~6:21-7:24/km) "
+        "— jamais plus rapide que l'effort ni que le seuil.\n"
+        "- Si « propositions_precedentes » figure dans les données : sers-t'en "
+        "pour ne pas répéter une séance de qualité identique de trop près, "
+        "alterner les sollicitations et repérer un sport négligé (aucune "
+        "activité réelle récente) pour orienter la priorité du jour. N'y "
+        "consacre qu'une phrase maximum dans l'email.\n"
         "- Si les tendances sont fournies : orients-en la priorité du jour et "
         "annonce la tendance en une phrase.\n"
         "- Si « repos_imposes_prochains » figure dans les données : un bloc "
