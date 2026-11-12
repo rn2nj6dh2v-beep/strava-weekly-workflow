@@ -1,17 +1,17 @@
 {
-  "genere_le": "2026-11-12T06:25:31.173312+00:00",
+  "genere_le": "2026-11-12T06:53:17.507819+00:00",
   "periode": {
     "debut": "2026-11-06",
     "fin": "2026-11-12"
   },
   "nb_jours": 7,
-  "nb_jours_vfc": 6,
-  "vfc_moyenne_ms": 44.0,
+  "nb_jours_vfc": 7,
+  "vfc_moyenne_ms": 43.3,
   "vfc_min_ms": 29.0,
   "vfc_max_ms": 49.0,
   "fc_repos_moyenne": 44.4,
-  "sommeil_moyen_h": 9.0,
-  "qualite_sommeil_moyenne": 2.8,
+  "sommeil_moyen_h": 9.1,
+  "qualite_sommeil_moyenne": 2.9,
   "readiness_moyen": null,
   "tsb_moyen": null,
   "jours": [
@@ -120,12 +120,12 @@
       "fc_repos": 46,
       "humeur": null,
       "poids_kg": null,
-      "qualite_sommeil": null,
+      "qualite_sommeil": 3,
       "readiness": null,
-      "sommeil_h": null,
+      "sommeil_h": 9.5,
       "stress": null,
       "tsb": null,
-      "vfc_ms": null
+      "vfc_ms": 39.0
     }
   ]
 }

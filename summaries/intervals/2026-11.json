@@ -184,11 +184,11 @@
     "fc_repos": 46,
     "humeur": null,
     "poids_kg": null,
-    "qualite_sommeil": null,
+    "qualite_sommeil": 3,
     "readiness": null,
-    "sommeil_h": null,
+    "sommeil_h": 9.5,
     "stress": null,
     "tsb": null,
-    "vfc_ms": null
+    "vfc_ms": 39.0
   }
 }
