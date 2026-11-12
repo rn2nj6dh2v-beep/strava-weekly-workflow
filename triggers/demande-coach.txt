@@ -1,2 +1,2 @@
-Demande coach: 2026-11-11T15:32:55.775Z
-Objet: fetch frais intervals.icu pour analyse détaillée de la séance vélo du 2026-11-11 (2 blocs 30s/1min)
+Demande coach à la demande — 2026-11-12T06:53:02.676Z
+Relance : le run de 7h25 a été fait avant la synchro Garmin → intervals.icu (VFC/sommeil de la nuit du 11 au 12/11 absents). Fetch frais + régénération des séances.
