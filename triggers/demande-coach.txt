@@ -1,1 +1,1 @@
-demande-coach 2026-11-13T07:49:58.061Z — validation correctif seuils sommeil (commit 623f796)
+demande-coach recalibrage sommeil 2026-11-13T07:50:45.991Z
