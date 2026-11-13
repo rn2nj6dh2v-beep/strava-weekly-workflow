@@ -1,6 +1,6 @@
 {
   "date": "2026-11-13",
-  "genere_le": "2026-11-13T07:57:00.413649+00:00",
+  "genere_le": "2026-11-13T08:42:40.847165+00:00",
   "sujet": "🏃🚴 Séances du jour — vendredi 13 novembre",
   "donnees": {
     "date": "2026-11-13",
@@ -126,7 +126,7 @@
       "motif": "VFC veille -7.1 % vs moyenne 7 j"
     }
   },
-  "seances": "**Objet : Séances du 13/11 – Priorité vélo (charge course élevée cette semaine)**\n\nVFC veille à 39 ms (-7 % vs moyenne), sommeil à 7h1 (baisse de 1h4 vs 7j), C:T en légère hausse (38). La charge de course (231 CTL/7j) et les 3 séances récentes en endurance active pèsent sur la récup. Alternance vélo/course pour équilibrer.\n\n---\n🚴 **SÉANCE VÉLO — Endurance fondamentale avec accélérations tactiques** *(priorité du jour)*\nObjectif : Maintenir l’endurance tout en stimulant légèrement la puissance sans surcharge. 75 min (échauffement 15 min) : 50 min en zone 2 (FC < 140 bpm, 120-140 W) + 4 x 30 sec à 150-160 W (récup 1 min à 80 W). Retour au calme 10 min (FC < 120 bpm).\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\nObjectif : Récupération active avec travail de seuil court. 50 min (échauffement 10 min) : 30 min en endurance fondamentale (6:21-6:45/km) + 4 x 400 m à 5:10/km (récup 1 min 30 à 6:45/km). Retour au calme 10 min (footing lent).\n\n---\nLa tendance course (27 km cette semaine vs 76 km vélo) et les 4 séances récentes en course justifient la priorité vélo aujourd’hui. Évite les répétitions de qualité (dernière séance vélo le 11/11) et recentre l’effort sur l’endurance.\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**Objet : Séances du 13/11 – Équilibre endurance/accélérations légères**\n\nVFC veille à 39 ms (-7 % vs moyenne), sommeil à 7h1 (vs 8h5), charge vélo/course bien répartie cette semaine (104/231). Pas de repos imposé, mais la VFC suggère une journée modérée sans excès.\n\n---\n🚴 **SÉANCE VÉLO — Endurance active avec sprints tactiques** *(priorité du jour)*\n**Objectif** : Maintenir l’endurance tout en stimulant légèrement la puissance via des accélérations courtes.\n**Durée** : 1h15 (échauffement inclus).\n**Échauffement** : 15 min en endurance fondamentale (70-80 % FCmax, ~120-140 W) + 5 min de pédalage libre.\n**Contenu** :\n- 50 min en endurance fondamentale (130-150 W) avec **6 x 10 secondes à 150-170 % de la puissance moyenne** (récup 1 min en endurance).\n- 10 min en endurance légère pour le retour au calme.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\n**Objectif** : Renforcer l’endurance avec des efforts courts pour varier la charge.\n**Durée** : 50 min (échauffement inclus).\n**Échauffement** : 10 min de footing lent (6:21-7:24/km).\n**Contenu** :\n- 30 min en endurance modérée (6:21-6:50/km) avec **4 x 30 secondes à 5:30/km** (récup 1 min30 en footing lent entre chaque).\n- 10 min de retour au calme en endurance légère.\n\n---\nLa semaine dernière a été équilibrée (112 km vélo vs 27 km course), mais la VFC basse aujourd’hui évite les charges lourdes. Les accélérations légères en vélo et course maintiennent la réactivité sans surcharge. *Bonne séance !*\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
