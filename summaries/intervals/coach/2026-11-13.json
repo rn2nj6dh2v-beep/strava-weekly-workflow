@@ -1,6 +1,6 @@
 {
   "date": "2026-11-13",
-  "genere_le": "2026-11-13T06:23:14.168050+00:00",
+  "genere_le": "2026-11-13T07:50:20.480584+00:00",
   "sujet": "🏃🚴 Séances du jour — vendredi 13 novembre",
   "donnees": {
     "date": "2026-11-13",
@@ -30,6 +30,7 @@
       "vfc_ms": 39.0
     },
     "vfc_veille_vs_moy_7j_pct": -7.1,
+    "sommeil_veille_vs_moy_7j_h": -1.4,
     "ctl_atl_tsb": {
       "ctl": 38.20276,
       "atl": 45.841892,
@@ -122,10 +123,10 @@
     "intensite_conseillee": {
       "intensite": "moderee",
       "definition": "endurance fondamentale avec au maximum quelques accélérations courtes ; pas de travail de qualité aujourd'hui",
-      "motif": "VFC veille -7.1 % vs moyenne 7 j"
+      "motif": "VFC veille -7.1 % vs moyenne 7 j; sommeil 7.1 h (-1.4 h vs moy. 7 j)"
     }
   },
-  "seances": "**Objet : Séances vélo & course à pied – 13/11 – Intensité modérée**\n\nVFC veille à 39 ms (-7 % vs 7j), sommeil à 7h1 (qualité moyenne), charge course dominante cette semaine (231 CTL vs 104 vélo). La tendance montre un léger déséquilibre vélo/course (S45 : 112,5 km vélo vs 27,1 km course) – aujourd’hui, on recentre sur le vélo pour équilibrer.\n\n---\n🚴 **SÉANCE VÉLO — Endurance active avec accélérations tactiques** *(priorité du jour)*\n**Objectif** : Réveiller les jambes en douceur tout en stimulant légèrement le système énergétique.\n**Durée** : 1h15 (échauffement inclus).\n**Échauffement** : 20 min à 60-70 % FCmax (puissance ~120-140 W) + 5 accélérations de 10 s à 100 % (récup 30 s).\n**Contenu** :\n- 50 min en endurance fondamentale (130-150 W, 85-90 rpm) avec **4 x 30 s à 160-180 W** (cadence libre) espacés de 2 min à allure facile.\n- 10 min en footing léger (90-110 W) pour retour au calme.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\n**Objectif** : Maintenir l’endurance tout en introduisant un travail structuré sans surcharge.\n**Durée** : 50 min (échauffement inclus).\n**Échauffement** : 10 min de footing à 6:45/km + 4 x 20 s accélérés (5:30/km) avec récup 40 s.\n**Contenu** :\n- **6 x 400 m à 5:10/km** (90 % VMA) avec récup 1 min 30 s à 6:45/km entre chaque.\n- 20 min de footing continu à 6:25/km pour retour au calme.\n\n---\nLa charge course des 7 derniers jours (231 CTL) justifie une séance vélo prioritaire aujourd’hui pour éviter la surcharge. Le fractionné léger en course reste accessible sans dépasser les limites d’intensité modérée. Bonne séance !\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**Objet : Séances du 13/11 – Équilibre et légère stimulation**\n\nVFC veille à 39 ms (-7 % vs moyenne), sommeil à 7h1 (qualité moyenne), charge course élevée cette semaine (231 CTL) avec un léger déséquilibre vélo/course (104 CTL). La tendance montre une baisse progressive de la VFC et un CTL stable, mais la course domine depuis 48h. *Priorité vélo aujourd’hui pour rééquilibrer la charge.*\n\n---\n🚴 **SÉANCE VÉLO — Endurance active avec accélérations tactiques** *(priorité du jour)*\n**Objectif** : Travailler l’endurance fondamentale avec 3 accélérations courtes pour stimuler légèrement la puissance sans surcharge.\n**Durée** : 1h15 (échauffement inclus).\n**Échauffement** : 15 min en Z1 (60-70 % FCmax, ~120-140 W) + 5 min en Z2 (70-80 %, ~150-170 W).\n**Contenu** :\n- 50 min en Z2 (150-170 W) avec 3 x 30 sec à 110-120 % FTP (280-300 W) en récup 1 min à Z1.\n- Retour au calme : 10 min Z1 + étirements dynamiques.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\n**Objectif** : Réduire la charge tout en maintenant l’endurance avec un travail fractionné très court pour éviter la lassitude.\n**Durée** : 45 min (échauffement inclus).\n**Échauffement** : 10 min footing lent (6:21-7:24/km) + 5 min accélérations progressives.\n**Contenu** :\n- 25 min en Z2 (6:00-6:20/km) avec 6 x 20 sec à 95 % VMA (4:14/km) en récup 40 sec footing lent.\n- Retour au calme : 10 min footing très lent (7:00-7:30/km) + étirements.\n\n---\n*Justification* : La charge course est élevée (231 CTL) et la VFC légèrement basse, donc priorité au vélo pour diversifier la sollicitation. Les accélérations au vélo évitent la monotonie sans dépasser l’intensité modérée. La course reste légère pour ne pas cumuler la fatigue. *Prochaine semaine : surveiller le CTL course qui approche des 300.*\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
