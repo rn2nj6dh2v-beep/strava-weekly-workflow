@@ -1,0 +1,132 @@
+{
+  "date": "2026-11-13",
+  "genere_le": "2026-11-13T06:23:14.168050+00:00",
+  "sujet": "🏃🚴 Séances du jour — vendredi 13 novembre",
+  "donnees": {
+    "date": "2026-11-13",
+    "wellness_7j": {
+      "vfc_moyenne_ms": 42.0,
+      "vfc_min_ms": 29.0,
+      "vfc_max_ms": 49.0,
+      "fc_repos_moyenne": 45,
+      "sommeil_moyen_h": 8.5,
+      "tsb_moyen": null,
+      "nb_jours_vfc": 7
+    },
+    "veille": {
+      "atl": 45.841892,
+      "ctl": 38.20276,
+      "date": "2026-11-13",
+      "douleurs": null,
+      "fatigue": null,
+      "fc_repos": 47,
+      "humeur": null,
+      "poids_kg": null,
+      "qualite_sommeil": 3,
+      "readiness": null,
+      "sommeil_h": 7.1,
+      "stress": null,
+      "tsb": null,
+      "vfc_ms": 39.0
+    },
+    "vfc_veille_vs_moy_7j_pct": -7.1,
+    "ctl_atl_tsb": {
+      "ctl": 38.20276,
+      "atl": 45.841892,
+      "tsb": null,
+      "date": "2026-11-13"
+    },
+    "volume": {
+      "7j": {
+        "velo": {
+          "seances": 3,
+          "km": 48.6,
+          "heures": 2.0,
+          "charge_entrainement": 104.0
+        },
+        "course": {
+          "seances": 4,
+          "km": 34.5,
+          "heures": 3.5,
+          "charge_entrainement": 231.0
+        }
+      },
+      "14j": {
+        "velo": {
+          "seances": 11,
+          "km": 161.1,
+          "heures": 6.6,
+          "charge_entrainement": 307.0
+        },
+        "course": {
+          "seances": 5,
+          "km": 45.1,
+          "heures": 4.5,
+          "charge_entrainement": 296.0
+        }
+      }
+    },
+    "activites_7j": [
+      "2026-11-07 Run : 8.4 km, 50 min, charge 47, FC moy 136, puis. pond. 298 W",
+      "2026-11-08 Run : 8.2 km, 48 min, charge 52, FC moy 140, puis. pond. 301 W",
+      "2026-11-10 Run : 8.8 km, 55 min, charge 72, FC moy 148, puis. pond. 294 W",
+      "2026-11-11 Ride : 34.0 km, 74 min, charge 87, FC moy 128, puis. pond. 195 W",
+      "2026-11-12 Run : 9.1 km, 56 min, charge 60, FC moy 140, puis. pond. 286 W",
+      "2026-11-12 Ride : 7.3 km, 23 min, charge 11, FC moy 111",
+      "2026-11-12 Ride : 7.3 km, 23 min, charge 6, FC moy 93"
+    ],
+    "tendances_semaines": "{\"genere_le\": \"2026-11-08T22:30:52.610500+00:00\", \"nb_semaines\": 3, \"semaines\": [{\"km_velo\": 76.8, \"km_course\": 27.2, \"heures\": 6.1, \"vfc_moyenne_ms\": 45.7, \"ctl\": 36.784634, \"tsb\": null, \"puissance_pond_moy_velo_w\": 202, \"vitesse_moy_course_kmh\": 10.4, \"semaine\": \"2026-S43\"}, {\"km_velo\": 0.0, \"km_course\": 35.5, \"heures\": 3.7, \"vfc_moyenne_ms\": 44.4, \"ctl\": 34.235497, \"tsb\": null, \"puissance_pond_moy_velo_w\": null, \"vitesse_moy_course_kmh\": 9.6, \"semaine\": \"2026-S44\"}, {\"km_velo\": 112.5, \"km_course\": 27.1, \"heures\": 7.4, \"vfc_moyenne_ms\": 42.9, \"ctl\": 37.064606, \"tsb\": null, \"puissance_pond_moy_velo_w\": 184.5, \"vitesse_moy_course_kmh\": 10.1, \"semaine\": \"2026-S45\"}]}",
+    "records": "{\"genere_le\": \"2026-11-01T08:31:58.103716+00:00\", \"records\": {\"fc_max_bpm\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2025-11-29\", \"unite\": \"bpm\", \"valeur\": 177}, \"meilleure_allure_course_kmh\": {\"activite\": \"Nantes Course à pied\", \"date\": \"2026-04-22\", \"unite\": \"km/h\", \"valeur\": 12.1}, \"plus_gros_denivele_velo_m\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"m\", \"valeur\": 914.0}, \"plus_longue_sortie_course_km\": {\"activite\": \"Semi marathon Auray Vannes\", \"date\": \"2026-09-13\", \"unite\": \"km\", \"valeur\": 21.2}, \"plus_longue_sortie_velo_km\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-04-26\", \"unite\": \"km\", \"valeur\": 109.9}, \"puissance_ponderee_max_w\": {\"activite\": \"Nantes Cyclisme sur route\", \"date\": \"2026-05-22\", \"unite\": \"W\", \"valeur\": 208}, \"vitesse_max_velo_kmh\": {\"activite\": \"Nantes Cyclisme\", \"date\": \"2026-07-16\", \"unite\": \"km/h\", \"valeur\": 67.7}}}",
+    "propositions_precedentes": [
+      {
+        "date": "2026-11-12",
+        "repos_impose": false,
+        "intensite_proposee": "moderee",
+        "seances_proposees": [
+          "🚴 **SÉANCE VÉLO — Endurance active avec accélérations tactiques** *(priorité du jour)*",
+          "🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**"
+        ],
+        "activites_reelles": "Run 9.1 km / 56 min (charge 60) ; Ride 7.3 km / 23 min (charge 11) ; Ride 7.3 km / 23 min (charge 6)"
+      },
+      {
+        "date": "2026-11-11",
+        "repos_impose": false,
+        "intensite_proposee": "moderee",
+        "seances_proposees": [
+          "🚴 **SÉANCE VÉLO — Endurance active + récupération (priorité du jour)**",
+          "🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**"
+        ],
+        "activites_reelles": "Ride 34.0 km / 74 min (charge 87)"
+      },
+      {
+        "date": "2026-11-10",
+        "repos_impose": false,
+        "intensite_proposee": "qualite",
+        "seances_proposees": [
+          "🚴 **SÉANCE VÉLO — *Sortie fractionnée en côte* (priorité du jour)**",
+          "🏃 **SÉANCE COURSE À PIED — *Fartlek varié en terrain mixte***"
+        ],
+        "activites_reelles": "Run 8.8 km / 55 min (charge 72)"
+      },
+      {
+        "date": "2026-11-09",
+        "repos_impose": false,
+        "intensite_proposee": "qualite",
+        "seances_proposees": [
+          "🚴 **SÉANCE VÉLO — \"Intervalles courts en puissance (qualité)\"** *(priorité du jour)*",
+          "🏃 **SÉANCE COURSE À PIED — \"Fartlek fractionné (qualité)\"**"
+        ],
+        "activites_reelles": "aucune activité enregistrée"
+      }
+    ],
+    "intensite_conseillee": {
+      "intensite": "moderee",
+      "definition": "endurance fondamentale avec au maximum quelques accélérations courtes ; pas de travail de qualité aujourd'hui",
+      "motif": "VFC veille -7.1 % vs moyenne 7 j"
+    }
+  },
+  "seances": "**Objet : Séances vélo & course à pied – 13/11 – Intensité modérée**\n\nVFC veille à 39 ms (-7 % vs 7j), sommeil à 7h1 (qualité moyenne), charge course dominante cette semaine (231 CTL vs 104 vélo). La tendance montre un léger déséquilibre vélo/course (S45 : 112,5 km vélo vs 27,1 km course) – aujourd’hui, on recentre sur le vélo pour équilibrer.\n\n---\n🚴 **SÉANCE VÉLO — Endurance active avec accélérations tactiques** *(priorité du jour)*\n**Objectif** : Réveiller les jambes en douceur tout en stimulant légèrement le système énergétique.\n**Durée** : 1h15 (échauffement inclus).\n**Échauffement** : 20 min à 60-70 % FCmax (puissance ~120-140 W) + 5 accélérations de 10 s à 100 % (récup 30 s).\n**Contenu** :\n- 50 min en endurance fondamentale (130-150 W, 85-90 rpm) avec **4 x 30 s à 160-180 W** (cadence libre) espacés de 2 min à allure facile.\n- 10 min en footing léger (90-110 W) pour retour au calme.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\n**Objectif** : Maintenir l’endurance tout en introduisant un travail structuré sans surcharge.\n**Durée** : 50 min (échauffement inclus).\n**Échauffement** : 10 min de footing à 6:45/km + 4 x 20 s accélérés (5:30/km) avec récup 40 s.\n**Contenu** :\n- **6 x 400 m à 5:10/km** (90 % VMA) avec récup 1 min 30 s à 6:45/km entre chaque.\n- 20 min de footing continu à 6:25/km pour retour au calme.\n\n---\nLa charge course des 7 derniers jours (231 CTL) justifie une séance vélo prioritaire aujourd’hui pour éviter la surcharge. Le fractionné léger en course reste accessible sans dépasser les limites d’intensité modérée. Bonne séance !\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "modele_ia": "open-mistral-nemo",
+  "ia_erreur": null,
+  "email_erreur": null
+}

@@ -1,36 +1,20 @@
 {
-  "genere_le": "2026-11-12T07:48:20.718151+00:00",
+  "genere_le": "2026-11-13T06:23:05.629175+00:00",
   "periode": {
-    "debut": "2026-11-06",
-    "fin": "2026-11-12"
+    "debut": "2026-11-07",
+    "fin": "2026-11-13"
   },
   "nb_jours": 7,
   "nb_jours_vfc": 7,
-  "vfc_moyenne_ms": 43.3,
+  "vfc_moyenne_ms": 42.0,
   "vfc_min_ms": 29.0,
   "vfc_max_ms": 49.0,
-  "fc_repos_moyenne": 44.4,
-  "sommeil_moyen_h": 9.1,
+  "fc_repos_moyenne": 45,
+  "sommeil_moyen_h": 8.5,
   "qualite_sommeil_moyenne": 2.9,
   "readiness_moyen": null,
   "tsb_moyen": null,
   "jours": [
-    {
-      "atl": 43.396946,
-      "ctl": 36.45667,
-      "date": "2026-11-06",
-      "douleurs": null,
-      "fatigue": null,
-      "fc_repos": 43,
-      "humeur": null,
-      "poids_kg": null,
-      "qualite_sommeil": 3,
-      "readiness": null,
-      "sommeil_h": 11.3,
-      "stress": null,
-      "tsb": null,
-      "vfc_ms": 48.0
-    },
     {
       "atl": 43.87659,
       "ctl": 36.704735,
@@ -112,8 +96,8 @@
       "vfc_ms": 46.0
     },
     {
-      "atl": 42.6312,
-      "ctl": 37.311584,
+      "atl": 52.881603,
+      "ctl": 39.123264,
       "date": "2026-11-12",
       "douleurs": null,
       "fatigue": null,
@@ -123,6 +107,22 @@
       "qualite_sommeil": 3,
       "readiness": null,
       "sommeil_h": 9.5,
+      "stress": null,
+      "tsb": null,
+      "vfc_ms": 39.0
+    },
+    {
+      "atl": 45.841892,
+      "ctl": 38.20276,
+      "date": "2026-11-13",
+      "douleurs": null,
+      "fatigue": null,
+      "fc_repos": 47,
+      "humeur": null,
+      "poids_kg": null,
+      "qualite_sommeil": 3,
+      "readiness": null,
+      "sommeil_h": 7.1,
       "stress": null,
       "tsb": null,
       "vfc_ms": 39.0
