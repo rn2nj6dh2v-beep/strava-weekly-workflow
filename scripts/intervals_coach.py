@@ -183,6 +183,12 @@ def _digester(aujourdhui) -> dict:
     if vfc_veille and vfc_moy:
         d["vfc_veille_vs_moy_7j_pct"] = round(
             (vfc_veille - vfc_moy) / vfc_moy * 100, 1)
+    # Écart de sommeil de la veille vs moyenne 7 j (13/11/2026) : Cyril dort
+    # habituellement 6-7 h — c'est l'ÉCART qui compte, pas la valeur absolue.
+    sommeil_veille = (veille or {}).get("sommeil_h")
+    sommeil_moy = d["wellness_7j"].get("sommeil_moyen_h")
+    if sommeil_veille is not None and sommeil_moy:
+        d["sommeil_veille_vs_moy_7j_h"] = round(sommeil_veille - sommeil_moy, 1)
     # Dernier point de forme connu (CTL = condition, ATL = fatigue, TSB = forme)
     for j in reversed(jours):
         if j.get("ctl") is not None:
@@ -297,16 +303,25 @@ def _intensite_conseillee(digest: dict) -> dict:
     12/11/2026 (demande de Cyril, inverse de sa demande du matin même) :
     un niveau « repos » est décidé de façon déterministe quand la fatigue
     est marquée — VFC veille ≤ −15 % vs moyenne 7 j ET (TSB < −20, ou
-    sommeil < 6 h, ou qualité de sommeil ≤ 2/5). Le coach propose alors un
-    jour de repos (récupération active légère possible) au lieu des séances."""
+    sommeil très court, ou qualité de sommeil ≤ 2/5). Le coach propose alors
+    un jour de repos (récupération active légère possible) au lieu des
+    séances.
+    13/11/2026 (demande de Cyril) : Cyril dort habituellement 6-7 h par
+    nuit — les seuils ABSOLUS de sommeil (< 6,5 h modérée, < 6 h repos)
+    se déclenchaient sur des nuits normales. Remplacés par un ÉCART vs la
+    moyenne 7 j (sommeil_veille_vs_moy_7j_h) avec planchers absolus bas :
+    repos si sommeil < 5 h ou ≤ moyenne − 1,5 h ; modérée si sommeil
+    < 5,5 h ou ≤ moyenne − 1 h."""
     vfc_pct = digest.get("vfc_veille_vs_moy_7j_pct")
     tsb = (digest.get("ctl_atl_tsb") or {}).get("tsb")
     veille = digest.get("veille") or {}
     sommeil = veille.get("sommeil_h")
+    sommeil_ecart = digest.get("sommeil_veille_vs_moy_7j_h")
     qualite = veille.get("qualite_sommeil")
     if ((vfc_pct is not None and vfc_pct <= -15)
             and ((tsb is not None and tsb < -20)
-                 or (sommeil is not None and sommeil < 6)
+                 or (sommeil is not None and sommeil < 5)
+                 or (sommeil_ecart is not None and sommeil_ecart <= -1.5)
                  or (qualite is not None and qualite <= 2))):
         return {
             "intensite": "repos",
@@ -341,8 +356,11 @@ def _intensite_conseillee(digest: dict) -> dict:
         motifs.append(f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j")
     if tsb is not None and -20 <= tsb < -5:
         motifs.append(f"TSB {tsb:.0f}")
-    if sommeil is not None and sommeil < 6.5:
-        motifs.append(f"sommeil {sommeil} h")
+    if ((sommeil is not None and sommeil < 5.5)
+            or (sommeil_ecart is not None and sommeil_ecart <= -1)):
+        motifs.append(
+            f"sommeil {sommeil} h ({sommeil_ecart:+.1f} h vs moy. 7 j)"
+            if sommeil_ecart is not None else f"sommeil {sommeil} h")
     if qualite is not None and qualite <= 2:
         motifs.append(f"qualité de sommeil {qualite}/5")
     if motifs or not veille:
