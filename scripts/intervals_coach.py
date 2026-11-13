@@ -206,7 +206,7 @@ def _digester(aujourdhui) -> dict:
         "7j": {"velo": _volume(velo, 7, aujourdhui),
                "course": _volume(course, 7, aujourdhui)},
         "14j": {"velo": _volume(velo, 14, aujourdhui),
-                "course": _volume(course, 14, aujourdhui)},
+               "course": _volume(course, 14, aujourdhui)},
     }
     # Détail des 7 derniers jours (une ligne courte par activité)
     limite7 = (aujourdhui - dt.timedelta(days=6)).isoformat()
@@ -365,6 +365,13 @@ def _construire_prompt(digest: dict) -> str:
         "peut contenir du travail de qualité. Applique cette intensité aux "
         "DEUX séances, sans la discuter et sans inventer d'autre "
         "intensité.\n"
+        "- JAMAIS DE REPOS (règle de Cyril, 12/11/2026) : ne propose JAMAIS un "
+        "jour de repos, ni « prends un jour off », même si les données (VFC "
+        "très basse, TSB très négatif, sommeil très mauvais) le suggèrent. "
+        "Propose toujours les DEUX séances, en version très douce (endurance "
+        "fondamentale courte, zones FC basses) quand la fatigue est forte. Le "
+        "repos complet ne vient QUE des jours sans sport décidés par Cyril "
+        "(champ repos_imposes_prochains).\n"
         "- Chaque séance : objectif, durée, échauffement, contenu précis "
         "(séries, zones de FC, puissance en W au vélo), retour au calme.\n"
         "- ALLURES COURSE À PIED — VMA de Cyril : 13,5 km/h. Endurance "
@@ -472,7 +479,8 @@ def _seances_secours(digest: dict, raison: str) -> str:
         "20 s dans les 10 dernières minutes. Retour au calme 5-10 min.\n"
         "\n"
         "Écoute ton corps : VFC de la veille en baisse ou sommeil insuffisant "
-        "→ raccourcis les séances ou prends du repos.\n"
+        "→ raccourcis les séances si la fatigue se fait sentir (jamais de "
+        "jour de repos complet).\n"
         + (f"\n(VFC veille : {vfc} ms, sommeil : {sommeil} h — données partielles.)\n"
            if vfc or sommeil else "")
     )
@@ -597,4 +605,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
