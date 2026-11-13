@@ -1,2 +1,1 @@
-Demande coach à la demande — 2026-11-12T07:10:51.674Z
-Relance n°2 du 12/11 : digest enrichi (propositions précédentes vs réalisé) + règles d'allures VMA/récupération. Fetch frais + régénération des séances.
+demande-coach 2026-11-13T07:49:58.061Z — validation correctif seuils sommeil (commit 623f796)
