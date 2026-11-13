@@ -308,10 +308,13 @@ def _intensite_conseillee(digest: dict) -> dict:
     séances.
     13/11/2026 (demande de Cyril) : Cyril dort habituellement 6-7 h par
     nuit — les seuils ABSOLUS de sommeil (< 6,5 h modérée, < 6 h repos)
-    se déclenchaient sur des nuits normales. Remplacés par un ÉCART vs la
-    moyenne 7 j (sommeil_veille_vs_moy_7j_h) avec planchers absolus bas :
-    repos si sommeil < 5 h ou ≤ moyenne − 1,5 h ; modérée si sommeil
-    < 5,5 h ou ≤ moyenne − 1 h."""
+    se déclenchaient sur des nuits normales. Nouveaux planchers ABSOLUS :
+    repos si sommeil < 5 h ; modérée si sommeil < 5,5 h. L'écart vs la
+    moyenne 7 j (sommeil_veille_vs_moy_7j_h) reste calculé et visible dans
+    le digest à titre informatif, mais n'entre PLUS dans les conditions :
+    la moyenne enregistrée (8,5 h au 13/11) est gonflée par la surestimation
+    de la montre (temps passé au lit compté comme sommeil) — un seuil
+    relatif aurait signalé « modérée » sur des nuits normales."""
     vfc_pct = digest.get("vfc_veille_vs_moy_7j_pct")
     tsb = (digest.get("ctl_atl_tsb") or {}).get("tsb")
     veille = digest.get("veille") or {}
@@ -321,7 +324,6 @@ def _intensite_conseillee(digest: dict) -> dict:
     if ((vfc_pct is not None and vfc_pct <= -15)
             and ((tsb is not None and tsb < -20)
                  or (sommeil is not None and sommeil < 5)
-                 or (sommeil_ecart is not None and sommeil_ecart <= -1.5)
                  or (qualite is not None and qualite <= 2))):
         return {
             "intensite": "repos",
@@ -356,8 +358,7 @@ def _intensite_conseillee(digest: dict) -> dict:
         motifs.append(f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j")
     if tsb is not None and -20 <= tsb < -5:
         motifs.append(f"TSB {tsb:.0f}")
-    if ((sommeil is not None and sommeil < 5.5)
-            or (sommeil_ecart is not None and sommeil_ecart <= -1)):
+    if sommeil is not None and sommeil < 5.5:
         motifs.append(
             f"sommeil {sommeil} h ({sommeil_ecart:+.1f} h vs moy. 7 j)"
             if sommeil_ecart is not None else f"sommeil {sommeil} h")
