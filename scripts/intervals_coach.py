@@ -293,12 +293,31 @@ def _intensite_conseillee(digest: dict) -> dict:
     l'IA ne choisit plus l'intensité, elle rédige les séances dans le cadre
     imposé. Motif : le double run du 02/11/2026 a produit deux emails aux
     consignes opposées (« qualité » vs « doux ») à partir des mêmes données
-    — la marge d'interprétation est supprimée."""
+    — la marge d'interprétation est supprimée.
+    12/11/2026 (demande de Cyril, inverse de sa demande du matin même) :
+    un niveau « repos » est décidé de façon déterministe quand la fatigue
+    est marquée — VFC veille ≤ −15 % vs moyenne 7 j ET (TSB < −20, ou
+    sommeil < 6 h, ou qualité de sommeil ≤ 2/5). Le coach propose alors un
+    jour de repos (récupération active légère possible) au lieu des séances."""
     vfc_pct = digest.get("vfc_veille_vs_moy_7j_pct")
     tsb = (digest.get("ctl_atl_tsb") or {}).get("tsb")
     veille = digest.get("veille") or {}
     sommeil = veille.get("sommeil_h")
     qualite = veille.get("qualite_sommeil")
+    if ((vfc_pct is not None and vfc_pct <= -15)
+            and ((tsb is not None and tsb < -20)
+                 or (sommeil is not None and sommeil < 6)
+                 or (qualite is not None and qualite <= 2))):
+        return {
+            "intensite": "repos",
+            "definition": ("aucune séance aujourd'hui : repos complet ou "
+                           "récupération active très légère (marche, "
+                           "étirements) ; reprise normale dès que les "
+                           "signaux s'améliorent"),
+            "motif": (f"fatigue marquée : VFC veille {vfc_pct:+.1f} % vs "
+                      "moyenne 7 j, associée à un TSB bas, un sommeil court "
+                      "ou de mauvaise qualité"),
+        }
     if (vfc_pct is not None and vfc_pct < -10) or (tsb is not None and tsb < -20):
         motif = (f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j"
                  if vfc_pct is not None and vfc_pct < -10
@@ -354,24 +373,26 @@ def _construire_prompt(digest: dict) -> str:
         "séances complètes — une VÉLO et une COURSE À PIED — adaptées à sa "
         "forme du jour : il choisit ensuite selon la météo et ses horaires.\n"
         "RÈGLES :\n"
-        "- TOUJOURS les deux séances, jamais une seule ni un « vélo OU course ».\n"
+        "- TOUJOURS les deux séances, jamais une seule ni un « vélo OU course » "
+        "— SAUF si l'intensité imposée est « repos » (règle REPOS "
+        "ci-dessous).\n"
         "- Indique la PRIORITÉ DU JOUR (la séance à privilégier s'il n'en fait "
         "qu'une) sans imposer le choix. Maximum 2-3 séances de qualité par "
         "sport et par semaine : alterne qualité et endurance fondamentale.\n"
         "- INTENSITÉ IMPOSÉE : le champ « intensite_conseillee » des données "
-        "décide de l'intensité du jour — douce = endurance/récupération "
+        "décide de l'intensité du jour — repos = aucune séance, repos "
+        "complet conseillé ; douce = endurance/récupération "
         "uniquement ; moderee = endurance fondamentale avec au maximum "
         "quelques accélérations courtes ; qualite = une des deux séances "
         "peut contenir du travail de qualité. Applique cette intensité aux "
         "DEUX séances, sans la discuter et sans inventer d'autre "
         "intensité.\n"
-        "- JAMAIS DE REPOS (règle de Cyril, 12/11/2026) : ne propose JAMAIS un "
-        "jour de repos, ni « prends un jour off », même si les données (VFC "
-        "très basse, TSB très négatif, sommeil très mauvais) le suggèrent. "
-        "Propose toujours les DEUX séances, en version très douce (endurance "
-        "fondamentale courte, zones FC basses) quand la fatigue est forte. Le "
-        "repos complet ne vient QUE des jours sans sport décidés par Cyril "
-        "(champ repos_imposes_prochains).\n"
+        "- REPOS CONSEILLÉ (règle de Cyril, 12/11/2026) : si l'intensité "
+        "imposée est « repos », ne propose AUCUNE séance : écris « 🧘 JOUR DE "
+        "REPOS CONSEILLÉ », explique en 2-3 lignes les signaux observés "
+        "(VFC, TSB, sommeil) et propose une récupération active très légère "
+        "(marche, étirements, mobilité) pour ceux qui veulent bouger. Dans "
+        "tous les autres cas, propose toujours les DEUX séances.\n"
         "- Chaque séance : objectif, durée, échauffement, contenu précis "
         "(séries, zones de FC, puissance en W au vélo), retour au calme.\n"
         "- ALLURES COURSE À PIED — VMA de Cyril : 13,5 km/h. Endurance "
@@ -479,8 +500,7 @@ def _seances_secours(digest: dict, raison: str) -> str:
         "20 s dans les 10 dernières minutes. Retour au calme 5-10 min.\n"
         "\n"
         "Écoute ton corps : VFC de la veille en baisse ou sommeil insuffisant "
-        "→ raccourcis les séances si la fatigue se fait sentir (jamais de "
-        "jour de repos complet).\n"
+        "→ raccourcis les séances ou prends un jour de repos si nécessaire.\n"
         + (f"\n(VFC veille : {vfc} ms, sommeil : {sommeil} h — données partielles.)\n"
            if vfc or sommeil else "")
     )
@@ -559,10 +579,16 @@ def main() -> None:
             print("Jour de repos imposé — email repos envoyé ✉️")
         return
 
-    sujet = (f"🏃🚴 Séances du jour — {JOURS_FR_LONG[aujourdhui.weekday()]} "
-             f"{aujourdhui.day} {MOIS_FR[aujourdhui.month - 1]}")
-
     digest = _digester(aujourdhui)
+
+    # Sujet adapté si le coach décide un jour de repos (12/11/2026).
+    if (digest.get("intensite_conseillee") or {}).get("intensite") == "repos":
+        sujet = (f"🧘 Repos conseillé — {JOURS_FR_LONG[aujourdhui.weekday()]} "
+                 f"{aujourdhui.day} {MOIS_FR[aujourdhui.month - 1]}")
+    else:
+        sujet = (f"🏃🚴 Séances du jour — {JOURS_FR_LONG[aujourdhui.weekday()]} "
+                 f"{aujourdhui.day} {MOIS_FR[aujourdhui.month - 1]}")
+
     print(f"Données du jour : veille={digest.get('veille') and 'oui' or 'inconnue'}, "
           f"volume 7j vélo={digest['volume']['7j']['velo']['km']} km, "
           f"course={digest['volume']['7j']['course']['km']} km")
