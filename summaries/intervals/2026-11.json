@@ -192,19 +192,35 @@
     "vfc_ms": 39.0
   },
   "2026-11-13": {
-    "atl": 45.841892,
-    "ctl": 38.20276,
+    "atl": 47.57248,
+    "ctl": 38.50863,
     "date": "2026-11-13",
     "douleurs": null,
     "fatigue": null,
-    "fc_repos": 47,
+    "fc_repos": 44,
     "humeur": null,
     "poids_kg": null,
     "qualite_sommeil": 3,
     "readiness": null,
-    "sommeil_h": 7.1,
+    "sommeil_h": 8.4,
     "stress": null,
     "tsb": null,
     "vfc_ms": 39.0
+  },
+  "2026-11-14": {
+    "atl": 41.239532,
+    "ctl": 37.602585,
+    "date": "2026-11-14",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 42,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.3,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 46.0
   }
 }
