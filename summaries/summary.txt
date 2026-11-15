@@ -1,19 +1,23 @@
 📊 Résumé sportif des 7 derniers jours (intervals.icu)
-• 11 activité(s), 139.58 km, 7h25, 626.9 m de D+
-• ❤️ VFC moyenne (7 j) : 42.9 ms (29.0–51.0), FC repos 43.9 bpm, sommeil moyen 8.9 h
-  - lundi 02/11 — Ride : 7.27 km, 21 min
-  - lundi 02/11 — Ride : 7.3 km, 25 min
-  - mardi 03/11 — Ride : 32.64 km, 68 min
-  - mercredi 04/11 — Run : 10.56 km, 63 min
-  - mercredi 04/11 — Ride : 7.29 km, 22 min
-  - mercredi 04/11 — Ride : 7.36 km, 24 min
-  - jeudi 05/11 — Ride : 8.19 km, 23 min
-  - jeudi 05/11 — Ride : 7.31 km, 23 min
-  - vendredi 06/11 — Ride : 35.1 km, 77 min
-  - samedi 07/11 — Run : 8.38 km, 50 min
-  - dimanche 08/11 — Run : 8.18 km, 49 min
+• 15 activité(s), 141.17 km, 7h46, 778.8 m de D+
+• ❤️ VFC moyenne (7 j) : 44.4 ms (39.0–49.0), FC repos 44 bpm, sommeil moyen 8.5 h
+  - mardi 10/11 — Run : 8.84 km, 56 min
+  - mercredi 11/11 — Ride : 34.01 km, 75 min
+  - jeudi 12/11 — Run : 9.14 km, 57 min
+  - jeudi 12/11 — Ride : 7.3 km, 23 min
+  - jeudi 12/11 — Ride : 7.35 km, 24 min
+  - vendredi 13/11 — Ride : 7.25 km, 22 min
+  - vendredi 13/11 — Ride : 7.3 km, 24 min
+  - samedi 14/11 — Ride : 7.29 km, 22 min
+  - samedi 14/11 — Ride : 8.11 km, 24 min
+  - samedi 14/11 — Ride : 8.1 km, 23 min
+  - samedi 14/11 — Ride : 7.33 km, 23 min
+  - dimanche 15/11 — Ride : 7.2 km, 20 min
+  - dimanche 15/11 — Ride : 7.34 km, 29 min
+  - dimanche 15/11 — Ride : 7.28 km, 19 min
+  - dimanche 15/11 — Ride : 7.33 km, 25 min
 
 🧠 Analyse IA :
-Bravo pour cette semaine intense et variée, avec près de 140 km parcourus et des efforts bien dosés ! Tes sorties longues (35 km à vélo et 10 km en course) ont été réalisées avec une puissance et une cadence optimales, preuve d’une bonne condition physique. La VFC reste globalement stable autour de 45 ms, sauf le 7 novembre où elle chute à 29 ms (alerte fatigue !) : ton corps a clairement besoin d’un temps de récupération, surtout que la FC de repos a grimpé à 46 bpm ce jour-là. Tes nuits ont été irrégulières, avec des écarts entre 6,5 h et 11,3 h, ce qui peut expliquer cette baisse de VFC.
+Cette semaine, tu as maintenu un volume d’entraînement solide (141 km) avec une intensité bien dosée : tes sorties en vélo et course montrent une bonne régularité, notamment sur les longues sorties où tu as atteint des puissances pondérées élevées (294 W en course, 195 W en vélo), preuve d’une forme physique solide. Tes cadences élevées (88-89 rpm en course) indiquent aussi une efficacité technique au niveau musculaire. Les pics de charge (jusqu’à 87) sur des efforts courts mais intenses (comme le 34 km en vélo le 11/11) confirment que tu as su varier les stimuli sans excès.
 
-Pour la semaine prochaine, **privilégie un jour de repos actif ou une sortie très légère** (moins de 2h, FC <130 bpm) pour laisser ton système nerveux se régénérer. Écoute ton corps : si la VFC reste basse ou si la FC de repos dépasse 45 bpm, réduis l’intensité des séances. Tu as le potentiel pour enchaîner les performances, mais ton corps te signale qu’il a besoin d’un peu plus de repos – c’est normal et même sain !
+Cependant, la **VFC a chuté à 39 ms les 12 et 13 novembre** (contre 42-47 ms en moyenne), avec une **FC de repos à 46 bpm** et un sommeil réduit à **7,3 h le 14/11** – des signes clairs de fatigue accumulée. L’alerte "fatigue" dans tes données est un appel à l’action : ton corps te signale qu’il a besoin d’un temps de récupération actif. **Pour la semaine prochaine**, réduis le volume de 10-15% et privilégie des séances courtes et légères (ex : 20 km max en vélo, avec 2-3 sorties à 60-70% FC max) pour laisser ton système nerveux se régénérer. Un coucher plus tôt et une sieste de 20 min pourraient aussi booster ta VFC ! Tu as le profil pour rebondir, mais écoute ces signaux – c’est la clé de la performance durable.
