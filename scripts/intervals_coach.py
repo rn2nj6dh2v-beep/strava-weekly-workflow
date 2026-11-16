@@ -413,7 +413,12 @@ def _retirer_marqueur_priorite(ligne: str) -> str:
         ligne = ligne.replace(m, "")
     while "  " in ligne:
         ligne = ligne.replace("  ", " ")
-    return ligne.replace(" **", "**").rstrip()
+    ligne = ligne.replace(" **", "**").rstrip()
+    # Astérisque orphelin laissé par le retrait du marqueur (vu le 16/11 :
+    # « … tactiques * ») — on le supprime s'il est isolé en fin de ligne.
+    if ligne.endswith("*") and not ligne.endswith("**"):
+        ligne = ligne[:-1].rstrip()
+    return ligne
 
 
 def _appliquer_priorite(texte: str, digest: dict) -> str:
