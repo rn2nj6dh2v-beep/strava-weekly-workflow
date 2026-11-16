@@ -324,7 +324,7 @@ def _intensite_conseillee(digest: dict) -> dict:
     12/11/2026 (demande de Cyril, inverse de sa demande du matin même) :
     un niveau « repos » est décidé de façon déterministe quand la fatigue
     est marquée — VFC veille ≤ −15 % vs moyenne 7 j ET (TSB < −20, ou
-    sommeil très court, ou qualité de sommeil ≤ 2/5). Le coach propose alors
+    sommeil très court). Le coach propose alors
     un jour de repos (récupération active légère possible) au lieu des
     séances.
     13/11/2026 (demande de Cyril) : Cyril dort habituellement 6-7 h par
@@ -335,17 +335,19 @@ def _intensite_conseillee(digest: dict) -> dict:
     le digest à titre informatif, mais n'entre PLUS dans les conditions :
     la moyenne enregistrée (8,5 h au 13/11) est gonflée par la surestimation
     de la montre (temps passé au lit compté comme sommeil) — un seuil
-    relatif aurait signalé « modérée » sur des nuits normales."""
+    relatif aurait signalé « modérée » sur des nuits normales.
+    16/11/2026 (demande de Cyril) : la QUALITÉ de sommeil (note /5) n'est
+    PLUS prise en compte nulle part — donnée jugée non fiable. Seule la
+    DURÉE du sommeil reste un signal (planchers < 5 h repos, < 5,5 h
+    modérée) ; la VFC et le TSB restent les signaux principaux."""
     vfc_pct = digest.get("vfc_veille_vs_moy_7j_pct")
     tsb = (digest.get("ctl_atl_tsb") or {}).get("tsb")
     veille = digest.get("veille") or {}
     sommeil = veille.get("sommeil_h")
     sommeil_ecart = digest.get("sommeil_veille_vs_moy_7j_h")
-    qualite = veille.get("qualite_sommeil")
     if ((vfc_pct is not None and vfc_pct <= -15)
             and ((tsb is not None and tsb < -20)
-                 or (sommeil is not None and sommeil < 5)
-                 or (qualite is not None and qualite <= 2))):
+                 or (sommeil is not None and sommeil < 5))):
         return {
             "intensite": "repos",
             "definition": ("aucune séance aujourd'hui : repos complet ou "
@@ -353,8 +355,8 @@ def _intensite_conseillee(digest: dict) -> dict:
                            "étirements) ; reprise normale dès que les "
                            "signaux s'améliorent"),
             "motif": (f"fatigue marquée : VFC veille {vfc_pct:+.1f} % vs "
-                      "moyenne 7 j, associée à un TSB bas, un sommeil court "
-                      "ou de mauvaise qualité"),
+                      "moyenne 7 j, associée à un TSB bas ou un sommeil "
+                      "court"),
         }
     if (vfc_pct is not None and vfc_pct < -10) or (tsb is not None and tsb < -20):
         motif = (f"VFC veille {vfc_pct:+.1f} % vs moyenne 7 j"
@@ -383,8 +385,6 @@ def _intensite_conseillee(digest: dict) -> dict:
         motifs.append(
             f"sommeil {sommeil} h ({sommeil_ecart:+.1f} h vs moy. 7 j)"
             if sommeil_ecart is not None else f"sommeil {sommeil} h")
-    if qualite is not None and qualite <= 2:
-        motifs.append(f"qualité de sommeil {qualite}/5")
     if motifs or not veille:
         return {
             "intensite": "moderee",
@@ -483,6 +483,10 @@ def _construire_prompt(digest: dict) -> str:
         "peut contenir du travail de qualité. Applique cette intensité aux "
         "DEUX séances, sans la discuter et sans inventer d'autre "
         "intensité.\n"
+        "- QUALITÉ DE SOMMEIL : ne t'en sers JAMAIS (donnée non fiable, "
+        "demande de Cyril du 16/11/2026) — n'en mentionne pas la valeur "
+        "dans l'email et ne l'utilise jamais pour ajuster les séances ; "
+        "pour le sommeil, seule la DURÉE compte.\n"
         "- REPOS CONSEILLÉ (règle de Cyril, 12/11/2026) : si l'intensité "
         "imposée est « repos », ne propose AUCUNE séance : écris « 🧘 JOUR DE "
         "REPOS CONSEILLÉ », explique en 2-3 lignes les signaux observés "
