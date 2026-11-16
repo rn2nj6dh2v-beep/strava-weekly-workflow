@@ -454,6 +454,38 @@ def _appliquer_priorite(texte: str, digest: dict) -> str:
     return "\n".join(lignes)
 
 
+def _corriger_prose_priorite(texte: str, digest: dict) -> str:
+    """Post-traitement DÉTERMINISTE de la PROSE (16/11/2026) : même une fois
+    le marqueur « (priorité du jour) » replacé côté Python par
+    _appliquer_priorite, nemo peut écrire dans la justification
+    « La séance vélo est prioritaire aujourd'hui » en contradiction avec le
+    marqueur. Toute phrase contenant « priorit* » qui cite le mauvais sport
+    (et pas le bon) voit le nom du sport corrigé."""
+    sous_exploite = (digest.get("sport_sous_exploite") or {}).get("sport")
+    if sous_exploite not in ("velo", "course"):
+        return texte
+    if sous_exploite == "course":
+        # « vélo » → « course » (le marqueur forcé porte sur la course)
+        mauvais, bon = "vélo", "course"
+        _sub = lambda p: re.sub(mauvais, bon, p, flags=re.IGNORECASE)
+    else:
+        # « course » → « vélo » avec accord : « la course » → « le vélo »,
+        # « course à pied » → « vélo » d'abord pour éviter « vélo à pied ».
+        def _sub(p):
+            p = re.sub(r"course à pied", "vélo", p, flags=re.IGNORECASE)
+            p = re.sub(r"\b[Ll]a course\b", "le vélo", p)
+            p = re.sub(r"\b[Cc]ourse\b", "vélo", p)
+            return p
+        bon, mauvais = "vélo", "course"
+    morceaux = re.split(r"([.!?]\s*|\n)", texte)
+    phrases = [morceaux[i] + (morceaux[i + 1] if i + 1 < len(morceaux) else "")
+               for i in range(0, len(morceaux), 2)]
+    return "".join(
+        _sub(p) if ("priorit" in p.lower() and mauvais in p.lower()
+                    and bon not in p.lower()) else p
+        for p in phrases)
+
+
 # Table de cohérence % VMA ↔ allure course à pied (VMA 13,5 km/h, test
 # demi-Cooper du 10/11/2026) — mêmes valeurs que la règle du prompt.
 VMA_KMH = 13.5
@@ -738,6 +770,7 @@ def main() -> None:
     else:
         pied = f"\n\n— Ton coach (GitHub Actions + intervals.icu, modèle {modele})"
     texte = _appliquer_priorite(texte, digest)
+    texte = _corriger_prose_priorite(texte, digest)
     texte = _corriger_allures_vma(texte)
     texte += pied
 
