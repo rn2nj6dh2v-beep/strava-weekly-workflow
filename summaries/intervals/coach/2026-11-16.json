@@ -1,6 +1,6 @@
 {
   "date": "2026-11-16",
-  "genere_le": "2026-11-16T16:55:52.252386+00:00",
+  "genere_le": "2026-11-16T21:06:10.168483+00:00",
   "sujet": "🏃🚴 Séances du jour — lundi 16 novembre",
   "donnees": {
     "date": "2026-11-16",
@@ -139,7 +139,7 @@
       "motif": "VFC veille +9.6 % vs moyenne 7 j — forme au vert"
     }
   },
-  "seances": "**Forme du jour** : VFC à 49 ms (+9.6 % vs moyenne 7j), sommeil à 8h2 (stable), charge vélo/course déséquilibrée (189 vs 200 AU7j). La course est sous-exploitée (3 séances/27.8 km vs 13/123 km en vélo) — priorité obligatoire aujourd’hui.\n\n---\n🚴**SÉANCE VÉLO — Endurance fondamentale longue avec accélérations tactiques\nObjectif : Maintenir l’endurance tout en travaillant la régularité avec des stimulations légères. Durée : 1h30-1h45. Échauffement : 20 min en Z1 (60-70 % FCmax, 100-120 W) + 5 min en Z2 (70-80 %, 130-150 W). Contenu : 1h en Z2 (130-150 W) avec 6 x 30 sec en Z4 (90-95 % FCmax, 250-280 W) espacés de 2 min en Z1. Retour au calme : 15 min en Z1.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fractionné court en endurance active (priorité du jour)**\nObjectif : Rééquilibrer la charge avec un travail spécifique. Durée : 50-55 min. Échauffement : 10 min footing lent (6:21-7:24/km) + 4 x 100 m accélérés. Contenu : 6 x 400 m à 95 % VMA (4:14/km, 5:40-6:00/min) avec 90 sec de récupération lente (6:21-7:24/km) entre chaque. Retour au calme : 10 min footing très lent.\n\n---\nLa course est clairement sous-représentée cette semaine (200 AU vs 189 en vélo), malgré une charge totale similaire. La séance de fractionné court aujourd’hui compense le manque de travail spécifique récent. *Prochaine semaine :* la tendance montre un léger déclin de la vitesse moyenne en course (9.7 km/h vs 10.4 km/h en S43) — à surveiller.\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**Forme du jour** : VFC légèrement élevée (+9.6 % vs moyenne 7j) mais sommeil stable (8.2h), charge vélo dominatrice (189 vs 200 en course). Priorité **course** pour rééquilibrer.\n\n---\n🚴**SÉANCE VÉLO — Endurance fondamentale longue avec accélérations tactiques**\nÉchauffement : 20 min en zone 2 (FC < 140 bpm) + 5 min en zone 3.\nContenu : 1h30 en endurance fondamentale (zone 2, 120-140 bpm) avec 6 x 30 sec à 110-120 % FTP en récupération active (zone 2). Retour au calme : 15 min très lent (FC < 120 bpm).\n\n---\n🏃 **SÉANCE COURSE À PIED — Fractionné court en endurance active (priorité du jour)**\nÉchauffement : 10 min footing lent (6:21-7:24/km) + 4 x 100 m accélérés.\nContenu : 6 x 400 m à 95 % VMA (4:40/km) avec 1 min 30 de récupération lente (6:21-7:24/km). Retour au calme : 10 min très lent.\n\n---\nLa course est sous-exploitée (3 séances/7j vs 13 en vélo) et la VFC veille suggère une forme réactive. Alternance qualité/endurance respectée : dernière séance de qualité vélo le 15/11.\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
