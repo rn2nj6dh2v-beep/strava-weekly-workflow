@@ -1,6 +1,6 @@
 {
   "date": "2026-11-16",
-  "genere_le": "2026-11-16T11:00:26.085946+00:00",
+  "genere_le": "2026-11-16T11:17:31.673270+00:00",
   "sujet": "🏃🚴 Séances du jour — lundi 16 novembre",
   "donnees": {
     "date": "2026-11-16",
@@ -139,7 +139,7 @@
       "motif": "qualité de sommeil 2/5"
     }
   },
-  "seances": "**VFC : 49 ms (+9,6 % vs moyenne 7j) – Sommeil : 9h (stable) – TSB : non mesuré**\n\n🚴 **SÉANCE VÉLO — Endurance fondamentale avec accélérations tactiques (priorité du jour)**\nObjectif : Rééquilibrer la charge hebdomadaire (course sous-exploitée) en travaillant l’endurance tout en intégrant des stimulations légères pour éviter la stagnation.\nDurée : 1h30. Échauffement : 20 min (FC progressive 100-120 bpm, cadence 85-95 tr/min, puissance <100 W). Contenu : 1h à 130-140 W (60-65 % FTP) avec 6 accélérations de 10s à 250-270 W (90-95 % FTP) toutes les 20 min, récup 1 min en endurance. Retour au calme : 15 min (FC <120 bpm, étirements dynamiques).\n\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger**\nObjectif : Améliorer l’efficacité à l’effort tout en respectant l’intensité modérée.\nDurée : 50 min. Échauffement : 10 min (footing lent 6:21/km). Contenu : 30 min à 6:21-6:45/km (70 % VMA) + 4 x (30s à 5:10/km ~90 % VMA, récup 1 min 30s footing lent). Retour au calme : 10 min (étirements).\n\n*Justification : La VFC élevée (+9,6 %) et la qualité de sommeil moyenne (2/5) justifient une séance modérée sans surcharge. La priorité course est respectée (dernière séance de qualité du 15/11), tandis que le vélo reste en endurance fondamentale pour éviter la fatigue accumulée (189 CTL sur 7j).*\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
+  "seances": "**Bonjour Cyril,**\n\nVFC légèrement élevée ce matin (49 ms, +9,6 % vs moyenne 7j) avec un sommeil correct (9h, qualité 2/5) et un CTL stable (39,1). La course à pied reste sous-exploitée (3 séances/27,8 km vs 13 séances/123 km en vélo) — **priorité absolue aujourd’hui**.\n\n---\n🚴**SÉANCE VÉLO — Endurance fondamentale avec accélérations tactiques *\nObjectif : équilibrer la charge hebdomadaire sans surcharge. 1h15 d’échauffement progressif (60-70 % FCmax) + 3x 30 sec à 110-120 % FTP en endurance active (récup 2 min à 60 % FCmax). Retour au calme 15 min.\n\n---\n🏃 **SÉANCE COURSE À PIED — Fond modéré avec fractionné léger (priorité du jour)**\nObjectif : stimuler l’endurance et la VMA. 50 min à 65-70 % VMA (6:30-6:45/km) + 6x 200 m à 90 % VMA (4:56/km, récup 1 min à 6:30/km). Retour au calme 10 min.\n\n---\nLa semaine S46 montre un déséquilibre vélo/course (123 km vs 18 km), et le CTL stable confirme que tu peux enchaîner sans risque. Profites-en pour combler l’écart — la course a besoin de ce coup de pouce. *Pas de repos imposé dans les 7 prochains jours.*\n\n— Ton coach (GitHub Actions + intervals.icu, modèle open-mistral-nemo)",
   "modele_ia": "open-mistral-nemo",
   "ia_erreur": null,
   "email_erreur": null
