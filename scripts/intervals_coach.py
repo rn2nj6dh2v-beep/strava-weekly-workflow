@@ -214,6 +214,27 @@ def _digester(aujourdhui) -> dict:
         "14j": {"velo": _volume(velo, 14, aujourdhui),
                "course": _volume(course, 14, aujourdhui)},
     }
+    # --- Sport sous-exploité sur 7 j (16/11/2026, demande de Cyril) ---
+    # Ce matin-là, l'IA a mis la priorité au vélo en écrivant elle-même
+    # « course sous-exploitée cette semaine » : laisser la priorité à
+    # l'appréciation de l'IA produit des incohérences. Calcul déterministe :
+    # le sport avec le MOINS de séances sur 7 j est sous-exploité et doit
+    # recevoir la priorité du jour (rééquilibrer la semaine).
+    v7 = d["volume"]["7j"]["velo"]
+    c7 = d["volume"]["7j"]["course"]
+    if v7["seances"] != c7["seances"]:
+        sous_exploite = "course" if c7["seances"] < v7["seances"] else "velo"
+        dominant = "velo" if sous_exploite == "course" else "course"
+        petit, gros = (c7, v7) if sous_exploite == "course" else (v7, c7)
+        libelles = {"velo": "vélo", "course": "course à pied"}
+        d["sport_sous_exploite"] = {
+            "sport": sous_exploite,
+            "note": (
+                f"{libelles[sous_exploite]} : {petit['seances']} séances / "
+                f"{petit['km']} km sur 7 j contre {gros['seances']} séances / "
+                f"{gros['km']} km en {libelles[dominant]} — priorité du jour "
+                "OBLIGATOIREMENT à ce sport pour rééquilibrer la semaine"),
+        }
     # Détail des 7 derniers jours (une ligne courte par activité)
     limite7 = (aujourdhui - dt.timedelta(days=6)).isoformat()
     d["activites_7j"] = [
@@ -398,6 +419,12 @@ def _construire_prompt(digest: dict) -> str:
         "- Indique la PRIORITÉ DU JOUR (la séance à privilégier s'il n'en fait "
         "qu'une) sans imposer le choix. Maximum 2-3 séances de qualité par "
         "sport et par semaine : alterne qualité et endurance fondamentale.\n"
+        "- PRIORITÉ ET ÉQUILIBRE (règle du 16/11/2026) : si le champ "
+        "« sport_sous_exploite » figure dans les données, la priorité du "
+        "jour va OBLIGATOIREMENT au sport qu'il désigne — c'est lui qu'il "
+        "faut rééquilibrer, JAMAIS au sport qui domine déjà la semaine. "
+        "Reste cohérent : n'écris jamais « priorité vélo » en justifiant "
+        "par « course sous-exploitée » (erreur du 16/11, interdite).\n"
         "- INTENSITÉ IMPOSÉE : le champ « intensite_conseillee » des données "
         "décide de l'intensité du jour — repos = aucune séance, repos "
         "complet conseillé ; douce = endurance/récupération "
@@ -417,13 +444,18 @@ def _construire_prompt(digest: dict) -> str:
         "- ALLURES COURSE À PIED — VMA de Cyril : 13,5 km/h. Endurance "
         "fondamentale 60-70 % VMA (~6:21-7:24/km) ; endurance active/seuil "
         "75-90 % (~4:56-5:33/km) ; fractionné court 95-105 % (~4:14-4:44/km). "
+        "Cohérence OBLIGATOIRE pourcentage ↔ allure (correctif du 16/11/2026) : "
+        "90 % VMA = 4:56/km ; 95 % = 4:40/km ; 100 % = 4:27/km ; 105 % = "
+        "4:14/km — n'associe JAMAIS un pourcentage à une allure d'une autre "
+        "zone (l'erreur « 90 % VMA (4:14/km) » du 16/11 est interdite). "
         "Règle absolue : l'allure de RÉCUPÉRATION entre les fractions est "
         "toujours PLUS LENTE que l'allure d'effort (footing lent ~6:21-7:24/km) "
         "— jamais plus rapide que l'effort ni que le seuil.\n"
         "- Si « propositions_precedentes » figure dans les données : sers-t'en "
         "pour ne pas répéter une séance de qualité identique de trop près, "
         "alterner les sollicitations et repérer un sport négligé (aucune "
-        "activité réelle récente) pour orienter la priorité du jour. N'y "
+        "activité réelle récente) pour orienter la priorité du jour — le "
+        "champ « sport_sous_exploite », s'il est présent, tranche. N'y "
         "consacre qu'une phrase maximum dans l'email.\n"
         "- Si les tendances sont fournies : orients-en la priorité du jour et "
         "annonce la tendance en une phrase.\n"
