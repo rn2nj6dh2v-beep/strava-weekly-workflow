@@ -44,6 +44,7 @@ import datetime as dt
 import json
 import os
 import pathlib
+import re
 import smtplib
 import ssl
 import urllib.error
@@ -453,6 +454,37 @@ def _appliquer_priorite(texte: str, digest: dict) -> str:
     return "\n".join(lignes)
 
 
+# Table de cohérence % VMA ↔ allure course à pied (VMA 13,5 km/h, test
+# demi-Cooper du 10/11/2026) — mêmes valeurs que la règle du prompt.
+VMA_KMH = 13.5
+ALLURES_VMA = {90: "4:56", 95: "4:40", 100: "4:27", 105: "4:14"}
+
+
+def _allure_vma(pct: int) -> str:
+    """Allure (M:SS/km) pour un pourcentage de la VMA : valeur de la table
+    pour 90/95/100/105 %, calcul arrondi à la seconde sinon."""
+    if pct in ALLURES_VMA:
+        return ALLURES_VMA[pct]
+    secs = round(3600.0 / (VMA_KMH * pct / 100.0))
+    return f"{secs // 60}:{secs % 60:02d}"
+
+
+def _corriger_allures_vma(texte: str) -> str:
+    """Post-traitement DÉTERMINISTE des allures course (16/11/2026) : malgré
+    la table du prompt, nemo a de nouveau accolé l'allure du haut de la zone
+    fractionné à un pourcentage de milieu de zone (« 6x400 m à 95 % VMA
+    (4:14/km) » au lieu de 4:40/km). Toute mention « N % VMA (M:SS/km) »
+    voit son allure remplacée par la valeur correcte pour ce pourcentage ;
+    les plages (« 95-105 % VMA (4:14-4:44/km) ») ne sont pas touchées."""
+    def _remplace(m):
+        pct = int(m.group(1))
+        if not 50 <= pct <= 130:
+            return m.group(0)
+        return f"{pct} % VMA ({_allure_vma(pct)}/km)"
+    return re.sub(r"(\d{2,3})\s*%\s*VMA\s*\(\d{1,2}:\d{2}\s*/\s*km\)",
+                  _remplace, texte)
+
+
 def _construire_prompt(digest: dict) -> str:
     return (
         "Tu es le coach sportif personnel de Cyril. Il pratique le vélo et la "
@@ -706,6 +738,7 @@ def main() -> None:
     else:
         pied = f"\n\n— Ton coach (GitHub Actions + intervals.icu, modèle {modele})"
     texte = _appliquer_priorite(texte, digest)
+    texte = _corriger_allures_vma(texte)
     texte += pied
 
     erreur_email = _envoi_email(texte, sujet)
