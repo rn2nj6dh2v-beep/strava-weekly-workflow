@@ -405,6 +405,49 @@ def _intensite_conseillee(digest: dict) -> dict:
     }
 
 
+def _retirer_marqueur_priorite(ligne: str) -> str:
+    """Retire le marqueur « (priorité du jour) » d'un en-tête de séance,
+    avec ou sans astérisques markdown (nemo les ajoute malgré l'interdiction)."""
+    for m in ("*(priorité du jour)*", "(priorité du jour)*",
+              "*(priorité du jour)", "(priorité du jour)"):
+        ligne = ligne.replace(m, "")
+    while "  " in ligne:
+        ligne = ligne.replace("  ", " ")
+    return ligne.replace(" **", "**").rstrip()
+
+
+def _appliquer_priorite(texte: str, digest: dict) -> str:
+    """Post-traitement DÉTERMINISTE de la priorité du jour (16/11/2026) :
+    dès la première relance, nemo a ignoré la règle du prompt et laissé le
+    marqueur « (priorité du jour) » sur le vélo alors même que le digest
+    désignait la course comme sport sous-exploité. Comme pour l'intensité
+    (02/11), la décision est retirée à l'IA : côté Python, on retire le
+    marqueur de la mauvaise séance et on le pose sur la bonne."""
+    sous_exploite = (digest.get("sport_sous_exploite") or {}).get("sport")
+    if sous_exploite not in ("velo", "course"):
+        return texte
+    lignes = texte.splitlines()
+    idx = {"velo": None, "course": None}
+    for i, ligne in enumerate(lignes):
+        if "SÉANCE VÉLO" in ligne:
+            idx["velo"] = i
+        elif "SÉANCE COURSE" in ligne:
+            idx["course"] = i
+    if idx["velo"] is None or idx["course"] is None:
+        return texte
+    bonne = idx[sous_exploite]
+    mauvaise = idx["course" if sous_exploite == "velo" else "velo"]
+    lignes[mauvaise] = _retirer_marqueur_priorite(lignes[mauvaise])
+    if "(priorité du jour)" not in lignes[bonne]:
+        l = lignes[bonne].rstrip()
+        if l.endswith("**"):
+            l = l[:-2].rstrip() + " (priorité du jour)**"
+        else:
+            l = l + " (priorité du jour)"
+        lignes[bonne] = l
+    return "\n".join(lignes)
+
+
 def _construire_prompt(digest: dict) -> str:
     return (
         "Tu es le coach sportif personnel de Cyril. Il pratique le vélo et la "
@@ -423,6 +466,8 @@ def _construire_prompt(digest: dict) -> str:
         "« sport_sous_exploite » figure dans les données, la priorité du "
         "jour va OBLIGATOIREMENT au sport qu'il désigne — c'est lui qu'il "
         "faut rééquilibrer, JAMAIS au sport qui domine déjà la semaine. "
+        "Mets le marqueur « (priorité du jour) » UNIQUEMENT sur la séance "
+        "du sport désigné par « sport_sous_exploite », JAMAIS sur l'autre. "
         "Reste cohérent : n'écris jamais « priorité vélo » en justifiant "
         "par « course sous-exploitée » (erreur du 16/11, interdite).\n"
         "- INTENSITÉ IMPOSÉE : le champ « intensite_conseillee » des données "
@@ -651,6 +696,7 @@ def main() -> None:
         pied = "\n\n— Ton coach (GitHub Actions + intervals.icu)"
     else:
         pied = f"\n\n— Ton coach (GitHub Actions + intervals.icu, modèle {modele})"
+    texte = _appliquer_priorite(texte, digest)
     texte += pied
 
     erreur_email = _envoi_email(texte, sujet)
