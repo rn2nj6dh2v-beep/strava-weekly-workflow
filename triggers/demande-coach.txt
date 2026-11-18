@@ -1,1 +1,1 @@
-Demande coach manuelle - 2026-11-17T11:13:29.670Z
+Exécution manuelle : 2026-11-18T11:58:35.331Z — Cyril signale ne plus recevoir d'emails depuis le 16/11 ; relance de test SMTP.
