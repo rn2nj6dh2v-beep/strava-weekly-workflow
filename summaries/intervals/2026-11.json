@@ -256,8 +256,8 @@
     "vfc_ms": 49.0
   },
   "2026-11-17": {
-    "atl": 42.70025,
-    "ctl": 38.401554,
+    "atl": 50.42133,
+    "ctl": 39.766197,
     "date": "2026-11-17",
     "douleurs": null,
     "fatigue": null,
@@ -270,5 +270,21 @@
     "stress": null,
     "tsb": null,
     "vfc_ms": 43.0
+  },
+  "2026-11-18": {
+    "atl": 45.17348,
+    "ctl": 39.08938,
+    "date": "2026-11-18",
+    "douleurs": null,
+    "fatigue": null,
+    "fc_repos": 45,
+    "humeur": null,
+    "poids_kg": null,
+    "qualite_sommeil": 2,
+    "readiness": null,
+    "sommeil_h": 7.1,
+    "stress": null,
+    "tsb": null,
+    "vfc_ms": 39.0
   }
 }
